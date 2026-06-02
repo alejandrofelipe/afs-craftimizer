@@ -24,6 +24,7 @@ design/
 
 # IDE and OS files
 .vscode/
+!.vscode/settings.json  # Versionar settings.json para configuração de modelo
 .idea/
 *.swp
 *.swo

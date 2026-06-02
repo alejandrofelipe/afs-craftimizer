@@ -1,0 +1,433 @@
+---
+name: craftimizer-version-bump
+description: >
+  Gerenciamento de versão do plugin Craftimizer seguindo convenções semânticas MAJOR.MINOR.PATCH.BUILD.
+  Automatiza bump de versão no .csproj, valida commit message conventions, e prepara para deploy.
+  
+  Triggers: "bumpar versão", "atualizar versão do plugin", "incrementar versão",
+  "preparar release", "bump version", "version management", "criar nova versão".
+  
+  NOT for: deploy (use dalamud-plugin-deploy após bump),
+  análise de compatibilidade (use ffxiv-patch-compatibility-check),
+  implementação de features (use agent principal).
+---
+
+# Skill: Craftimizer Version Bump
+
+## Objetivo
+
+Incrementar a versão do plugin Craftimizer de forma consistente e automatizada, seguindo convenções semânticas e preparando para deploy.
+
+## Quando Usar
+
+- Antes de commit de nova feature
+- Antes de commit de bug fix
+- Após refactor significativo
+- Antes de criar release tag
+
+## Convenções de Versionamento
+
+### Formato: MAJOR.MINOR.PATCH.BUILD
+
+```
+2.10.0.2
+│ │  │ │
+│ │  │ └─ BUILD: Incrementa em refactors/fixes pequenos
+│ │  └─── PATCH: Incrementa em bug fixes visíveis ao usuário
+│ └────── MINOR: Incrementa em novas features ou update de patch FFXIV
+└──────── MAJOR: Mudanças incompatíveis (raramente usado)
+```
+
+### Regras de Incremento
+
+| Tipo de Mudança | Componente | Regra | Exemplo |
+|---|---|---|---|
+| **Breaking change** | MAJOR | Bumpar MAJOR, zerar restante | 2.10.0.2 → 3.0.0.0 |
+| **Update patch FFXIV** | MINOR | Bumpar MINOR, zerar PATCH/BUILD | 2.10.0.2 → 2.11.0.0 |
+| **Nova feature visível** | PATCH | Bumpar PATCH, zerar BUILD | 2.10.0.2 → 2.10.1.0 |
+| **Bug fix visível** | PATCH | Bumpar PATCH, zerar BUILD | 2.10.0.2 → 2.10.1.0 |
+| **Refactor/fix pequeno** | BUILD | Bumpar apenas BUILD | 2.10.0.2 → 2.10.0.3 |
+| **Refactor interno** | Nenhum | Não bumpar | 2.10.0.2 → 2.10.0.2 |
+
+### Mapeamento com Conventional Commits
+
+| Commit Type | Bump | Condição |
+|---|---|---|
+| `feat(scope): ...` | PATCH → MINOR se major feature | Nova funcionalidade |
+| `fix(scope): ...` | PATCH → BUILD se trivial | Correção de bug |
+| `feat!:` ou `BREAKING CHANGE:` | MAJOR | Incompatibilidade |
+| `refactor:`, `chore:` | BUILD | Não afeta usuário |
+| `docs:`, `style:`, `test:` | Nenhum | Não afeta runtime |
+| `perf:` | BUILD | Melhoria de performance |
+
+## Procedimento
+
+### Método 1: Script Automatizado (Recomendado)
+
+Usar `scripts/bump-version.ps1`:
+
+```powershell
+# Bump BUILD (padrão)
+.\scripts\bump-version.ps1
+
+# Bump específico
+.\scripts\bump-version.ps1 -Type major    # 2.10.0.2 → 3.0.0.0
+.\scripts\bump-version.ps1 -Type minor    # 2.10.0.2 → 2.11.0.0
+.\scripts\bump-version.ps1 -Type patch    # 2.10.0.2 → 2.10.1.0
+.\scripts\bump-version.ps1 -Type build    # 2.10.0.2 → 2.10.0.3
+```
+
+**O que o script faz:**
+1. Lê versão atual de `Craftimizer.csproj`
+2. Incrementa componente especificado
+3. Zera componentes inferiores (se aplicável)
+4. Atualiza XML do `.csproj`
+5. Mostra versão antiga → nova
+6. Deixa arquivo staged para commit
+
+### Método 2: Manual (XML Editing)
+
+```powershell
+# 1. Ler versão atual
+$csprojPath = "Craftimizer/Craftimizer.csproj"
+$xml = [xml](Get-Content $csprojPath)
+$currentVersion = $xml.Project.PropertyGroup[0].Version
+Write-Host "Versão atual: $currentVersion"
+
+# 2. Calcular nova versão
+$parts = $currentVersion.Split('.')
+$major = [int]$parts[0]
+$minor = [int]$parts[1]
+$patch = [int]$parts[2]
+$build = [int]$parts[3]
+
+# Exemplo: bump BUILD
+$build++
+$newVersion = "$major.$minor.$patch.$build"
+
+# 3. Atualizar XML
+$xml.Project.PropertyGroup[0].Version = $newVersion
+$xml.Save((Resolve-Path $csprojPath))
+
+Write-Host "Nova versão: $newVersion" -ForegroundColor Green
+```
+
+### Método 3: IDE (Visual Studio)
+
+1. Abrir `Craftimizer/Craftimizer.csproj` no VS
+2. Localizar `<Version>2.10.0.2</Version>`
+3. Editar manualmente seguindo regras
+4. Salvar arquivo
+
+## Workflow Completo: Feature → Deploy
+
+### Exemplo: Nova Feature (Bump PATCH)
+
+```powershell
+# 1. Implementar feature (múltiplos commits de trabalho)
+git add .
+git commit -m "wip: adicionar gear wear tracking"
+
+# 2. Feature completa → Bump versão
+.\scripts\bump-version.ps1 -Type patch
+# 2.10.0.2 → 2.10.1.0
+
+# 3. Commit da versão nova
+git add Craftimizer/Craftimizer.csproj
+git commit -m "feat(gear): adicionar tracking de desgaste de gear
+
+- Implementa GearWearTracker.cs com ML
+- Configuração opt-in em Settings
+- UI warning quando gear < threshold
+
+Version: 2.10.1.0
+Closes #123"
+
+# 4. Build e deploy
+.\scripts\build.ps1 -Deploy
+
+# 5. Teste in-game
+# ... testar ...
+
+# 6. Se OK, criar release tag
+git tag -a v2.10.1.0 -m "Release 2.10.1.0 - Gear Wear Tracking"
+git push origin main --tags
+```
+
+### Exemplo: Bug Fix (Bump PATCH)
+
+```powershell
+# 1. Fix bug
+git add Craftimizer/Windows/SynthHelper.cs
+git commit -m "wip: corrigir overlay não aparecendo"
+
+# 2. Bump versão
+.\scripts\bump-version.ps1 -Type patch
+# 2.10.0.2 → 2.10.1.0
+
+# 3. Commit consolidado
+git add Craftimizer/Craftimizer.csproj
+git commit -m "fix(ui): corrigir SynthHelper overlay não aparecendo após craft
+
+- Adiciona null check em AddonSynthesis
+- Valida AtkValue[8] antes de ler
+
+Version: 2.10.1.0
+Fixes #456"
+
+# 4. Deploy e teste
+.\scripts\build.ps1 -Deploy
+```
+
+### Exemplo: Refactor Interno (Bump BUILD)
+
+```powershell
+# 1. Refactor
+git add .
+git commit -m "refactor: mover UI utils para Utils/UI/"
+
+# 2. Bump BUILD apenas
+.\scripts\bump-version.ps1 -Type build
+# 2.10.0.2 → 2.10.0.3
+
+# 3. Commit da versão
+git add Craftimizer/Craftimizer.csproj
+git commit -m "refactor(structure): mover UI utils para Utils/UI/
+
+- Consolida ImGuiExtras, ImGuiUtils, ImRaii2
+- Atualiza namespaces para Craftimizer.Utils
+- Sem mudanças funcionais
+
+Version: 2.10.0.3"
+```
+
+### Exemplo: Update de Patch FFXIV (Bump MINOR)
+
+```powershell
+# 1. Análise de compatibilidade (skill separada)
+# ... documentos criados ...
+
+# 2. Se mudanças necessárias, implementar
+git add .
+git commit -m "fix(sdk): atualizar offsets para patch 7.55"
+
+# 3. Bump MINOR
+.\scripts\bump-version.ps1 -Type minor
+# 2.10.0.2 → 2.11.0.0
+
+# 4. Commit consolidado
+git add Craftimizer/Craftimizer.csproj
+git commit -m "feat(compat): suporte para FFXIV patch 7.55
+
+- Atualiza Dalamud.NET.Sdk 15.0.0 → 15.1.0
+- Corrige offset CSRecipeNote 0x118 → 0x120
+- Adiciona suporte para novo Cosmic Exploration NPC
+- Testes in-game confirmados
+
+Version: 2.11.0.0
+Closes #789"
+
+# 5. Deploy e release
+.\scripts\build.ps1 -Deploy
+git tag -a v2.11.0.0 -m "Release 2.11.0.0 - FFXIV 7.55 Compatible"
+git push origin main --tags
+```
+
+## Validação
+
+### Checklist Pré-Commit
+
+- [ ] Versão incrementada corretamente seguindo regras
+- [ ] `Craftimizer.csproj` atualizado
+- [ ] Build compila sem erros (`dotnet build -c Release`)
+- [ ] Commit message segue Conventional Commits
+- [ ] Versão mencionada no commit message (ex: "Version: 2.10.1.0")
+
+### Checklist Pós-Deploy
+
+- [ ] Plugin carrega in-game com nova versão
+- [ ] `/xlplugins` mostra versão correta
+- [ ] Funcionalidade testada
+- [ ] Git tag criado (para releases importantes)
+- [ ] GitHub release criada (opcional)
+
+## Antipatterns (Evitar)
+
+### ❌ Bumpar Após Commit
+
+```powershell
+# ERRADO: Bump depois de commitar feature
+git commit -m "feat: nova feature"
+.\scripts\bump-version.ps1 -Type patch  # ← Bump separado, histórico confuso
+git add Craftimizer/Craftimizer.csproj
+git commit -m "chore: bump version"     # ← Commit extra desnecessário
+```
+
+**Correto:** Bump ANTES do commit final da feature.
+
+### ❌ Esquecer de Zerar Componentes Inferiores
+
+```powershell
+# ERRADO: 2.10.0.2 → 2.11.0.2 (BUILD não zerado)
+$newVersion = "2.11.0.2"
+
+# CORRETO: 2.10.0.2 → 2.11.0.0 (PATCH e BUILD zerados)
+$newVersion = "2.11.0.0"
+```
+
+**Regra:** Ao bumpar MINOR ou PATCH, zerar componentes à direita.
+
+### ❌ Não Documentar Versão no Commit
+
+```powershell
+# ERRADO: Sem menção da versão
+git commit -m "feat: nova feature"
+
+# CORRETO: Versão explícita
+git commit -m "feat: nova feature
+
+Version: 2.10.1.0
+Closes #123"
+```
+
+**Motivo:** Facilita rastreamento em `git log`.
+
+### ❌ Versões Duplicadas
+
+```powershell
+# ERRADO: Esquecer de bump → duas releases com mesma versão
+# Release 1: v2.10.0.2 (feature A)
+# Release 2: v2.10.0.2 (feature B)  ← CONFLITO!
+
+# CORRETO: Sempre bumpar antes de nova release
+# Release 1: v2.10.0.2 (feature A)
+# Release 2: v2.10.1.0 (feature B)
+```
+
+**Prevenção:** Usar script de bump que valida versão única.
+
+## Troubleshooting
+
+### Erro: "Versão já existe no Git"
+
+**Sintoma:** Tag `v2.10.0.2` já existe ao tentar criar release
+
+**Diagnóstico:**
+```powershell
+git tag -l | Select-String "2.10.0.2"
+```
+
+**Solução:**
+```powershell
+# Se versão foi bumpada erroneamente
+.\scripts\bump-version.ps1 -Type build  # Bumpar novamente
+git add Craftimizer/Craftimizer.csproj
+git commit --amend  # Emendar commit anterior
+
+# Ou criar nova versão
+.\scripts\bump-version.ps1 -Type build
+# 2.10.0.2 → 2.10.0.3
+```
+
+### Erro: "XML inválido após edição manual"
+
+**Sintoma:** Build falha com erro de parsing
+
+**Diagnóstico:**
+```powershell
+[xml](Get-Content Craftimizer/Craftimizer.csproj)
+# Se erro → XML corrompido
+```
+
+**Solução:**
+```powershell
+# Restaurar de backup
+git restore Craftimizer/Craftimizer.csproj
+
+# Usar script em vez de edição manual
+.\scripts\bump-version.ps1 -Type build
+```
+
+### Erro: "Versão não aparece in-game"
+
+**Sintoma:** `/xlplugins` mostra versão antiga
+
+**Causa:** Cache do XIVLauncher ou build antigo
+
+**Solução:**
+```powershell
+# 1. Clean build
+dotnet clean
+dotnet build Craftimizer/Craftimizer.csproj -c Release
+
+# 2. Deploy forçado
+.\scripts\build.ps1 -Deploy -NoBuild
+
+# 3. Reiniciar FFXIV completamente
+# (fechar jogo + XIVLauncher)
+```
+
+## Integração com CI/CD
+
+### GitHub Actions: Auto-bump em PR merge
+
+```yaml
+name: Auto Version Bump
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+jobs:
+  bump:
+    if: github.event.pull_request.merged == true
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Determine bump type
+        id: bump_type
+        run: |
+          $title = "${{ github.event.pull_request.title }}"
+          if ($title -match "^feat!:|BREAKING CHANGE") {
+            echo "type=major" >> $env:GITHUB_OUTPUT
+          } elseif ($title -match "^feat") {
+            echo "type=minor" >> $env:GITHUB_OUTPUT
+          } elseif ($title -match "^fix") {
+            echo "type=patch" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "type=build" >> $env:GITHUB_OUTPUT
+          }
+      - name: Bump version
+        run: .\scripts\bump-version.ps1 -Type ${{ steps.bump_type.outputs.type }}
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Craftimizer/Craftimizer.csproj
+          git commit -m "chore: bump version to $(.\scripts\get-version.ps1)"
+          git push
+```
+
+## Histórico de Versões (Exemplo)
+
+| Versão | Data | Tipo | Mudanças |
+|---|---|---|---|
+| 2.10.0.3 | 2026-06-02 | Build | Correção de namespace após reorganização |
+| 2.10.0.2 | 2026-06-02 | Build | Reorganização estrutural (86 arquivos) |
+| 2.10.0.0 | 2026-05-24 | Minor | Análise compatibilidade 7.51 |
+| 2.9.4.32 | 2026-05-24 | Build | Adiciona bump obrigatório no workflow |
+| 2.9.4.31 | 2026-05-24 | Build | Corrige warnings build (P8) |
+| 2.9.4.30 | 2026-05-24 | Build | Gerenciamento cache ícones (P7) |
+
+## Referências
+
+- Script de bump: `scripts/bump-version.ps1`
+- Conventional Commits: https://www.conventionalcommits.org/
+- Semantic Versioning: https://semver.org/
+- Keep a Changelog: https://keepachangelog.com/
+
+## Manutenção da Skill
+
+Atualizar quando:
+- Convenções de versionamento mudarem
+- Novo script de automação for criado
+- Integração com CI/CD for implementada

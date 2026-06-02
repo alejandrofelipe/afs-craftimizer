@@ -1,0 +1,22 @@
+{
+  // GitHub Copilot - Modelo preferencial para este workspace
+  "github.copilot.chat.model": "claude-sonnet-4.5",
+  
+  // Configuração de agente padrão
+  "github.copilot.chat.defaultAgent": "craftimizer-dalamud",
+  
+  // Descrição do workspace
+  "github.copilot.chat.workspaceDescription": "Plugin Craftimizer para FFXIV (Dalamud) - Simulador de crafting, solver MCTS/Raphael, UI ImGui, hooks no jogo, integração com Lumina/FFXIVClientStructs",
+  
+  // Configurações adicionais do Copilot
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "plaintext": false,
+    "markdown": true,
+    "json": true,
+    "jsonc": true,
+    "csharp": true,
+    "powershell": true
+  }
+}
