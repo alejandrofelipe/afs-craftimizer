@@ -1,0 +1,62 @@
+# Craftimizer - Claude Desktop Configuration
+
+project_name = "Craftimizer"
+project_type = "dalamud-plugin"
+primary_language = "csharp"
+
+# Model Preferences
+preferred_model = "claude-sonnet-4.5"
+default_agent = "craftimizer-dalamud"
+
+# Project Context
+description = """
+Plugin Dalamud para Final Fantasy XIV que fornece:
+- Simulador de crafting (engine puro C#)
+- Solver MCTS + Raphael (otimização de macros)
+- UI ImGui (overlays in-game)
+- Hooks e integração com jogo (FFXIVClientStructs)
+- Cache de dados do jogo (Lumina sheets)
+"""
+
+# Paths
+agents_path = ".claude/agents/"
+skills_path = ".claude/skills/"
+instructions_path = ".claude/instructions/"
+prompts_path = ".claude/prompts/"
+
+# Key Files
+main_project = "Craftimizer/Craftimizer.csproj"
+solution = "Craftimizer.sln"
+readme = "README.md"
+
+# Technologies
+[technologies]
+runtime = ".NET 10"
+sdk = "Dalamud.NET.Sdk 15.0.0"
+ui = "ImGui (DearImGui)"
+data = "Lumina + FFXIVClientStructs"
+solver = "Raphael.Net (Rust) + MCTS"
+storage = "Microsoft.Data.Sqlite"
+
+# Conventions
+[conventions]
+version_format = "MAJOR.MINOR.PATCH.BUILD"
+commit_style = "Conventional Commits"
+lumina_access = "LuminaSheets.GetSheet<T>() only"
+service_pattern = "[PluginService] DI"
+unsafe_blocks = "Craftimizer/ project only"
+
+# Build Commands
+[commands]
+build = "dotnet build Craftimizer/Craftimizer.csproj -c Release"
+test = "dotnet test Test/Craftimizer.Test.csproj"
+deploy = ".\\scripts\\build.ps1 -Deploy"
+bump_version = ".\\scripts\\bump-version.ps1 -Type {major|minor|patch|build}"
+
+# Exclude from Context
+[exclude]
+patterns = [
+    "bin/", "obj/", "TestResults/", 
+    "backlog/", "design/", "dist/",
+    ".vs/", "packages.lock.json"
+]

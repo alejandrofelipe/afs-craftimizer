@@ -1,5 +1,5 @@
 name: craftimizer-dalamud
-model: Claude Sonnet 4.5 (copilot)
+model: claude-sonnet-4.5
 description: >
   Especialista em desenvolvimento e manutenção do plugin Craftimizer para FFXIV via Dalamud.
   Use para: atualizar o plugin para novas versões do jogo; corrigir breaking changes do Dalamud SDK;
