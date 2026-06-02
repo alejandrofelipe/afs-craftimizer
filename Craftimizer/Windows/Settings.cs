@@ -633,6 +633,26 @@ public sealed class Settings : Window, IDisposable
                 if (ImGui.IsItemHovered())
                     ImGuiUtils.Tooltip("Reset all collected gear wear data. Tracking will start fresh.");
             }
+
+            ImGuiHelpers.ScaledDummy(3);
+
+            DrawOption(
+                "Enable Cosmic Tool Tracking (Experimental - Phase 0)",
+                "Shows research data progress for Cosmic Exploration Stellar Missions (Patch 7.21+). Currently in Phase 0: debug mode only. Enable this to access debug window for testing recipe detection and API validation.",
+                Config.EnableCosmicToolTracking,
+                v => Config.EnableCosmicToolTracking = v,
+                ref isDirty,
+                "🌌 Cosmic Tool Progress Tracking (WIP)\n\nPhase 0 (Current):\n• Debug window: /craftimizer debug cosmic\n• Recipe detection validation\n• API discovery and testing\n\nFuture Phases:\n• Live progress display in SynthHelper\n• Visual progress bar overlay\n• Stage completion notifications"
+            );
+
+            if (Config.EnableCosmicToolTracking)
+            {
+                ImGuiHelpers.ScaledDummy(2);
+                using (ImRaii.PushColor(ImGuiCol.Text, new Vector4(1f, 0.8f, 0f, 1f)))
+                {
+                    ImGui.TextWrapped("⚠ Phase 0: Debug mode active. Use '/craftimizer debug cosmic' to access validation tools.");
+                }
+            }
         }
 
         if (isDirty)

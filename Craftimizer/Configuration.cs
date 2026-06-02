@@ -114,6 +114,13 @@ public partial class Configuration
     /// </summary>
     public Dictionary<string, GearWearTracker.GearWearStats> GearWearData { get; set; } = new();
 
+    /// <summary>
+    /// Enable Cosmic Tool progression tracking (default: false).
+    /// Shows research data progress for Cosmic Exploration Stellar Missions.
+    /// WARNING: Experimental feature - game API still being reverse-engineered.
+    /// </summary>
+    public bool EnableCosmicToolTracking { get; set; } = false;
+
     public MacroCopyConfiguration MacroCopy { get; set; } = new();
 
     /// <summary>

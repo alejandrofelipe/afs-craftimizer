@@ -1,9 +1,11 @@
 #if DEBUG
 using Craftimizer.Plugin;
 using Craftimizer.Utils;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using static Craftimizer.Utils.ProgressBarComponent;
 
@@ -192,7 +194,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
             ImGui.Spacing();
             var completedCount = _testSnapshots.Count(s => s.State == ProgressState.Completed);
             ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1f), 
-                $"Completed: {completedCount}/{_testSnapshots.Count} = {(float)completedCount / _testSnapshots.Count:P0}");
+                $"Completed: {completedCount}/{_testSnapshots.Count} = {(float)completedCount / (float)_testSnapshots.Count:P0}");
             
             ImGui.Spacing();
             ImGui.Text("Snapshot Details:");

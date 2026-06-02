@@ -19,6 +19,16 @@ public sealed record RecipeData
     public RecipeInfo RecipeInfo { get; }
     public bool IsCollectable => Recipe.ItemResult.ValueNullable?.AlwaysCollectable ?? false;
     public IReadOnlyList<int?>? CollectableThresholds { get; }
+    
+    // Cosmic Exploration detection (patch 7.21+)
+    // Note: CollectableMetadataKey needs to be discovered in-game (Studium uses key=7, Cosmic uses different key)
+    public bool IsCosmicExploration => Recipe.MaxAdjustableJobLevel.RowId != 0 && 
+                                        Recipe.CollectableMetadataKey != 7 && 
+                                        Recipe.CollectableMetadataKey != 0;
+    
+    // Studium Deliveries (Endwalker WKS system)
+    public bool IsStudiumDelivery => Recipe.CollectableMetadataKey == 7;
+    
     public IReadOnlyList<(Item Item, int Amount)> Ingredients { get; }
     public int MaxStartingQuality { get; }
     public ushort? AdjustedJobLevel { get; }
