@@ -252,6 +252,76 @@ git push origin main
 
 **IMPORTANTE:** Sempre mencione ao usuário quando teste manual in-game for necessário, pois o agente não tem acesso ao jogo.
 
+## Skills Especializadas Disponíveis
+
+Este agente tem acesso a **4 skills especializadas** para tarefas complexas e recorrentes:
+
+### 1. 🔍 ffxiv-patch-compatibility-check
+
+**Quando usar:** Análise preventiva de compatibilidade com nova versão do FFXIV
+
+**O que faz:**
+- Verifica Dalamud SDK version e compatibilidade semântica
+- Mapeia 27 structs FFXIVClientStructs críticos
+- Cria matriz de risco 3D (componente × funcionalidade × cenário)
+- Gera 3 documentos markdown (viabilidade, análise detalhada, guia rápido)
+- Define procedimentos de teste in-game
+
+**Triggers:** "verificar compatibilidade patch 7.55", "analisar breaking changes", "preparar para manutenção"
+
+### 2. 📦 dalamud-plugin-deploy
+
+**Quando usar:** Build e deploy do plugin para XIVLauncher
+
+**O que faz:**
+- Executa build Release configuration
+- Lê versão de Craftimizer.csproj
+- Cria diretório destino em %APPDATA%\XIVLauncher\installedPlugins\
+- Copia todos arquivos (DLL + dependencies)
+- Verifica sucesso do deploy
+
+**Triggers:** "fazer deploy", "build e instalar", "compilar Craftimizer"
+
+**Script:** `.\scripts\build.ps1 -Deploy` (automatizado)
+
+### 3. 🔧 ffxiv-memory-offset-debug
+
+**Quando usar:** Diagnosticar e corrigir memory offsets quebrados após patch
+
+**O que faz:**
+- Identifica offset quebrado (logs, sintomas)
+- Encontra novo offset (via FFXIVClientStructs, CheatEngine, comunidade)
+- Valida novo offset in-game
+- Documenta mudança (commit + histórico)
+
+**Triggers:** "offset quebrado", "CSRecipeNote não funciona", "struct offset inválido"
+
+**Componentes de risco:** CSRecipeNote (0x118), Gearsets, Hooks
+
+### 4. 🏷️ craftimizer-version-bump
+
+**Quando usar:** Incrementar versão do plugin antes de commit/release
+
+**O que faz:**
+- Lê versão atual de .csproj
+- Incrementa componente (MAJOR.MINOR.PATCH.BUILD)
+- Zera componentes inferiores (se aplicável)
+- Atualiza XML e deixa staged para commit
+
+**Triggers:** "bumpar versão", "incrementar versão", "preparar release"
+
+**Script:** `.\scripts\bump-version.ps1 -Type {major|minor|patch|build}`
+
+**Convenções:**
+- `feat!:` ou BREAKING → MAJOR
+- Update patch FFXIV / feat grande → MINOR
+- Bug fix / feat pequena → PATCH
+- Refactor / chore → BUILD
+
+---
+
+**📚 Documentação completa das skills:** `.github/skills/README.md`
+
 ## Referências Externas
 
 - **Dalamud SDK**: https://github.com/goatcorp/Dalamud.NET.Sdk
