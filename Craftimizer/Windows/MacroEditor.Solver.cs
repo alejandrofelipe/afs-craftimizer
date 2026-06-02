@@ -45,7 +45,8 @@ public sealed partial class MacroEditor
         SolverObject = solver;
         solver.Start();
         var t = solver.GetTask();
-        _ = t.ContinueWith(_ => Macro.RemoveEphemeral());
+        _ = t.ContinueWith(_ => Macro.RemoveEphemeral(), System.Threading.Tasks.TaskContinuationOptions.NotOnCanceled);
+        _ = t.ContinueWith(faulted => Log.Error(faulted.Exception!, "Solver task faulted"), System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         _ = t.GetAwaiter().GetResult();
 
         token.ThrowIfCancellationRequested();

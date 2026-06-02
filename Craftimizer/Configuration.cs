@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace Craftimizer.Plugin;
 
@@ -153,11 +154,16 @@ public partial class Configuration
         };
     }
 
+    private readonly Lock _saveLock = new();
+
     public void Save()
     {
-        var f = Service.PluginInterface.ConfigFile;
-        using var stream = new FileStream(f.FullName, FileMode.Create, FileAccess.Write);
-        JsonSerializer.Serialize(stream, this, JsonContext.Default.Configuration);
+        lock (_saveLock)
+        {
+            var f = Service.PluginInterface.ConfigFile;
+            using var stream = new FileStream(f.FullName, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(stream, this, JsonContext.Default.Configuration);
+        }
     }
 
     public static Configuration Load()

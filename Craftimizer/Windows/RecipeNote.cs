@@ -75,10 +75,10 @@ public sealed unsafe class RecipeNote : Window, IDisposable
 
     private ILoadedTextureIcon ExpertBadge { get; }
     private ILoadedTextureIcon CollectibleBadge { get; }
-    private ILoadedTextureIcon CosmicExplorationBadge { get; }
-    private ILoadedTextureIcon SplendorousBadge { get; }
-    private ILoadedTextureIcon SpecialistBadge { get; }
-    private ILoadedTextureIcon NoManipulationBadge { get; }
+    private ITextureIcon CosmicExplorationBadge { get; }
+    private ITextureIcon SplendorousBadge { get; }
+    private ITextureIcon SpecialistBadge { get; }
+    private ITextureIcon NoManipulationBadge { get; }
     private IFontHandle AxisFont { get; }
 
     private readonly global::Craftimizer.Plugin.Plugin _plugin;
@@ -88,10 +88,10 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         _plugin = plugin;
         ExpertBadge = IconManager.GetAssemblyTexture("Graphics.expert_badge.png");
         CollectibleBadge = IconManager.GetAssemblyTexture("Graphics.collectible_badge.png");
-        CosmicExplorationBadge = IconManager.GetIcon(60810);
-        SplendorousBadge = IconManager.GetAssemblyTexture("Graphics.splendorous.png");
-        SpecialistBadge = IconManager.GetAssemblyTexture("Graphics.specialist.png");
-        NoManipulationBadge = IconManager.GetAssemblyTexture("Graphics.no_manip.png");
+        CosmicExplorationBadge = Service.IconManager.GetIconCached(60810);
+        SplendorousBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png");
+        SpecialistBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png");
+        NoManipulationBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png");
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
 
         RespectCloseHotkey = false;
@@ -1296,9 +1296,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         AxisFont?.Dispose();
         ExpertBadge.Dispose();
         CollectibleBadge.Dispose();
-        CosmicExplorationBadge.Dispose();
-        SplendorousBadge.Dispose();
-        SpecialistBadge.Dispose();
-        NoManipulationBadge.Dispose();
+        // CosmicExplorationBadge, SplendorousBadge, SpecialistBadge, NoManipulationBadge are
+        // ITextureIcon from IconManager cache — lifetime managed by IconManager, not the window.
     }
 }

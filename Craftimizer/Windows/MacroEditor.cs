@@ -62,13 +62,13 @@ public sealed partial class MacroEditor : Window, IDisposable
 
             foreach (var status in statuses)
             {
-                if (status.StatusId == 48)
+                if (status.StatusId == GameConstants.CrafterStatusIds.WellFed)
                     Food = FoodStatus.ResolveFoodParam(status.Param) ?? default;
-                else if (status.StatusId == 49)
+                else if (status.StatusId == GameConstants.CrafterStatusIds.Medicated)
                     Medicine = FoodStatus.ResolveFoodParam(status.Param) ?? default;
-                else if (status.StatusId == 356)
+                else if (status.StatusId == GameConstants.CrafterStatusIds.InControl)
                     FC = FC with { Craftsmanship = status.Param / 5 };
-                else if (status.StatusId == 357)
+                else if (status.StatusId == GameConstants.CrafterStatusIds.EatFromTheHand)
                     FC = FC with { Control = status.Param / 5 };
             }
         }
@@ -92,10 +92,10 @@ public sealed partial class MacroEditor : Window, IDisposable
     private Solver.Solver? SolverObject { get; set; }
     private int? SolverStartStepCount { get; set; }
 
-    private ILoadedTextureIcon CosmicExplorationBadge { get; }
-    private ILoadedTextureIcon SplendorousBadge { get; }
-    private ILoadedTextureIcon SpecialistBadge { get; }
-    private ILoadedTextureIcon NoManipulationBadge { get; }
+    private ITextureIcon CosmicExplorationBadge { get; }
+    private ITextureIcon SplendorousBadge { get; }
+    private ITextureIcon SpecialistBadge { get; }
+    private ITextureIcon NoManipulationBadge { get; }
     private ITextureIcon ManipulationBadge { get; }
     private ILoadedTextureIcon WellFedBadge { get; }
     private ILoadedTextureIcon MedicatedBadge { get; }
@@ -127,15 +127,15 @@ public sealed partial class MacroEditor : Window, IDisposable
         foreach (var action in DefaultActions)
             AddStep(action);
 
-        CosmicExplorationBadge = IconManager.GetIcon(60810);
-        SplendorousBadge = IconManager.GetAssemblyTexture("Graphics.splendorous.png");
-        SpecialistBadge = IconManager.GetAssemblyTexture("Graphics.specialist.png");
-        NoManipulationBadge = IconManager.GetAssemblyTexture("Graphics.no_manip.png");
+        CosmicExplorationBadge = Service.IconManager.GetIconCached(60810);
+        SplendorousBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png");
+        SpecialistBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png");
+        NoManipulationBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png");
         ManipulationBadge = ActionType.Manipulation.GetIcon(RecipeData.ClassJob);
-        WellFedBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(48)!.Icon);
-        MedicatedBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(49)!.Icon);
-        InControlBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(356)!.Icon);
-        EatFromTheHandBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(357)!.Icon);
+        WellFedBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(GameConstants.CrafterStatusIds.WellFed)!.Icon);
+        MedicatedBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(GameConstants.CrafterStatusIds.Medicated)!.Icon);
+        InControlBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(GameConstants.CrafterStatusIds.InControl)!.Icon);
+        EatFromTheHandBadge = IconManager.GetIcon(LuminaSheets.StatusSheet.GetRow(GameConstants.CrafterStatusIds.EatFromTheHand)!.Icon);
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
 
         IsOpen = true;
@@ -293,10 +293,8 @@ public sealed partial class MacroEditor : Window, IDisposable
     {
         _plugin.WindowSystem.RemoveWindow(this);
 
-        CosmicExplorationBadge.Dispose();
-        SplendorousBadge.Dispose();
-        SpecialistBadge.Dispose();
-        NoManipulationBadge.Dispose();
+        // CosmicExplorationBadge, SplendorousBadge, SpecialistBadge, NoManipulationBadge are
+        // ITextureIcon from IconManager cache — lifetime managed by IconManager, not the window.
         WellFedBadge.Dispose();
         MedicatedBadge.Dispose();
         InControlBadge.Dispose();

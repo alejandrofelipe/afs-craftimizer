@@ -14,7 +14,7 @@ public class StoredActionTypeConverter : JsonConverter<ActionType[]>
         JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartArray)
-            throw new JsonException();
+            throw new JsonException($"Expected StartArray, got {reader.TokenType} when reading ActionType[]");
 
         var ret = new List<ActionType>();
 
@@ -76,10 +76,10 @@ public class StoredActionTypeConverter : JsonConverter<ActionType[]>
                     ret.Add(key.Value);
             }
             else
-                throw new JsonException();
+                throw new JsonException($"Unexpected token {reader.TokenType} in ActionType array");
         }
 
-        throw new JsonException();
+        throw new JsonException("Unexpected end of JSON stream; expected EndArray for ActionType[]");
     }
 
     public override void Write(
@@ -89,7 +89,7 @@ public class StoredActionTypeConverter : JsonConverter<ActionType[]>
     {
         writer.WriteStartArray();
         foreach (var item in value)
-            writer.WriteStringValue(Enum.GetName(item) ?? throw new JsonException());
+            writer.WriteStringValue(Enum.GetName(item) ?? throw new JsonException($"ActionType value {item} has no enum name"));
         writer.WriteEndArray();
     }
 }
