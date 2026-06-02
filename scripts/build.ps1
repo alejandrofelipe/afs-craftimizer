@@ -44,13 +44,13 @@ $version = $xml.Project.PropertyGroup[0].Version
 if (-not $NoBuild) {
     # Always build the requested configuration
     Write-Host "Building Craftimizer $version ($Configuration)..." -ForegroundColor Cyan
-    & $dotnet build $csproj -c $Configuration --nologo
+    & $dotnet build $csproj -c $Configuration --nologo /p:NodeReuse=false
     if ($LASTEXITCODE -ne 0) { throw "Build failed ($Configuration)." }
 
     # When deploying, also ensure Release is up to date
     if ($Deploy -and $Configuration -ne "Release") {
         Write-Host "Building Craftimizer $version (Release)..." -ForegroundColor Cyan
-        & $dotnet build $csproj -c Release --nologo
+        & $dotnet build $csproj -c Release --nologo /p:NodeReuse=false
         if ($LASTEXITCODE -ne 0) { throw "Build failed (Release)." }
     }
 

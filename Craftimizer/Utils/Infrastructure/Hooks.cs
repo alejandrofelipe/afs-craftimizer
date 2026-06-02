@@ -3,7 +3,7 @@ using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using ActionType = Craftimizer.Simulator.Actions.ActionType;
-using ActionUtils = Craftimizer.Plugin.ActionUtils;
+using ActionUtils = Craftimizer.Utils.ActionUtils;
 using CSActionType = FFXIVClientStructs.FFXIV.Client.Game.ActionType;
 
 namespace Craftimizer.Utils;

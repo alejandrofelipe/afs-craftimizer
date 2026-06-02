@@ -8,6 +8,7 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using SimActionUtils = Craftimizer.Utils.ActionUtils;
 
 namespace Craftimizer.Plugin;
 
@@ -83,7 +84,7 @@ public sealed class Plugin : IDalamudPlugin
 
         // Trigger static constructors so a hitch doesn't occur on first RecipeNote frame.
         FoodStatus.Initialize();
-        ActionUtils.Initialize();
+        SimActionUtils.Initialize();
 
         Service.PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
         Service.PluginInterface.UiBuilder.OpenConfigUi += () => OpenSettingsWindow(true);

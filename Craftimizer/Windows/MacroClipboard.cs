@@ -1,4 +1,5 @@
 using Craftimizer.Plugin;
+using Craftimizer.Utils;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;

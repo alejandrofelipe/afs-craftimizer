@@ -16,6 +16,7 @@ using Lumina.Text.Payloads;
 using Lumina.Excel.Sheets;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Craftimizer.Plugin;
 
 namespace Craftimizer.Utils;
 

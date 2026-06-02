@@ -15,6 +15,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using PluginClass = Craftimizer.Plugin.Plugin;
+using Configuration = Craftimizer.Plugin.Configuration;
+using MacroCopyConfiguration = Craftimizer.Plugin.MacroCopyConfiguration;
+using Service = Craftimizer.Plugin.Service;
 
 namespace Craftimizer.Windows;
 
@@ -22,7 +26,7 @@ public sealed class Settings : Window, IDisposable
 {
     private const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags.None;
 
-    private readonly Plugin _plugin;
+    private readonly PluginClass _plugin;
     private Configuration Config => _plugin.Configuration;
 
     private static float OptionWidth => 200 * ImGuiHelpers.GlobalScale;
@@ -33,7 +37,7 @@ public sealed class Settings : Window, IDisposable
     private IFontHandle HeaderFont { get; }
     private IFontHandle SubheaderFont { get; }
 
-    public Settings(Plugin plugin) : base("Craftimizer Settings", WindowFlags)
+    public Settings(PluginClass plugin) : base("Craftimizer Settings", WindowFlags)
     {
         _plugin = plugin;
         _plugin.WindowSystem.AddWindow(this);
@@ -1306,7 +1310,7 @@ public sealed class Settings : Window, IDisposable
                     ImGuiUtils.AlignCentered(ImGui.CalcTextSize($"Support me on Ko-fi!").X);
                     ImGui.TextUnformatted($"Support me on ");
                     ImGui.SameLine(0, 0);
-                    ImGuiUtils.Hyperlink("Ko-fi", Plugin.SupportLink);
+                    ImGuiUtils.Hyperlink("Ko-fi", PluginClass.SupportLink);
                     ImGui.SameLine(0, 0);
                     ImGui.TextUnformatted("!");
                 }
