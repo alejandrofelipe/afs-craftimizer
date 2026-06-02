@@ -16,7 +16,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace Craftimizer.Plugin.Windows;
+namespace Craftimizer.Windows;
 
 public sealed class Settings : Window, IDisposable
 {

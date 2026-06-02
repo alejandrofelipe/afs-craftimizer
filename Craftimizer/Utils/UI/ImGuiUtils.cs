@@ -17,7 +17,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Craftimizer.Plugin;
+namespace Craftimizer.Utils;
 
 internal static class ImGuiUtils
 {

@@ -1,4 +1,3 @@
-using Craftimizer.Plugin.Windows;
 using Craftimizer.Simulator;
 using Craftimizer.Simulator.Actions;
 using Craftimizer.Utils;

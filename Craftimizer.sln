@@ -10,9 +10,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer", "Craftimizer\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer.Benchmark", "Benchmark\Craftimizer.Benchmark.csproj", "{057C4B64-4D99-4847-9BCF-966571CAE57C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer.Simulator", "Craftimizer\Core\Simulator\Craftimizer.Simulator.csproj", "{172EE849-AC7E-4F2A-ACAB-EF9D065523B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer.Simulator", "Simulator\Craftimizer.Simulator.csproj", "{172EE849-AC7E-4F2A-ACAB-EF9D065523B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer.Solver", "Craftimizer\Core\Solver\Craftimizer.Solver.csproj", "{2B0EA452-6DFC-48DB-9049-EA782E600C21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Craftimizer.Solver", "Solver\Craftimizer.Solver.csproj", "{2B0EA452-6DFC-48DB-9049-EA782E600C21}"
 	ProjectSection(ProjectDependencies) = postProject
 		{172EE849-AC7E-4F2A-ACAB-EF9D065523B3} = {172EE849-AC7E-4F2A-ACAB-EF9D065523B3}
 	EndProjectSection

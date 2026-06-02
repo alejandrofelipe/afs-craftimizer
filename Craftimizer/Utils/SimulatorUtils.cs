@@ -17,7 +17,7 @@ using Lumina.Excel.Sheets;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
-namespace Craftimizer.Plugin;
+namespace Craftimizer.Utils;
 
 internal static class ActionUtils
 {
