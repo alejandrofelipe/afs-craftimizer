@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="36%" r="62%">
+      <stop offset="0%" stop-color="#321b78"/>
+      <stop offset="100%" stop-color="#0b0921"/>
+    </radialGradient>
+    <linearGradient id="hg" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%"   stop-color="#f9efd4"/>
+      <stop offset="45%"  stop-color="#e8b84b"/>
+      <stop offset="100%" stop-color="#9e5f0e"/>
+    </linearGradient>
+    <linearGradient id="sg" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#fffde0"/>
+      <stop offset="100%" stop-color="#f5a200"/>
+    </linearGradient>
+    <filter id="starGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="hammerShadow">
+      <feDropShadow dx="4" dy="6" stdDeviation="14" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="256" cy="256" r="252" fill="url(#bg)"/>
+  <!-- Subtle inner highlight -->
+  <ellipse cx="215" cy="195" rx="140" ry="110" fill="white" opacity="0.025"/>
+  <!-- Border ring -->
+  <circle cx="256" cy="256" r="247" fill="none" stroke="#7050c8" stroke-width="5" opacity="0.45"/>
+  <circle cx="256" cy="256" r="242" fill="none" stroke="#9070e0" stroke-width="1.5" opacity="0.2"/>
+
+  <!-- Hammer — vertical in local space, rotated -45° so it points upper-left -->
+  <g transform="translate(256,256) rotate(-45)" filter="url(#hammerShadow)">
+    <!-- Handle -->
+    <rect x="-14" y="32" width="28" height="178" rx="10" fill="url(#hg)"/>
+    <!-- Handle bottom cap -->
+    <ellipse cx="0" cy="208" rx="14" ry="8" fill="#7a4010"/>
+    <!-- Head body -->
+    <rect x="-66" y="-96" width="132" height="104" rx="18" fill="url(#hg)"/>
+    <!-- Head top highlight -->
+    <rect x="-66" y="-96" width="132" height="26" rx="18" fill="white" opacity="0.16"/>
+    <!-- Head left highlight -->
+    <rect x="-66" y="-96" width="28" height="104" rx="18" fill="white" opacity="0.09"/>
+    <!-- Head center groove -->
+    <rect x="-66" y="-8" width="132" height="7" rx="3" fill="#7a4010" opacity="0.38"/>
+  </g>
+
+  <!-- Star glow halo (at striking face — upper-left of rotated hammer) -->
+  <circle cx="183" cy="179" r="52" fill="#f5c020" opacity="0.10"/>
+  <circle cx="183" cy="179" r="32" fill="#f5c020" opacity="0.14"/>
+
+  <!-- 4-point star (HQ symbol) -->
+  <g filter="url(#starGlow)">
+    <path d="M183,144 L192,167 L218,179 L192,191 L183,214 L174,191 L148,179 L174,167 Z"
+          fill="url(#sg)"/>
+    <!-- Inner shine -->
+    <path d="M183,155 L189,169 L204,179 L189,189 L183,203 L177,189 L162,179 L177,169 Z"
+          fill="white" opacity="0.42"/>
+  </g>
+
+  <!-- Sparkles -->
+  <!-- Upper right cluster -->
+  <circle cx="352" cy="126" r="5.5" fill="#f5c820" opacity="0.78"/>
+  <circle cx="367" cy="110" r="3.2" fill="#f5c820" opacity="0.52"/>
+  <circle cx="338" cy="108" r="2.2" fill="#f5c820" opacity="0.58"/>
+  <!-- Right side -->
+  <circle cx="392" cy="275" r="4"   fill="#b898f8" opacity="0.55"/>
+  <circle cx="406" cy="254" r="2.4" fill="#b898f8" opacity="0.38"/>
+  <!-- Lower left -->
+  <circle cx="158" cy="374" r="4.2" fill="#f5c820" opacity="0.52"/>
+  <circle cx="143" cy="390" r="2.5" fill="#f5c820" opacity="0.36"/>
+  <!-- Left -->
+  <circle cx="112" cy="218" r="3.2" fill="#b898f8" opacity="0.44"/>
+  <circle cx="98"  cy="236" r="2"   fill="#b898f8" opacity="0.32"/>
+  <!-- Bottom -->
+  <circle cx="278" cy="398" r="3"   fill="#b898f8" opacity="0.38"/>
+</svg>

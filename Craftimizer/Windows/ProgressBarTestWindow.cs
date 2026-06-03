@@ -22,9 +22,9 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
     // Test state
     private int _testProgress = 50;
     private int _testMax = 100;
-    private int _selectedMode = 0;
-    private int _selectedState = 0;
-    private int _selectedTheme = 0;
+    private int _selectedMode;
+    private int _selectedState;
+    private int _selectedTheme;
     private bool _showPercentage = true;
     private bool _showTooltip = true;
     private string _customTooltip = "";
@@ -214,7 +214,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
         }
     }
 
-    private void DrawEdgeCaseTests()
+    private static void DrawEdgeCaseTests()
     {
         if (ImGui.CollapsingHeader("Edge Case Tests"))
         {

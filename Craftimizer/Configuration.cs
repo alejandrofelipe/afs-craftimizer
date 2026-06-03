@@ -97,7 +97,7 @@ public partial class Configuration
     /// Enable gear wear tracking system (default: false).
     /// Learns how much gear durability each recipe consumes over time.
     /// </summary>
-    public bool EnableGearWearTracking { get; set; } = false;
+    public bool EnableGearWearTracking { get; set; }
 
     /// <summary>
     /// Show warning when gear durability is low (default: true).
@@ -120,7 +120,7 @@ public partial class Configuration
     /// Shows research data progress for Cosmic Exploration Stellar Missions.
     /// WARNING: Experimental feature - game API still being reverse-engineered.
     /// </summary>
-    public bool EnableCosmicToolTracking { get; set; } = false;
+    public bool EnableCosmicToolTracking { get; set; }
 
     public MacroCopyConfiguration MacroCopy { get; set; } = new();
 

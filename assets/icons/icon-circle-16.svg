@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#321b78"/>
+      <stop offset="100%" stop-color="#0b0921"/>
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <circle cx="8" cy="8" r="7.5" fill="url(#bg)"/>
+  <!-- Hammer silhouette — pixel-friendly, minimal detail -->
+  <g transform="translate(8,8) rotate(-45)">
+    <!-- Handle -->
+    <rect x="-1" y="1" width="2" height="6" rx="0.5" fill="#d4943a"/>
+    <!-- Head -->
+    <rect x="-3.5" y="-4.5" width="7" height="4.5" rx="1" fill="#e8b84b"/>
+  </g>
+  <!-- Star — single bright dot at striking face -->
+  <circle cx="5.5" cy="5.5" r="1.8" fill="#ffe066"/>
+  <circle cx="5.5" cy="5.5" r="1" fill="white" opacity="0.7"/>
+</svg>

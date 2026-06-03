@@ -243,7 +243,7 @@ public class GearWearTracker : IDisposable
     /// <summary>
     /// Fallback estimation when no tracking data exists (conservative 1% per craft).
     /// </summary>
-    private (int MinCrafts, int MaxCrafts, float Confidence) EstimateWithFallback(float currentCondition)
+    private static (int MinCrafts, int MaxCrafts, float Confidence) EstimateWithFallback(float currentCondition)
     {
         const float conservativeLoss = 1.0f; // 1% per craft
         var crafts = (int)Math.Floor(currentCondition / conservativeLoss);

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="64" height="64">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="36%" r="70%">
+      <stop offset="0%" stop-color="#321b78"/>
+      <stop offset="100%" stop-color="#0b0921"/>
+    </radialGradient>
+    <linearGradient id="hg" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%"   stop-color="#f9efd4"/>
+      <stop offset="45%"  stop-color="#e8b84b"/>
+      <stop offset="100%" stop-color="#9e5f0e"/>
+    </linearGradient>
+    <linearGradient id="sg" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#fffde0"/>
+      <stop offset="100%" stop-color="#f5a200"/>
+    </linearGradient>
+    <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="115" ry="115" fill="url(#bg)"/>
+  <rect x="8" y="8" width="496" height="496" rx="110" ry="110" fill="none" stroke="#7050c8" stroke-width="8" opacity="0.45"/>
+  <g transform="translate(256,256) rotate(-45)">
+    <rect x="-15" y="30" width="30" height="182" rx="12" fill="url(#hg)"/>
+    <rect x="-70" y="-100" width="140" height="108" rx="20" fill="url(#hg)"/>
+    <rect x="-70" y="-100" width="140" height="28"  rx="20" fill="white" opacity="0.14"/>
+  </g>
+  <circle cx="183" cy="179" r="38" fill="#f5c020" opacity="0.12"/>
+  <g filter="url(#starGlow)">
+    <path d="M183,144 L193,168 L220,179 L193,190 L183,214 L173,190 L146,179 L173,168 Z" fill="url(#sg)"/>
+  </g>
+</svg>

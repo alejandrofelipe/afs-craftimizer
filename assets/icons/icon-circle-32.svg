@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="36%" r="62%">
+      <stop offset="0%" stop-color="#321b78"/>
+      <stop offset="100%" stop-color="#0b0921"/>
+    </radialGradient>
+    <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f9efd4"/>
+      <stop offset="100%" stop-color="#c47a18"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <circle cx="16" cy="16" r="15.5" fill="url(#bg)"/>
+  <circle cx="16" cy="16" r="14.5" fill="none" stroke="#7050c8" stroke-width="1" opacity="0.5"/>
+  <!-- Hammer (simplified, flat fill) -->
+  <g transform="translate(16,16) rotate(-45)">
+    <!-- Handle -->
+    <rect x="-1.5" y="2" width="3" height="11" rx="1" fill="url(#hg)"/>
+    <!-- Head -->
+    <rect x="-5.5" y="-7" width="11" height="8" rx="1.5" fill="url(#hg)"/>
+  </g>
+  <!-- Star (simple 4-point) -->
+  <path d="M11.5,9 L12.5,11.5 L15,12.5 L12.5,13.5 L11.5,16 L10.5,13.5 L8,12.5 L10.5,11.5 Z"
+        fill="#ffe066"/>
+</svg>
