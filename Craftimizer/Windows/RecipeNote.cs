@@ -77,11 +77,15 @@ public sealed unsafe class RecipeNote : Window, IDisposable
     private ILoadedTextureIcon CollectibleBadge { get; }
     private IFontHandle AxisFont { get; }
 
+    private CosmicToolTracker.ToolProgress? _cosmicProgress;
+
     private readonly global::Craftimizer.Plugin.Plugin _plugin;
 
     public RecipeNote(global::Craftimizer.Plugin.Plugin plugin) : base(WindowNamePinned)
     {
         _plugin = plugin;
+        _cosmicProgress = _plugin.CosmicToolTracker.CachedProgress;
+        _plugin.CosmicToolTracker.OnProgressChanged += OnCosmicProgressChanged;
         ExpertBadge = IconManager.GetAssemblyTexture("Graphics.expert_badge.png");
         CollectibleBadge = IconManager.GetAssemblyTexture("Graphics.collectible_badge.png");
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
@@ -821,8 +825,28 @@ public sealed unsafe class RecipeNote : Window, IDisposable
             ImGui.TextUnformatted("Durability");
             ImGui.TableNextColumn();
             ImGuiUtils.TextRight($"{RecipeData.RecipeInfo.MaxDurability}");
+
+            if (RecipeData.IsCosmicExploration
+                && _plugin.Configuration.EnableCosmicToolTracking
+                && _cosmicProgress is { } cp)
+            {
+                ImGui.TableNextColumn();
+                ImGui.TextUnformatted($"Research Type {CosmicRomanType(cp.ResearchType)}");
+                ImGui.TableNextColumn();
+                var frac = cp.NeededData > 0 ? (float)cp.CurrentData / cp.NeededData : 0f;
+                ImGui.ProgressBar(frac, new Vector2(-1, ImGui.GetTextLineHeight()));
+                if (ImGui.IsItemHovered())
+                    ImGuiUtils.Tooltip($"{cp.CurrentData:N0} / {cp.NeededData:N0}  ({frac:P0})");
+            }
         }
     }
+
+    private static string CosmicRomanType(int zeroBasedType) => (zeroBasedType + 1) switch
+    {
+        1 => "I", 2 => "II", 3 => "III", 4 => "IV",
+        5 => "V", 6 => "VI", 7 => "VII",
+        _ => (zeroBasedType + 1).ToString()
+    };
 
     private enum MacroTaskType
     {
@@ -1279,8 +1303,12 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         CommunityMacroTask.Start();
     }
 
+    private void OnCosmicProgressChanged(CosmicToolTracker.ToolProgress? progress)
+        => _cosmicProgress = progress;
+
     public void Dispose()
     {
+        _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         SavedMacroTask?.Dispose();
         SuggestedMacroTask?.Dispose();
         CommunityMacroTask?.Dispose();

@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.10.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.10.3.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -52,6 +52,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Melhorias de qualidade de código: `Settings.cs` e `ImGuiUtils.cs` divididos em arquivos parciais, constantes para magic numbers do jogo, thread-safety em `Configuration.Save()`, error handlers em fire-and-forget tasks
 - 0 build warnings
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log (texturas de badges buscadas no draw em vez de armazenadas como campos)
+- Progresso de research data da Cosmic Tool exibido em tempo real no Crafting Log e no Macro Editor durante Stellar Missions (`CosmicToolTracker` via hooks WKS)
 
 ## Instalação
 

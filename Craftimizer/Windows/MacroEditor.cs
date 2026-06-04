@@ -92,6 +92,7 @@ public sealed partial class MacroEditor : Window, IDisposable
     private Solver.Solver? SolverObject { get; set; }
     private int? SolverStartStepCount { get; set; }
 
+    private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private ITextureIcon CosmicExplorationBadge { get; }
     private ITextureIcon SplendorousBadge { get; }
     private ITextureIcon SpecialistBadge { get; }
@@ -126,6 +127,9 @@ public sealed partial class MacroEditor : Window, IDisposable
         RecalculateState();
         foreach (var action in DefaultActions)
             AddStep(action);
+
+        _cosmicProgress = _plugin.CosmicToolTracker.CachedProgress;
+        _plugin.CosmicToolTracker.OnProgressChanged += OnCosmicProgressChanged;
 
         CosmicExplorationBadge = Service.IconManager.GetIconCached(60810);
         SplendorousBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png");
@@ -289,8 +293,12 @@ public sealed partial class MacroEditor : Window, IDisposable
         Macro.RemoveAt(index);
     }
 
+    private void OnCosmicProgressChanged(CosmicToolTracker.ToolProgress? progress)
+        => _cosmicProgress = progress;
+
     public void Dispose()
     {
+        _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         _plugin.WindowSystem.RemoveWindow(this);
 
         // CosmicExplorationBadge, SplendorousBadge, SpecialistBadge, NoManipulationBadge are

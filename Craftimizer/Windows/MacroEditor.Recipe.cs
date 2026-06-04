@@ -141,6 +141,15 @@ public sealed partial class MacroEditor
             ImGui.Image(CosmicExplorationBadge.Handle, new(imageSize));
             if (ImGui.IsItemHovered())
                 ImGuiUtils.Tooltip($"Cosmic Exploration");
+
+            if (_plugin.Configuration.EnableCosmicToolTracking && _cosmicProgress is { } cp)
+            {
+                ImGui.SameLine(0, 6);
+                var frac = cp.NeededData > 0 ? (float)cp.CurrentData / cp.NeededData : 0f;
+                ImGui.ProgressBar(frac, new Vector2(90 * ImGuiHelpers.GlobalScale, imageSize));
+                if (ImGui.IsItemHovered())
+                    ImGuiUtils.Tooltip($"Research Data Type {ToRomanType(cp.ResearchType)}: {cp.CurrentData:N0} / {cp.NeededData:N0}");
+            }
         }
 
         if (isCollectable)
@@ -331,4 +340,11 @@ public sealed partial class MacroEditor
         }
         return false;
     }
+
+    private static string ToRomanType(int zeroBasedType) => (zeroBasedType + 1) switch
+    {
+        1 => "I", 2 => "II", 3 => "III", 4 => "IV",
+        5 => "V", 6 => "VI", 7 => "VII",
+        _ => (zeroBasedType + 1).ToString()
+    };
 }
