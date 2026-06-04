@@ -56,7 +56,21 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 
 ## Instalação
 
-Este é um fork de desenvolvimento pessoal. Para a versão oficial e estável, instale pelo repositório original no Dalamud Plugin Installer.
+### Via Dalamud Plugin Installer (recomendado)
+
+1. Abra **Dalamud → Settings → Experimental**
+2. Em **Custom Plugin Repositories**, adicione a URL:
+   ```
+   https://raw.githubusercontent.com/alejandrofelipe/afs-craftimizer/main/repo.json
+   ```
+3. Clique **Save and Close**
+4. No **Plugin Installer**, procure por "Craftimizer" e instale
+
+Atualizações futuras aparecem automaticamente no Plugin Installer.
+
+### Versão oficial
+
+Para a versão estável e sem customizações, instale o [Craftimizer original](https://github.com/WorkingRobot/Craftimizer) pelo repositório padrão do Dalamud.
 
 ## Build
 

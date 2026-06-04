@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Craftimizer/Craftimizer.csproj
+
+      - name: Build Release
+        run: dotnet build Craftimizer/Craftimizer.csproj -c Release --no-restore --nologo
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Craftimizer/bin/Release/Craftimizer/latest.zip
+          generate_release_notes: false
+          body: |
+            ## Craftimizer (AFS Fork) ${{ github.ref_name }}
+
+            ### Instalação via Dalamud Plugin Installer
+
+            1. Abra **Dalamud → Settings → Experimental**
+            2. Em **Custom Plugin Repositories**, adicione:
+               ```
+               https://raw.githubusercontent.com/alejandrofelipe/afs-craftimizer/main/repo.json
+               ```
+            3. Clique **Save and Close**
+            4. Procure por "Craftimizer" no Plugin Installer e instale
+
+            Atualizações futuras aparecem automaticamente no Plugin Installer.
+
+      - name: Update repo.json version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          $timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds().ToString()
+
+          $repo = Get-Content repo.json -Raw | ConvertFrom-Json
+          $repo[0].AssemblyVersion = $version
+          $repo[0].LastUpdate = $timestamp
+          $repo | ConvertTo-Json -Depth 5 | Set-Content repo.json -Encoding UTF8
+
+          Write-Host "Updated repo.json: AssemblyVersion=$version, LastUpdate=$timestamp"
+
+      - name: Commit updated repo.json
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add repo.json
+          $status = git status --porcelain
+          if ($status) {
+            git commit -m "chore: atualizar repo.json para ${{ github.ref_name }}"
+            git push origin HEAD:main
+            Write-Host "repo.json committed and pushed"
+          } else {
+            Write-Host "repo.json already up to date, nothing to commit"
+          }
