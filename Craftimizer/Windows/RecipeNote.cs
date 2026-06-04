@@ -75,10 +75,6 @@ public sealed unsafe class RecipeNote : Window, IDisposable
 
     private ILoadedTextureIcon ExpertBadge { get; }
     private ILoadedTextureIcon CollectibleBadge { get; }
-    private ITextureIcon CosmicExplorationBadge { get; }
-    private ITextureIcon SplendorousBadge { get; }
-    private ITextureIcon SpecialistBadge { get; }
-    private ITextureIcon NoManipulationBadge { get; }
     private IFontHandle AxisFont { get; }
 
     private readonly global::Craftimizer.Plugin.Plugin _plugin;
@@ -88,10 +84,6 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         _plugin = plugin;
         ExpertBadge = IconManager.GetAssemblyTexture("Graphics.expert_badge.png");
         CollectibleBadge = IconManager.GetAssemblyTexture("Graphics.collectible_badge.png");
-        CosmicExplorationBadge = Service.IconManager.GetIconCached(60810);
-        SplendorousBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png");
-        SpecialistBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png");
-        NoManipulationBadge = Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png");
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
 
         RespectCloseHotkey = false;
@@ -565,19 +557,19 @@ public sealed unsafe class RecipeNote : Window, IDisposable
             if (hasSplendorous)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(SplendorousBadge.Handle, new Vector2(imageSize), "Splendorous Tool");
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png").Handle, new Vector2(imageSize), "Splendorous Tool");
             }
 
             if (hasSpecialist)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(SpecialistBadge.Handle, new Vector2(imageSize), "Specialist", Colors.SpecialistGold);
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png").Handle, new Vector2(imageSize), "Specialist", Colors.SpecialistGold);
             }
 
             if (shouldHaveManip)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(NoManipulationBadge.Handle, new Vector2(imageSize), "No Manipulation (Missing Job Quest)");
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png").Handle, new Vector2(imageSize), "No Manipulation (Missing Job Quest)");
             }
         }
 
@@ -785,7 +777,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
             if (isAdjustable)
             {
                 ImGui.SameLine(0, 3);
-                ImGui.Image(CosmicExplorationBadge.Handle, new(imageSize));
+                ImGui.Image(Service.IconManager.GetIconCached(60810).Handle, new(imageSize));
                 if (ImGui.IsItemHovered())
                     ImGuiUtils.Tooltip($"Cosmic Exploration");
             }
@@ -1296,7 +1288,5 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         AxisFont?.Dispose();
         ExpertBadge.Dispose();
         CollectibleBadge.Dispose();
-        // CosmicExplorationBadge, SplendorousBadge, SpecialistBadge, NoManipulationBadge are
-        // ITextureIcon from IconManager cache — lifetime managed by IconManager, not the window.
     }
 }
