@@ -1,0 +1,231 @@
+# /backlog
+
+Cria um novo item de backlog para o Craftimizer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md`.
+
+**Uso:** `/backlog <título ou descrição do item>`
+
+---
+
+## Instruções
+
+Receba o argumento `$ARGUMENTS` e siga os passos abaixo:
+
+### 1. Determinar tipo e profundidade
+
+Classifique o item com base na descrição fornecida:
+
+| Tipo | Quando usar | Template |
+|---|---|---|
+| **bug** | Crash, exceção, comportamento incorreto, regressão | Bug |
+| **feature-rascunho** | Ideia sem detalhes claros, questões em aberto | Rascunho |
+| **feature** | Feature com requisitos definidos e contexto técnico | Feature completa |
+
+Se não for possível determinar com certeza, perguntar ao usuário: "É um bug, uma ideia rápida ou uma feature para detalhar?"
+
+### 2. Gerar nome do arquivo
+
+- Formato: `backlog/<slug-kebab-case>.md`
+- Para bugs: prefixar com `bug-` → `backlog/bug-<slug>.md`
+- Slug: lowercase, sem acentos, palavras separadas por `-`, máximo 6 palavras
+- Exemplos:
+  - "Bug crash ao abrir macro editor" → `bug-crash-macro-editor.md`
+  - "Mostrar tempo estimado de craft" → `mostrar-tempo-estimado-craft.md`
+  - "Calcular custo de materiais" → `calcular-custo-materiais.md`
+
+### 3. Criar o arquivo com o template adequado
+
+---
+
+#### Template: Bug
+
+```markdown
+# Bug — [Título descritivo do bug]
+
+**Criado:** YYYY-MM-DD
+**Status:** 🔴 Bug confirmado
+**Tipo:** Bug / Crash
+
+---
+
+## Stack trace
+
+```
+[Colar stack trace aqui se disponível, ou "N/A"]
+```
+
+## Análise do Problema
+
+[Descrever o que causa o bug. Qual componente está envolvido, qual é o estado que leva ao problema, por que acontece.]
+
+## Solução Proposta
+
+[Passos para corrigir:]
+1. ...
+2. ...
+
+## Arquivos Afetados
+
+- `Craftimizer/[Arquivo].cs`
+
+## Status
+
+[Estado atual: pronto para corrigir / aguarda investigação / aguarda info]
+```
+
+---
+
+#### Template: Feature — Rascunho
+
+```markdown
+# Backlog — [Título da feature]
+
+**Criado:** YYYY-MM-DD
+**Status:** 📝 Rascunho — aguarda detalhamento
+**Tipo:** Feature
+
+---
+
+## Resumo
+
+[1-3 frases descrevendo a ideia.]
+
+## Questões em aberto
+
+- [O que ainda não está claro sobre como implementar?]
+- [Há dependências externas?]
+- [Qual é o escopo: nova janela, widget inline, hook?]
+
+## Status
+
+⏳ Aguarda detalhamento.
+```
+
+---
+
+#### Template: Feature — Completa
+
+```markdown
+# Backlog — [Título da feature]
+
+**Criado:** YYYY-MM-DD
+**Status:** 📝 Refinado
+**Tipo:** Nova feature
+**Estimativa total:** X–Yh
+
+---
+
+## Resumo Executivo
+
+[2-4 frases. O que é a feature, qual problema resolve, o que entrega ao usuário.]
+
+---
+
+## Problema
+
+[Por que essa feature é necessária? O que o usuário não consegue fazer hoje?]
+
+---
+
+## Objetivo
+
+[O que a feature entrega. Incluir formato alvo / mockup de texto se aplicável.]
+
+```
+[mockup ou exemplo de output]
+```
+
+---
+
+## Plugins Externos
+
+> [Se não depende de nenhum plugin externo, escrever: "Esta feature não depende de nenhum plugin externo."]
+>
+> Se depender, listar na tabela:
+
+| Plugin | Sub-feature | Comportamento sem o plugin |
+|---|---|---|
+| ... | ... | ... |
+
+---
+
+## Escopo da Feature
+
+### O que inclui
+- ...
+
+### O que não inclui (fora do escopo inicial)
+- ...
+
+---
+
+## Arquitetura
+
+### Novos Arquivos
+
+```
+Craftimizer/
+  [Listar arquivos novos com breve descrição]
+```
+
+### Arquivos Modificados
+
+| Arquivo | Motivo |
+|---|---|
+| `...` | ... |
+
+---
+
+## Fases de Implementação
+
+### Fase 0 — Investigação (Xh)
+- [ ] ...
+
+### Fase 1 — [Nome] (X–Yh)
+- [ ] ...
+
+### Fase 2 — [Nome] (X–Yh)
+- [ ] ...
+
+---
+
+## Critérios de Aceite
+
+- [ ] ...
+- [ ] ...
+
+---
+
+## Riscos
+
+| Risco | Probabilidade | Mitigação |
+|---|---|---|
+| ... | Baixo/Médio/Alto | ... |
+
+---
+
+## Referências
+
+- [Nome](URL)
+```
+
+---
+
+### 4. Atualizar `backlog/PROGRESS.md`
+
+Adicionar uma linha na tabela **Pendente** em `backlog/PROGRESS.md`:
+
+| Tipo | Linha a adicionar |
+|---|---|
+| Bug | `\| 🔴 Bug: [Título curto] \| 🔴 Bug confirmado \| Ver \`backlog/[arquivo].md\` \|` |
+| Feature rascunho | `\| [Título curto] \| 📝 Rascunho \| Ver \`backlog/[arquivo].md\` \|` |
+| Feature completa | `\| [Título curto] \| 📝 Refinado \| Ver \`backlog/[arquivo].md\` \|` |
+
+---
+
+### 5. Confirmar ao usuário
+
+Informar:
+- Arquivo criado: `backlog/[arquivo].md`
+- Entrada adicionada em `backlog/PROGRESS.md`
+- Se for rascunho: oferecer detalhar a feature agora ("Quer que eu detalhe mais a feature?")
+- Se for feature completa: mencionar que as fases de implementação foram deixadas em aberto para ajuste
