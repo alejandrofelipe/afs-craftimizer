@@ -23,8 +23,14 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: Download Dalamud
+        run: |
+          wget https://github.com/goatcorp/dalamud-distrib/raw/main/api15/latest.zip -O /tmp/dalamud.zip
+          mkdir -p $HOME/.xlcore/dalamud/Hooks/dev
+          unzip /tmp/dalamud.zip -d $HOME/.xlcore/dalamud/Hooks/dev
+
       - name: Restore dependencies
-        run: dotnet restore Craftimizer/Craftimizer.csproj
+        run: dotnet restore Craftimizer/Craftimizer.csproj /p:RestoreLockedMode=false
 
       - name: Build Release
         run: dotnet build Craftimizer/Craftimizer.csproj -c Release --no-restore --nologo
