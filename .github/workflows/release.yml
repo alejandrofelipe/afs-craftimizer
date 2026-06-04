@@ -25,7 +25,7 @@ jobs:
 
       - name: Download Dalamud
         run: |
-          wget https://github.com/goatcorp/dalamud-distrib/raw/main/api15/latest.zip -O /tmp/dalamud.zip
+          wget https://github.com/goatcorp/dalamud-distrib/raw/main/stg/latest.zip -O /tmp/dalamud.zip
           mkdir -p $HOME/.xlcore/dalamud/Hooks/dev
           unzip /tmp/dalamud.zip -d $HOME/.xlcore/dalamud/Hooks/dev
 
