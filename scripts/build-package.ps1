@@ -40,7 +40,8 @@ Write-Host "Version: $version" -ForegroundColor Yellow
 
 # --- build ---
 if (-not $NoBuild) {
-    Write-Host "`nBuilding Release configuration..." -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Building Release configuration..." -ForegroundColor Cyan
     & $dotnet build $csproj -c Release --nologo
     if ($LASTEXITCODE -ne 0) { throw "Build failed." }
     Write-Host "Build succeeded." -ForegroundColor Green
@@ -48,12 +49,13 @@ if (-not $NoBuild) {
 
 # --- verify bin directory exists ---
 if (-not (Test-Path $binDir)) {
-    throw "Release bin directory not found: $binDir`nRun without -NoBuild or build manually first."
+    throw "Release bin directory not found: $binDir. Run without -NoBuild or build manually first."
 }
 
 # --- create output directory ---
 if (-not (Test-Path $outputDir)) {
-    Write-Host "`nCreating output directory: $outputDir" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Creating output directory: $outputDir" -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $outputDir | Out-Null
 }
 
@@ -61,7 +63,8 @@ if (-not (Test-Path $outputDir)) {
 $zipName = "Craftimizer-v$version.zip"
 $zipPath = "$outputDir\$zipName"
 
-Write-Host "`nPackaging plugin..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Packaging plugin..." -ForegroundColor Cyan
 Write-Host "  Source: $binDir" -ForegroundColor Gray
 Write-Host "  Output: $zipPath" -ForegroundColor Gray
 
@@ -78,7 +81,8 @@ Compress-Archive -Path "$binDir\*" -DestinationPath $zipPath -CompressionLevel O
 # --- verify ---
 if (Test-Path $zipPath) {
     $size = (Get-Item $zipPath).Length / 1MB
-    Write-Host "`n✓ Package created successfully!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Package created successfully!" -ForegroundColor Green
     Write-Host "  File: $zipName" -ForegroundColor Green
     Write-Host "  Size: $([math]::Round($size, 2)) MB" -ForegroundColor Green
     Write-Host "  Path: $zipPath" -ForegroundColor Gray
@@ -86,4 +90,5 @@ if (Test-Path $zipPath) {
     throw "Failed to create package."
 }
 
-Write-Host "`nPackage ready for distribution to Dalamud!" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Package ready for distribution to Dalamud!" -ForegroundColor Cyan
