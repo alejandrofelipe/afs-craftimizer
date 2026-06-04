@@ -32,7 +32,23 @@ Se não for possível determinar com certeza, perguntar ao usuário: "É um bug,
   - "Mostrar tempo estimado de craft" → `mostrar-tempo-estimado-craft.md`
   - "Calcular custo de materiais" → `calcular-custo-materiais.md`
 
-### 3. Criar o arquivo com o template adequado
+### 3. Pesquisar na internet (quando relevante)
+
+Antes de criar o arquivo, use `WebSearch` e/ou `WebFetch` se a feature ou bug envolver:
+
+- **APIs ou SDKs externos** — buscar documentação atual (ex: Dalamud API, Lumina, FFXIVClientStructs)
+- **Mecânicas do jogo** — consultar wikis (Consolegameswiki, FFXIV Wiki) para confirmar nomes, IDs ou comportamentos
+- **Bibliotecas/pacotes NuGet** — verificar versão mais recente e compatibilidade
+- **Features do plugin original** — checar se o upstream (github.com/WorkingRobot/Craftimizer) já implementou ou discutiu algo parecido
+
+**Queries úteis de exemplo:**
+- `"Dalamud <recurso> API site:goatcorp.github.io"`
+- `"FFXIVClientStructs <struct> site:github.com"`
+- `"<nome da receita ou mechânica> FFXIV wiki"`
+
+Incluir os links encontrados na seção **Referências** do template. Se não houver nada relevante para buscar, pular esta etapa.
+
+### 4. Criar o arquivo com o template adequado
 
 ---
 
@@ -210,7 +226,7 @@ Craftimizer/
 
 ---
 
-### 4. Atualizar `backlog/PROGRESS.md`
+### 5. Atualizar `backlog/PROGRESS.md`
 
 Adicionar uma linha na tabela **Pendente** em `backlog/PROGRESS.md`:
 
@@ -222,7 +238,7 @@ Adicionar uma linha na tabela **Pendente** em `backlog/PROGRESS.md`:
 
 ---
 
-### 5. Confirmar ao usuário
+### 6. Confirmar ao usuário
 
 Informar:
 - Arquivo criado: `backlog/[arquivo].md`

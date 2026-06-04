@@ -1,43 +1,42 @@
 # /commit
 
 Prepara e executa o commit completo de uma mudança no Craftimizer:
-atualiza README, cria commit com mensagem estruturada, cria tag de versão e faz push.
+atualiza README, faz version bump, cria commit com mensagem estruturada, cria tag e faz push.
 
 **Uso:** `/commit <descrição curta do que foi feito>`
 
-O argumento `$ARGUMENTS` descreve a mudança — se omitido, inspecionar o `git diff --staged` para inferir.
+O argumento `$ARGUMENTS` descreve a mudança — se omitido, inspecionar o `git diff` para inferir.
 
 ---
 
 ## Instruções
 
-### Passo 1 — Verificar se o version bump foi feito
-
-```powershell
-$xml = [xml](Get-Content Craftimizer/Craftimizer.csproj)
-$version = $xml.Project.PropertyGroup[0].Version
-```
-
-Verificar se há mudança pendente (não staged) no `.csproj`:
-```powershell
-git diff Craftimizer/Craftimizer.csproj
-git diff --cached Craftimizer/Craftimizer.csproj
-```
-
-- Se o `.csproj` **não foi modificado** desde o último commit → avisar o usuário e sugerir `/version-bump` antes de continuar. **Não prosseguir sem confirmação.**
-- Se já foi modificado (staged ou unstaged) → usar a versão lida como `$VERSION`.
-
-### Passo 2 — Atualizar o README
+### Passo 1 — Atualizar o README
 
 Executar o fluxo do comando `/update-readme`:
-- Atualizar a linha de versão com `$VERSION`
 - Avaliar se a mudança merece nova entrada em "Diferenças deste Fork"
-  - Sim: adicionar o bullet e incluir `README.md` no commit
-  - Não: README só com a linha de versão atualizada; incluir `README.md` no commit mesmo assim
+  - Sim: adicionar o bullet
+  - Não: nenhuma alteração de conteúdo ainda (a versão será atualizada após o bump)
+
+> A linha de versão do README será atualizada **após** o bump, no Passo 3.
+
+### Passo 2 — Fazer o version bump
+
+Executar o fluxo do comando `/version-bump`:
+- Determinar o tipo da mudança com base em `$ARGUMENTS` e/ou `git diff`:
+  - `feat` → bump minor (X.Y+1.0.0)
+  - `fix` / `refactor` / `chore` → bump patch (X.Y.Z.W+1)
+- Atualizar `Craftimizer/Craftimizer.csproj` com a nova versão
+- Ler a versão resultante como `$VERSION`
+
+Após o bump, atualizar também a linha de versão no README:
+```
+**Versão atual:** $VERSION · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+```
 
 ### Passo 3 — Determinar tipo do commit e escopo
 
-Com base em `$ARGUMENTS` e/ou `git diff --staged`:
+Com base em `$ARGUMENTS` e/ou `git diff`:
 
 | Mudança | Tipo | Escopo sugerido |
 |---|---|---|
@@ -76,17 +75,16 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 
 **Exemplo de mensagem bem formada:**
 ```
-fix(ui): corrigir crash ao reabrir Crafting Log após inatividade
+feat(ui): adicionar progresso de Cosmic Tool em tempo real no Crafting Log
 
-Badges armazenados como campos fixos na janela ficavam com referências
-inválidas após o IconManager expirar as texturas do cache. DrawRecipeStats()
-tentava acessar .Handle de objeto já disposed.
+Research data da Cosmic Tool agora atualiza automaticamente após entregar
+um collectable em Stellar Missions, sem precisar reabrir a janela.
 
-- Removidos campos CosmicExplorationBadge, SplendorousBadge, SpecialistBadge,
-  NoManipulationBadge de RecipeNote.cs
-- Texturas agora buscadas via GetIconCached/GetAssemblyTextureCached no draw
+- Adicionado CosmicToolTracker com hooks em WKSManager.Load,
+  WKSMissionModule.ReportMission e AbandonMission
+- RecipeNote e MacroEditor assinam OnProgressChanged e redesenham ao receber dado novo
 
-Version: 2.10.2.0
+Version: 2.10.3.0
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
@@ -111,9 +109,9 @@ git tag -a "v$VERSION" -m "Release $VERSION - <título curto>"
 
 O título curto da tag deve ser o mesmo do commit, sem o prefixo convencional.
 
-**Exemplo:** `git tag -a v2.10.2.0 -m "Release 2.10.2.0 - Fix crash ao reabrir Crafting Log"`
+**Exemplo:** `git tag -a v2.10.3.0 -m "Release 2.10.3.0 - Cosmic Tool progress em tempo real"`
 
-### Passo 7 — Push do commit e das tags
+### Passo 7 — Push do commit e da tag
 
 ```powershell
 git push origin main
@@ -136,16 +134,10 @@ Reportar:
 
 ## Casos especiais
 
-### Sem mudanças staged
-Se `git status` não mostrar nada staged:
-1. Verificar se há mudanças unstaged relevantes
-2. Sugerir ao usuário quais arquivos adicionar
-3. Não criar commit vazio
-
-### Version bump não feito
-Se `.csproj` não foi alterado, perguntar:
-> "O version bump não foi feito ainda. Que tipo de mudança é esta? (feat/fix/refactor/chore) para eu rodar `/version-bump` com o tipo correto."
-Após resposta, executar `/version-bump` e continuar.
+### Sem mudanças staged ou unstaged
+Se `git status` não mostrar nada além do que já está no último commit:
+1. Informar que não há nada novo para commitar
+2. Não criar commit vazio
 
 ### Múltiplas mudanças não relacionadas
 Se o diff cobrir mudanças de escopos distintos sem relação, alertar o usuário e sugerir commits separados em vez de um commit grande.
