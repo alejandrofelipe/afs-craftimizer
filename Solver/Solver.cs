@@ -1,6 +1,7 @@
 using Craftimizer.Simulator;
 using Craftimizer.Simulator.Actions;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Craftimizer.Solver;
 
@@ -71,6 +72,7 @@ public sealed class Solver : IDisposable
             SolverAlgorithm.StepwiseForked => (SearchStepwiseForked, true),
             SolverAlgorithm.StepwiseGenetic => (SearchStepwiseGenetic, true),
             SolverAlgorithm.Raphael => (SearchRaphael, true),
+            SolverAlgorithm.NextActionForked => (SearchNextActionForked, false),
             _ => throw new ArgumentOutOfRangeException(nameof(config), config, $"Invalid algorithm: {config.Algorithm}")
         });
 
@@ -489,6 +491,72 @@ public sealed class Solver : IDisposable
             InvokeNewAction(action);
 
         return solution;
+    }
+
+    private async Task<SolverSolution> SearchNextActionForked()
+    {
+        var state = State;
+        var sim = new Simulator(Config.ActionPool, Config.MaxStepCount, state);
+
+        if (sim.IsComplete)
+            return new(Array.Empty<ActionType>(), state);
+
+        var availableActions = sim.AvailableActionsHeuristic(Config.StrictActions);
+        var actionCount = availableActions.Count;
+
+        if (actionCount == 0)
+            return new(Array.Empty<ActionType>(), state);
+
+        var forksPerAction = Math.Max(1, Config.ForkCount / actionCount);
+        var totalForks = actionCount * forksPerAction;
+
+        var iterCount = Config.Iterations / totalForks;
+        var maxIterCount = Math.Max(Config.Iterations, Config.MaxIterations) / totalForks;
+        maxProgress = iterCount * totalForks;
+
+        var taskResults = new Task<(float MaxScore, int ActionIdx, SolverSolution Solution)>[totalForks];
+        using var semaphore = new SemaphoreSlim(0, Config.MaxThreadCount);
+
+        for (var i = 0; i < actionCount; i++)
+        {
+            var action = availableActions.ElementAt(i);
+            var (_, childState) = sim.Execute(state, action);
+            var capturedAction = action;
+            var capturedActionIdx = i;
+
+            for (var j = 0; j < forksPerAction; j++)
+            {
+                taskResults[i * forksPerAction + j] = Task.Run(async () =>
+                {
+                    var solver = new MCTS(MCTSConfig, childState);
+                    await semaphore.WaitAsync(Token).ConfigureAwait(false);
+                    try
+                    {
+                        solver.Search(iterCount, maxIterCount, ref progress, Token);
+                    }
+                    finally
+                    {
+                        try { semaphore.Release(); }
+                        catch (ObjectDisposedException) { }
+                    }
+                    return (solver.MaxScore, capturedActionIdx, solver.Solution());
+                }, Token);
+            }
+        }
+
+        semaphore.Release(Config.MaxThreadCount);
+        await Task.WhenAll(taskResults).WaitAsync(Token).ConfigureAwait(false);
+
+        Token.ThrowIfCancellationRequested();
+
+        var best = taskResults.Select(t => t.Result).MaxBy(r => r.MaxScore);
+        var bestAction = availableActions.ElementAt(best.ActionIdx);
+        InvokeNewAction(bestAction);
+
+        var (_, bestChildState) = sim.Execute(state, bestAction);
+        OnSuggestSolution?.Invoke(new(new[] { bestAction }.Concat(best.Solution.Actions).ToArray(), best.Solution.State));
+
+        return new(new[] { bestAction }, bestChildState);
     }
 
     private Task<SolverSolution> SearchOneshot()

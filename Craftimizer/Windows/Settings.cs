@@ -178,6 +178,7 @@ public sealed partial class Settings : Window, IDisposable
             SolverAlgorithm.StepwiseForked => "Stepwise Forked",
             SolverAlgorithm.StepwiseGenetic => "Stepwise Genetic",
             SolverAlgorithm.Raphael => "Optimal",
+            SolverAlgorithm.NextActionForked => "Next Action Forked",
             _ => "Unknown",
         };
 
@@ -195,6 +196,10 @@ public sealed partial class Settings : Window, IDisposable
             SolverAlgorithm.Raphael => "Finds the best solution, every time. This solver has " +
                                                 "very different options compared to the rest, as it " +
                                                 "is designed using an entirely different algorithm.",
+            SolverAlgorithm.NextActionForked => "Evaluates each candidate next action independently " +
+                                                "using forked MCTS and picks the best one. Designed " +
+                                                "for Synthesis Helper: faster response and better " +
+                                                "adaptation to changing conditions (Good, Excellent, etc.).",
             _ => "Unknown"
         };
 

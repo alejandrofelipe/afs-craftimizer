@@ -44,7 +44,22 @@ public sealed partial class Settings
                 disableOptimal ? [SolverAlgorithm.Raphael] : []
             );
 
-            using (ImRaii.Disabled(config.Algorithm is not (SolverAlgorithm.OneshotForked or SolverAlgorithm.StepwiseForked or SolverAlgorithm.StepwiseGenetic or SolverAlgorithm.Raphael)))
+            if (config.Algorithm == SolverAlgorithm.NextActionForked)
+            {
+                DrawOption(
+                    "Time Limit (ms)",
+                    "Wall-clock budget in milliseconds for the Next Action Forked algorithm. " +
+                    "Each candidate action gets an equal share of this budget.\n" +
+                    "0 = use Target Iterations instead (no time limit).",
+                    config.MaxTimeMs,
+                    0,
+                    60000,
+                    v => config = config with { MaxTimeMs = v },
+                    ref isDirty
+                );
+            }
+
+            using (ImRaii.Disabled(config.Algorithm is not (SolverAlgorithm.OneshotForked or SolverAlgorithm.StepwiseForked or SolverAlgorithm.StepwiseGenetic or SolverAlgorithm.Raphael or SolverAlgorithm.NextActionForked)))
                 DrawOption(
                     "Max Core Count",
                     "The number of cores to use when solving. You should use as many " +
@@ -128,7 +143,7 @@ public sealed partial class Settings
                     ref isDirty
                 );
 
-                using (ImRaii.Disabled(config.Algorithm is not (SolverAlgorithm.OneshotForked or SolverAlgorithm.StepwiseForked or SolverAlgorithm.StepwiseGenetic)))
+                using (ImRaii.Disabled(config.Algorithm is not (SolverAlgorithm.OneshotForked or SolverAlgorithm.StepwiseForked or SolverAlgorithm.StepwiseGenetic or SolverAlgorithm.NextActionForked)))
                     DrawOption(
                         "Fork Count",
                         "Split the number of iterations across different solvers. In general, " +
@@ -137,7 +152,7 @@ public sealed partial class Settings
                         "The higher the number, the more chance you have of finding a " +
                         "better local maximum; this concept similar but not equivalent " +
                         "to the exploration constant.\n" +
-                        "(Only used in the Forked and Genetic algorithms)",
+                        "(Only used in the Forked, Genetic, and Next Action Forked algorithms)",
                         config.ForkCount,
                         1,
                         500,
@@ -190,6 +205,32 @@ public sealed partial class Settings
                         ImGuiUtils.TooltipWrapped("\"Ensure Reliability\" uses a lot more memory and can significantly increase solve times.");
                 }
             }
+        }
+
+        using (var panel = ImRaii2.GroupPanel("Quality Target", -1, out _))
+        {
+            ImGui.SetNextItemWidth(OptionWidth);
+            var percent = config.QualityTargetPercent > 0 ? config.QualityTargetPercent * 100f : 100f;
+            if (ImGui.SliderFloat("Quality Target %##qualityTarget", ref percent, 1f, 100f, "%.0f%%"))
+            {
+                config = config with { QualityTargetPercent = percent >= 100f ? 0f : percent / 100f };
+                isDirty = true;
+            }
+            if (ImGui.IsItemHovered())
+                ImGuiUtils.TooltipWrapped(
+                    "The quality % to aim for. The solver stops increasing quality once this " +
+                    "target is reached, freeing CP and steps for fewer/safer actions.\n" +
+                    "100% = always aim for maximum quality (default behavior).");
+
+            DrawOption(
+                "Cap at Max Collectability Tier",
+                "For collectible recipes, cap quality at the highest collectability tier " +
+                "instead of 100%. Reduces wasted quality points for crafts where more " +
+                "quality than the top tier has no benefit. Requires plugin-side resolution.",
+                config.QualityTargetToMaxCollectability,
+                v => config = config with { QualityTargetToMaxCollectability = v },
+                ref isDirty
+            );
         }
 
         using (var panel = ImRaii2.GroupPanel("Action Pool", -1, out var poolWidth))

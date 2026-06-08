@@ -21,6 +21,9 @@ public readonly record struct MCTSConfig
     public float ScoreCP { get; init; }
     public float ScoreSteps { get; init; }
 
+    // 0.0 = use MaxQuality as target (existing behavior)
+    public float QualityTargetPercent { get; init; }
+
     public ActionType[] ActionPool { get; init; }
 
     public MCTSConfig(in SolverConfig config)
@@ -43,6 +46,8 @@ public readonly record struct MCTSConfig
         ScoreDurability = config.ScoreDurability / total;
         ScoreCP = config.ScoreCP / total;
         ScoreSteps = config.ScoreSteps / total;
+
+        QualityTargetPercent = config.QualityTargetPercent;
 
         ActionPool = config.ActionPool;
     }

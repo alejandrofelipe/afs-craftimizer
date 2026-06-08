@@ -56,6 +56,10 @@ public struct SimulationNode(in SimulationState state, ActionType? action, Compl
 
         var qualityDominance = state.ActionCount / config.MaxStepCount;
 
+        var qualityTarget = config.QualityTargetPercent > 0
+            ? (int)(state.Input.Recipe.MaxQuality * config.QualityTargetPercent)
+            : state.Input.Recipe.MaxQuality;
+
         var progressScore = ApplyNondominant(
             config.ScoreProgress,
             qualityDominance,
@@ -67,7 +71,7 @@ public struct SimulationNode(in SimulationState state, ActionType? action, Compl
             config.ScoreQuality,
             qualityDominance,
             state.Quality,
-            state.Input.Recipe.MaxQuality
+            qualityTarget
         );
 
         var durabilityScore = ApplyNondominant(

@@ -257,7 +257,7 @@ public sealed class MCTS
     {
         maxIterations = Math.Max(iterations, maxIterations);
         var simulator = new Simulator(config.ActionPool, config.MaxStepCount, rootNode.State.State);
-        var random = rootNode.State.State.Input.Random;
+        var random = new Random();
         var staleCounter = 0;
         var i = 0;
 
@@ -300,7 +300,7 @@ public sealed class MCTS
         var actions = new List<ActionType>();
         var node = rootNode;
 
-        while (node.Children.Count != 0)
+        while (node.Children.Count != 0 && !node.State.IsComplete)
         {
             node = node.ChildAt(ChildMaxScore(in node.ChildScores))!;
 
