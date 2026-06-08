@@ -116,11 +116,17 @@ public partial class Configuration
     public Dictionary<string, GearWearTracker.GearWearStats> GearWearData { get; set; } = new();
 
     /// <summary>
-    /// Enable Cosmic Tool progression tracking (default: false).
-    /// Shows research data progress for Cosmic Exploration Stellar Missions.
-    /// WARNING: Experimental feature - game API still being reverse-engineered.
+    /// <summary>
+    /// Enable Cosmic Tool progression tracking.
+    /// Shows the CosmicTracker floating window in Sinus Ardorum / Auxesia.
     /// </summary>
-    public bool EnableCosmicToolTracking { get; set; }
+    public bool EnableCosmicToolTracking { get; set; } = true;
+
+    /// <summary>User-hidden the CosmicTracker window; it will not reopen automatically.</summary>
+    public bool CosmicTrackerHidden { get; set; }
+
+    /// <summary>CosmicTracker window is in compact mode (label + bar only, no numbers).</summary>
+    public bool CosmicTrackerMinimized { get; set; }
 
     public MacroCopyConfiguration MacroCopy { get; set; } = new();
 

@@ -12,10 +12,16 @@
 .PARAMETER NoBuild
     Skip build and just deploy whatever is already in the Release bin folder.
 
+.PARAMETER Bump
+    Bump the version before building. Accepted values: major, minor, patch, build (default).
+    Calls bump-version.ps1 with the given type.
+
 .EXAMPLE
     .\build.ps1
     .\build.ps1 -Configuration Release
     .\build.ps1 -Deploy
+    .\build.ps1 -Deploy -Bump build     # bump build number + build + deploy
+    .\build.ps1 -Deploy -Bump patch     # bump patch + build + deploy
     .\build.ps1 -Deploy -NoBuild
 #>
 param(
@@ -23,7 +29,10 @@ param(
     [string]$Configuration = "Debug",
 
     [switch]$Deploy,
-    [switch]$NoBuild
+    [switch]$NoBuild,
+
+    [ValidateSet("major", "minor", "patch", "build")]
+    [string]$Bump
 )
 
 Set-StrictMode -Version Latest
@@ -35,6 +44,11 @@ $csproj   = "$root\Craftimizer\Craftimizer.csproj"
 # Prefer Scoop-installed SDK; fall back to PATH
 $scoopDotnet = "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"
 $dotnet = if (Test-Path $scoopDotnet) { $scoopDotnet } else { "dotnet" }
+
+# --- bump version (optional) ---
+if ($Bump) {
+    & "$PSScriptRoot\bump-version.ps1" -Type $Bump
+}
 
 # --- read version from csproj ---
 $xml     = [xml](Get-Content $csproj)

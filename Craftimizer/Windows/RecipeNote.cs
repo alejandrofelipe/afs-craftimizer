@@ -78,6 +78,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
     private IFontHandle AxisFont { get; }
 
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
+    private readonly TitleBarButton _cosmicButton;
 
     private readonly global::Craftimizer.Plugin.Plugin _plugin;
 
@@ -86,6 +87,15 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         _plugin = plugin;
         _cosmicProgress = _plugin.CosmicToolTracker.CachedProgress;
         _plugin.CosmicToolTracker.OnProgressChanged += OnCosmicProgressChanged;
+
+        _cosmicButton = new TitleBarButton
+        {
+            Icon        = FontAwesomeIcon.Star,
+            IconOffset  = new(2, 1),
+            IconColor   = Colors.CosmicActive,
+            Click       = _ => _plugin.CosmicTrackerWindow.ToggleHidden(),
+            ShowTooltip = () => ImGuiUtils.Tooltip("Cosmic Tool Progress\nClick to show/hide tracker"),
+        };
         ExpertBadge = IconManager.GetAssemblyTexture("Graphics.expert_badge.png");
         CollectibleBadge = IconManager.GetAssemblyTexture("Graphics.collectible_badge.png");
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
@@ -117,6 +127,10 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                 ShowTooltip = () => ImGuiUtils.Tooltip("Support me on Ko-fi!")
             }
         ];
+
+        // If already in cosmic on plugin load, show the button immediately
+        if (_cosmicProgress != null)
+            TitleBarButtons.Insert(0, _cosmicButton);
 
         _plugin.WindowSystem.AddWindow(this);
     }
@@ -830,13 +844,14 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                 && _plugin.Configuration.EnableCosmicToolTracking
                 && _cosmicProgress is { } cp)
             {
+                var active = cp.Types[cp.ActiveType];
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted($"Research Type {CosmicRomanType(cp.ResearchType)}");
+                ImGui.TextUnformatted($"Research Type {CosmicRomanType(cp.ActiveType)}");
                 ImGui.TableNextColumn();
-                var frac = cp.NeededData > 0 ? (float)cp.CurrentData / cp.NeededData : 0f;
+                var frac = active.Needed > 0 ? (float)active.Current / active.Needed : 0f;
                 ImGui.ProgressBar(frac, new Vector2(-1, ImGui.GetTextLineHeight()));
                 if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"{cp.CurrentData:N0} / {cp.NeededData:N0}  ({frac:P0})");
+                    ImGuiUtils.Tooltip($"{active.Current:N0} / {active.Needed:N0}  ({frac:P0})");
             }
         }
     }
@@ -1304,7 +1319,20 @@ public sealed unsafe class RecipeNote : Window, IDisposable
     }
 
     private void OnCosmicProgressChanged(CosmicToolTracker.ToolProgress? progress)
-        => _cosmicProgress = progress;
+    {
+        _cosmicProgress = progress;
+
+        // Update star button color (amber when mission active, violet otherwise)
+        _cosmicButton.IconColor = progress?.MissionActive == true
+            ? Colors.CosmicMission
+            : Colors.CosmicActive;
+
+        // Add or remove the cosmic button from the title bar
+        if (progress != null && !TitleBarButtons.Contains(_cosmicButton))
+            TitleBarButtons.Insert(0, _cosmicButton);
+        else if (progress == null)
+            TitleBarButtons.Remove(_cosmicButton);
+    }
 
     public void Dispose()
     {

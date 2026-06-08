@@ -51,12 +51,26 @@ public sealed unsafe class SynthHelper : Window, IDisposable
     private CraftingSession Session { get; }
     private readonly global::Craftimizer.Plugin.Plugin _plugin;
     private IFontHandle AxisFont { get; }
+    private CosmicToolTracker.ToolProgress? _cosmicProgress;
+    private readonly TitleBarButton _cosmicButton;
 
     public SynthHelper(global::Craftimizer.Plugin.Plugin plugin) : base(WindowNamePinned)
     {
         _plugin = plugin;
         Session = new CraftingSession(plugin);
         AxisFont = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(new(GameFontFamilyAndSize.Axis14));
+
+        _cosmicProgress = plugin.CosmicToolTracker.CachedProgress;
+        _plugin.CosmicToolTracker.OnProgressChanged += OnCosmicProgressChanged;
+
+        _cosmicButton = new TitleBarButton
+        {
+            Icon        = FontAwesomeIcon.Star,
+            IconOffset  = new(2, 1),
+            IconColor   = _cosmicProgress?.MissionActive == true ? Colors.CosmicMission : Colors.CosmicActive,
+            Click       = _ => _plugin.CosmicTrackerWindow.ToggleHidden(),
+            ShowTooltip = () => ImGuiUtils.Tooltip("Cosmic Tool Progress\nClick to show/hide tracker"),
+        };
 
         _plugin.Hooks.OnActionUsed += OnUseAction;
 
@@ -87,6 +101,9 @@ public sealed unsafe class SynthHelper : Window, IDisposable
                 ShowTooltip = () => ImGuiUtils.Tooltip("Support me on Ko-fi!")
             }
         ];
+
+        if (_cosmicProgress != null)
+            TitleBarButtons.Insert(0, _cosmicButton);
 
         _plugin.WindowSystem.AddWindow(this);
     }
@@ -783,8 +800,21 @@ public sealed unsafe class SynthHelper : Window, IDisposable
         ImGuiUtils.ProgressBar(fraction, new(-1, ImGui.GetFrameHeight()), overlay);
     }
 
+    private void OnCosmicProgressChanged(CosmicToolTracker.ToolProgress? progress)
+    {
+        _cosmicProgress = progress;
+        _cosmicButton.IconColor = progress?.MissionActive == true
+            ? Colors.CosmicMission
+            : Colors.CosmicActive;
+        if (progress != null && !TitleBarButtons.Contains(_cosmicButton))
+            TitleBarButtons.Insert(0, _cosmicButton);
+        else if (progress == null)
+            TitleBarButtons.Remove(_cosmicButton);
+    }
+
     public void Dispose()
     {
+        _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         _plugin.Hooks.OnActionUsed -= OnUseAction;
         Session.Dispose();
         _plugin.WindowSystem.RemoveWindow(this);

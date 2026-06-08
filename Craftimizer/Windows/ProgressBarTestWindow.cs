@@ -271,6 +271,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
 
     private void UpdateSnapshotCount()
     {
+#pragma warning disable SCS0005 // test-only UI randomization, no security context
         var random = new Random();
         _testSnapshots.Clear();
         
@@ -289,10 +290,12 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
                 Stage: i
             ));
         }
+#pragma warning restore SCS0005
     }
 
     private void RandomizeSnapshots()
     {
+#pragma warning disable SCS0005 // test-only UI randomization, no security context
         var random = new Random();
         _testSnapshots.Clear();
         
@@ -320,6 +323,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
                 Stage: i
             ));
         }
+#pragma warning restore SCS0005
     }
 
     public void Dispose()

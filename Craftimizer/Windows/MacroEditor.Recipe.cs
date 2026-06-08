@@ -144,11 +144,12 @@ public sealed partial class MacroEditor
 
             if (_plugin.Configuration.EnableCosmicToolTracking && _cosmicProgress is { } cp)
             {
+                var active = cp.Types[cp.ActiveType];
                 ImGui.SameLine(0, 6);
-                var frac = cp.NeededData > 0 ? (float)cp.CurrentData / cp.NeededData : 0f;
+                var frac = active.Needed > 0 ? (float)active.Current / active.Needed : 0f;
                 ImGui.ProgressBar(frac, new Vector2(90 * ImGuiHelpers.GlobalScale, imageSize));
                 if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"Research Data Type {ToRomanType(cp.ResearchType)}: {cp.CurrentData:N0} / {cp.NeededData:N0}");
+                    ImGuiUtils.Tooltip($"Research Data Type {ToRomanType(cp.ActiveType)}: {active.Current:N0} / {active.Needed:N0}");
             }
         }
 

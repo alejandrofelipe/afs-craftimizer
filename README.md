@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.10.4.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.11.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -52,7 +52,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Melhorias de qualidade de código: `Settings.cs` e `ImGuiUtils.cs` divididos em arquivos parciais, constantes para magic numbers do jogo, thread-safety em `Configuration.Save()`, error handlers em fire-and-forget tasks
 - 0 build warnings
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log (texturas de badges buscadas no draw em vez de armazenadas como campos)
-- Progresso de research data da Cosmic Tool exibido em tempo real no Crafting Log e no Macro Editor durante Stellar Missions (`CosmicToolTracker` via hooks WKS)
+- Janela flutuante **CosmicTracker** com todos os 7 tipos de research (Type I–VII): barras de progresso individuais com marcador de threshold de upgrade, modo compacto, filtro "ocultar concluídos", destaque de delta por 10 s e auto-refresh a cada 5 s (`CosmicToolTracker` via hooks WKS + Lumina sheets)
+- Botão estrela ★ na barra de título do Recipe Note, Macro Editor, Macro List e Synthesis Helper para abrir/fechar o CosmicTracker rapidamente; muda de cor quando há Stellar Mission ativa
 
 ## Instalação
 

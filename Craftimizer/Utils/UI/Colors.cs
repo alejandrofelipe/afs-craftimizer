@@ -35,6 +35,22 @@ public static class Colors
     // ── Badge tints ───────────────────────────────────────────────────────────
     public static readonly Vector4 SpecialistGold = new(0.99f, 0.97f, 0.62f, 1f);
 
+    // ── Cosmic Exploration ────────────────────────────────────────────────────
+    /// <summary>Research type currently being collected (active stage).</summary>
+    public static readonly Vector4 CosmicActive   = new(0.69f, 0.48f, 1.00f, 1f); // #B07AFF violet
+    /// <summary>Research type fully collected (upgrade threshold met).</summary>
+    public static readonly Vector4 CosmicComplete = new(0.33f, 0.72f, 0.33f, 1f); // #55B855 green
+    /// <summary>Research type not yet unlocked.</summary>
+    public static readonly Vector4 CosmicLocked   = new(0.22f, 0.22f, 0.28f, 1f); // #383847 dim
+    /// <summary>Stellar Mission active indicator.</summary>
+    public static readonly Vector4 CosmicMission  = new(0.94f, 0.72f, 0.19f, 1f); // #F0B830 amber
+    /// <summary>Upgrade threshold marker line on the research bar.</summary>
+    public static readonly Vector4 CosmicUpgrade  = new(0.60f, 0.45f, 0.90f, 1f); // #9973E6 light violet
+    /// <summary>Background tint for a recently-updated research row (10 s highlight).</summary>
+    public static readonly Vector4 CosmicChanged  = new(0.94f, 0.72f, 0.19f, 0.12f); // amber, very transparent
+    /// <summary>Research type at absolute maximum XP cap (current >= max).</summary>
+    public static readonly Vector4 CosmicMaxed    = new(1.00f, 0.85f, 0.40f, 1f);    // #FFD966 gold
+
     // ── Semantic UI states ────────────────────────────────────────────────────
     /// <summary>Tint applied to disabled toggle-image buttons.</summary>
     public static readonly Vector4 Disabled = new(0.5f, 0.5f, 0.5f, 0.75f);

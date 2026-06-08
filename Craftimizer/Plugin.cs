@@ -27,6 +27,7 @@ public sealed class Plugin : IDalamudPlugin
     public MacroList ListWindow { get; private set; }
     public MacroEditor? EditorWindow { get; private set; }
     public MacroClipboard? ClipboardWindow { get; private set; }
+    public CosmicTracker CosmicTrackerWindow { get; }
     
 #if DEBUG
     public ProgressBarTestWindow? TestWindow { get; private set; }
@@ -78,6 +79,7 @@ public sealed class Plugin : IDalamudPlugin
         RecipeNoteWindow = new(this);
         SynthHelperWindow = new(this);
         ListWindow = new(this);
+        CosmicTrackerWindow = new(this);
 
 #if DEBUG
         TestWindow = new(Configuration);
@@ -222,6 +224,7 @@ public sealed class Plugin : IDalamudPlugin
         Hooks.Dispose();
         GearWearTracker.Dispose();
         CosmicToolTracker.Dispose();
+        CosmicTrackerWindow.Dispose();
         Icon.Dispose();
         MacroRepository.Dispose();
     }
