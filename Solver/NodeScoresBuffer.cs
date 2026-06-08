@@ -19,7 +19,7 @@ public struct NodeScoresBuffer
 
     public void Add()
     {
-        Data ??= GC.AllocateUninitializedArray<ScoresBatch>(ArenaBuffer.BatchCount);
+        Data ??= new ScoresBatch[ArenaBuffer.BatchCount];
         var count = Count++;
         if ((count & ArenaBuffer.BatchSizeMask) == 0)
             Data[count >> ArenaBuffer.BatchSizeBits] = new();

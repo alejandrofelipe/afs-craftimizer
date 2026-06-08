@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.11.0.2 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.12.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -35,6 +35,7 @@ O solver usa **Monte Carlo Tree Search (MCTS)** com múltiplas variantes configu
 | StepwiseForked | Stepwise com paralelismo |
 | **StepwiseGenetic** | Padrão — otimização genética + MCTS |
 | Raphael | Pathfinding A* determinístico |
+| NextActionForked | Avalia cada candidato da próxima ação via MCTS em paralelo e escolhe o melhor; ideal para Synthesis Helper |
 
 A função de score é multi-objetivo com pesos configuráveis:
 
@@ -54,6 +55,9 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log (texturas de badges buscadas no draw em vez de armazenadas como campos)
 - Janela flutuante **CosmicTracker** com todos os 7 tipos de research (Type I–VII): barras de progresso individuais com marcador de threshold de upgrade, modo compacto, filtro "ocultar concluídos", destaque de delta por 10 s e auto-refresh a cada 5 s (`CosmicToolTracker` via hooks WKS + Lumina sheets)
 - Botão estrela ★ na barra de título do Recipe Note, Macro Editor, Macro List e Synthesis Helper para abrir/fechar o CosmicTracker rapidamente; muda de cor quando há Stellar Mission ativa
+- Sync com upstream v2.11: correção de GC corruption em `NodeScoresBuffer`, fix de crash por RNG compartilhado entre threads no solver, solver não gera mais ações supérfluas após progress completo
+- Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade, liberando CP e steps para macros mais eficientes em crafts onde 100% não é necessário
+- Novo algoritmo de solver **Next Action Forked**: avalia cada próxima ação em paralelo via MCTS, oferecendo respostas mais rápidas e melhor adaptação a condições em tempo real no Synthesis Helper
 
 ## Instalação
 

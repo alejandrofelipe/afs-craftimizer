@@ -1,7 +1,9 @@
 using Craftimizer.Plugin;
 using Craftimizer.Simulator;
 using Craftimizer.Utils;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Craftimizer.Windows;
 
@@ -10,6 +12,10 @@ public sealed partial class MacroEditor
     private void CalculateBestMacro()
     {
         SolverTask?.Cancel();
+        _snapshotUpdateCts?.Cancel();
+        _snapshotUpdateCts?.Dispose();
+        _snapshotUpdateCts = null;
+        lock (_solverSnapshots) _solverSnapshots.Clear();
         Macro.ClearQueue();
 
         RevertPreviousMacro();
@@ -43,15 +49,51 @@ public sealed partial class MacroEditor
         solver.OnNewAction += a => Macro.Enqueue(a);
         solver.OnSuggestSolution += a => Macro.EnqueueEphemeral(a.Actions);
         SolverObject = solver;
+
+        _snapshotUpdateCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var snapshotTask = Task.Run(() => UpdateSnapshotsPeriodically(solver, config, _snapshotUpdateCts.Token), _snapshotUpdateCts.Token);
+
         solver.Start();
         var t = solver.GetTask();
-        _ = t.ContinueWith(_ => Macro.RemoveEphemeral(), System.Threading.Tasks.TaskContinuationOptions.NotOnCanceled);
-        _ = t.ContinueWith(faulted => Log.Error(faulted.Exception!, "Solver task faulted"), System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+        _ = t.ContinueWith(_ => Macro.RemoveEphemeral(), TaskContinuationOptions.NotOnCanceled);
+        _ = t.ContinueWith(faulted => Log.Error(faulted.Exception!, "Solver task faulted"), TaskContinuationOptions.OnlyOnFaulted);
         _ = t.GetAwaiter().GetResult();
+
+        _snapshotUpdateCts?.Cancel();
+        try { snapshotTask.GetAwaiter().GetResult(); }
+        catch (OperationCanceledException) { }
+
+        lock (_solverSnapshots)
+        {
+            _solverSnapshots.Clear();
+            _solverSnapshots.Add(ProgressBarComponent.FromSolver(solver, config.Algorithm.ToString()) with
+            {
+                State = ProgressBarComponent.ProgressState.Completed
+            });
+        }
 
         token.ThrowIfCancellationRequested();
 
         return 0;
+    }
+
+    private async Task UpdateSnapshotsPeriodically(Solver.Solver solver, Solver.SolverConfig config, CancellationToken token)
+    {
+        var algorithmName = config.Algorithm.ToString();
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var snapshot = ProgressBarComponent.FromSolver(solver, algorithmName);
+                lock (_solverSnapshots)
+                {
+                    _solverSnapshots.Clear();
+                    _solverSnapshots.Add(snapshot);
+                }
+                await Task.Delay(100, token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) { break; }
+        }
     }
 
     private void RevertPreviousMacro()

@@ -12,6 +12,9 @@ public enum SolverAlgorithm
     StepwiseForked,
     StepwiseGenetic,
     Raphael,
+    // Evaluates each candidate next action independently via forked MCTS and picks the best.
+    // Designed for Synthesis Helper: faster response, better condition adaptation.
+    NextActionForked,
 }
 
 [StructLayout(LayoutKind.Auto)]
@@ -38,6 +41,18 @@ public readonly record struct SolverConfig
     // Raphael/A* configuration
     public bool Adversarial { get; init; }
     public bool BackloadProgress { get; init; }
+
+    // Quality target settings
+    // 0.0 = aim for 100% quality (existing behavior)
+    // 0.01–1.0 = cap quality score at this fraction of MaxQuality
+    public float QualityTargetPercent { get; init; }
+    // When true, cap quality at the highest collectability tier instead of MaxQuality
+    // Resolved to QualityTargetPercent by plugin code (requires RecipeData)
+    public bool QualityTargetToMaxCollectability { get; init; }
+
+    // Wall-clock budget in milliseconds for NextActionForked algorithm.
+    // 0 = use Iterations-based budget (existing behavior for all other algorithms).
+    public int MaxTimeMs { get; init; }
 
     public int MaxThreadCount { get; init; }
     public ActionType[] ActionPool { get; init; }
