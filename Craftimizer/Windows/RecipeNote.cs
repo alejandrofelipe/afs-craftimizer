@@ -43,7 +43,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
         ImGuiWindowFlags.AlwaysAutoResize
       | ImGuiWindowFlags.NoFocusOnAppearing;
 
-    private const string WindowNamePinned = "Craftimizer Crafting Log Helper###CraftimizerRecipeNote";
+    private const string WindowNamePinned = "Crafting Helper###CraftimizerRecipeNote";
     private const string WindowNameFloating = $"{WindowNamePinned}Floating";
 
     public enum CraftableStatus

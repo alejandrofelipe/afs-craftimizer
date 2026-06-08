@@ -29,7 +29,7 @@ public sealed class MacroList : Window, IDisposable
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
 
-    public MacroList(global::Craftimizer.Plugin.Plugin plugin) : base("Craftimizer Macros", WindowFlags, false)
+    public MacroList(global::Craftimizer.Plugin.Plugin plugin) : base("Macro Library", WindowFlags, false)
     {
         _plugin = plugin;
         RefreshSearch();

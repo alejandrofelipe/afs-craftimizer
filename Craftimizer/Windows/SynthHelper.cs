@@ -38,7 +38,7 @@ public sealed unsafe class SynthHelper : Window, IDisposable
         ImGuiWindowFlags.AlwaysAutoResize
       | ImGuiWindowFlags.NoFocusOnAppearing;
 
-    private const string WindowNamePinned = "Craftimizer Synthesis Helper###CraftimizerSynthHelper";
+    private const string WindowNamePinned = "Synthesis Helper###CraftimizerSynthHelper";
     private const string WindowNameFloating = $"{WindowNamePinned}Floating";
 
     public AddonSynthesis* Addon { get; private set; }
