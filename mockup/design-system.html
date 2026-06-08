@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Craftimizer — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ─── Tokens ─────────────────────────────────────────────────────────────── */
+    :root {
+      /* Backgrounds / Surfaces */
+      --bg-base:     #060810;
+      --bg-surface:  #0D1120;
+      --bg-elevated: #141928;
+      --bg-overlay:  #1B2235;
+      --bg-hover:    #212A40;
+
+      /* Border */
+      --border:      rgba(100, 140, 200, 0.30);
+      --border-strong: rgba(100, 140, 200, 0.50);
+
+      /* Stat Colors */
+      --progress:    #52E5A0;
+      --quality:     #B07BFF;
+      --durability:  #FFB84A;
+      --cp:          #FF6C8A;
+      --collectability: #42C4E8;
+      --hq:          #97DC60;
+
+      /* Action Category */
+      --action-synth:   #52E5A0;
+      --action-touch:   #B07BFF;
+      --action-buff:    #4AB8FF;
+      --action-special: #FFB84A;
+
+      /* Conditions */
+      --cond-normal:    #C7C7C7;
+      --cond-good:      #FFB84A;
+      --cond-excellent: #FF6C8A;
+      --cond-poor:      #8A99BB;
+      --cond-pliant:    #4AB8FF;
+      --cond-malleable: #B07BFF;
+      --cond-sturdy:    #52E5A0;
+      --cond-primed:    #FF8C40;
+
+      /* Cosmic Exploration */
+      --cosmic-active:   #B07AFF;
+      --cosmic-complete: #55B855;
+      --cosmic-locked:   #383847;
+      --cosmic-mission:  #F0B830;
+      --cosmic-upgrade:  #9973E6;
+      --cosmic-maxed:    #FFD966;
+      --cosmic-changed:  rgba(240, 184, 48, 0.12);
+
+      /* Semantic States */
+      --good:       #52E5A0;
+      --bad:        #FF5C6E;
+      --link:       #4AB8FF;
+      --disabled:   rgba(128, 128, 128, 0.75);
+      --text-muted: #50607A;
+
+      /* Solver Progress — Colorful */
+      --solver-1: #DE313D;
+      --solver-2: #F59E1E;
+      --solver-3: #F7D600;
+      --solver-4: #5EB05A;
+      --solver-5: #364DFA;
+      --solver-6: #429EF0;
+      --solver-7: #B37CE0;
+
+      /* Collectability Thresholds */
+      --collect-t1: #78C7EE;
+      --collect-t2: #FDCA00;
+      --collect-t3: #BFFFBF;
+
+      /* Typography */
+      --font-body: "Inter", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Consolas", monospace;
+
+      /* Spacing (1 unit = 4px) */
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+
+      /* Radii */
+      --r-sm: 4px;
+      --r-md: 6px;
+      --r-lg: 8px;
+      --r-pill: 9999px;
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── Base ───────────────────────────────────────────────────────────────── */
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-base);
+      color: #D0D8E8;
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ─── Layout ─────────────────────────────────────────────────────────────── */
+    .ds-shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ─── Sidebar ────────────────────────────────────────────────────────────── */
+    .ds-sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      padding: var(--sp-6) var(--sp-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+
+    .ds-sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-2) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--sp-2);
+    }
+    .ds-sidebar-logo .logo-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--quality), var(--link));
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .ds-sidebar-logo .logo-text {
+      font-size: 13px; font-weight: 700;
+      color: #E0E8F8;
+      letter-spacing: 0.02em;
+    }
+    .ds-sidebar-logo .logo-sub {
+      font-size: 10px; color: var(--text-muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .ds-nav-group { margin-top: var(--sp-3); }
+    .ds-nav-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 0 var(--sp-2) var(--sp-1);
+    }
+    .ds-nav-link {
+      display: block; padding: var(--sp-1) var(--sp-2);
+      color: #8898B8; font-size: 13px; text-decoration: none;
+      border-radius: var(--r-sm);
+      transition: color 0.15s, background 0.15s;
+    }
+    .ds-nav-link:hover { color: #D0D8E8; background: var(--bg-overlay); }
+    .ds-nav-link.active { color: var(--link); background: rgba(74, 184, 255, 0.08); }
+
+    /* ─── Main ───────────────────────────────────────────────────────────────── */
+    .ds-main {
+      padding: var(--sp-10) var(--sp-12);
+      max-width: 960px;
+    }
+
+    /* ─── Sections ───────────────────────────────────────────────────────────── */
+    .ds-section {
+      margin-bottom: var(--sp-12);
+      scroll-margin-top: var(--sp-6);
+    }
+    .ds-section-title {
+      font-size: 22px; font-weight: 700; color: #E8EEF8;
+      margin-bottom: var(--sp-1);
+    }
+    .ds-section-desc {
+      color: var(--text-muted); font-size: 13px;
+      margin-bottom: var(--sp-6);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--sp-4);
+    }
+
+    .ds-subsection { margin-bottom: var(--sp-8); }
+    .ds-subsection-title {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: var(--sp-3);
+    }
+
+    /* ─── Showcase card ──────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: var(--sp-5);
+      margin-bottom: var(--sp-3);
+    }
+    .card-dark {
+      background: var(--bg-elevated);
+    }
+
+    /* ─── COLOR SWATCHES ─────────────────────────────────────────────────────── */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--sp-3);
+    }
+    .swatch {
+      border-radius: var(--r-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .swatch-color {
+      height: 56px;
+    }
+    .swatch-info {
+      background: var(--bg-overlay);
+      padding: var(--sp-2) var(--sp-2);
+    }
+    .swatch-name {
+      font-size: 11px; font-weight: 600; color: #D0D8E8;
+      margin-bottom: 2px;
+    }
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 10px; color: var(--text-muted);
+    }
+    .swatch-token {
+      font-size: 9px; color: var(--text-muted); opacity: 0.7;
+      margin-top: 1px;
+    }
+
+    /* background swatches stack two per row and show label */
+    .swatch-bg .swatch-color {
+      height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: rgba(255,255,255,0.5);
+    }
+
+    /* ─── TYPOGRAPHY ─────────────────────────────────────────────────────────── */
+    .type-row {
+      display: flex; align-items: baseline; gap: var(--sp-4);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta { width: 160px; flex-shrink: 0; }
+    .type-label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .type-spec  { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); opacity: 0.7; }
+
+    /* ─── SPACING SCALE ──────────────────────────────────────────────────────── */
+    .spacing-row {
+      display: flex; align-items: center; gap: var(--sp-4);
+      padding: var(--sp-2) 0;
+    }
+    .spacing-bar {
+      height: 8px; background: var(--link);
+      border-radius: var(--r-pill); opacity: 0.7;
+    }
+    .spacing-label {
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+      width: 60px; flex-shrink: 0;
+    }
+    .spacing-val {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    /* ─── COMPONENT: Plugin Window ───────────────────────────────────────────── */
+    .plugin-window {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+      display: inline-flex;
+      flex-direction: column;
+    }
+    .plugin-titlebar {
+      display: flex; align-items: center; gap: var(--sp-2);
+      padding: 5px var(--sp-3);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      user-select: none;
+    }
+    .plugin-titlebar-icon { color: var(--quality); font-size: 12px; }
+    .plugin-titlebar-label {
+      flex: 1; font-size: 12px; font-weight: 600; color: #C8B8FF;
+    }
+    .plugin-titlebar-btn {
+      width: 20px; height: 20px; border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-overlay);
+      color: #8898B8; font-size: 9px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .plugin-titlebar-btn:hover { background: var(--bg-hover); color: #D0D8E8; }
+    .plugin-titlebar-btn.active { color: var(--link); border-color: rgba(74,184,255,0.4); }
+    .plugin-body { padding: var(--sp-3); }
+
+    /* ─── COMPONENT: Group Panel ─────────────────────────────────────────────── */
+    .group-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      position: relative;
+      padding: var(--sp-4);
+      margin-top: 10px;
+    }
+    .group-panel-label {
+      position: absolute; top: -10px; left: 10px;
+      background: var(--bg-surface);
+      padding: 0 var(--sp-2);
+      font-size: 11px; font-weight: 600;
+      color: var(--link);
+    }
+
+    /* ─── COMPONENT: Progress Bar ────────────────────────────────────────────── */
+    .prog-wrap {
+      background: var(--bg-base);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      height: 14px;
+      position: relative;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: var(--r-sm);
+      transition: width 0.3s;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 5px;
+      font-size: 9px; font-weight: 700;
+      color: rgba(0,0,0,0.6);
+    }
+    .prog-label {
+      font-size: 11px; color: var(--text-muted);
+      margin-bottom: 4px;
+      display: flex; justify-content: space-between;
+    }
+
+    /* ─── COMPONENT: Badges / Pills ──────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 7px;
+      border-radius: var(--r-pill);
+      font-size: 11px; font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+
+    /* ─── COMPONENT: State Chips ─────────────────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 8px;
+      background: var(--bg-overlay);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: 11px; font-weight: 500; color: #B0B8CC;
+    }
+    .chip-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.75); }
+    }
+    .chip-dot.static { animation: none; }
+
+    /* ─── COMPONENT: Condition Indicator ─────────────────────────────────────── */
+    .cond-indicator {
+      display: inline-flex; align-items: center; gap: var(--sp-2);
+    }
+    .cond-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .cond-label { font-size: 12px; font-weight: 500; }
+
+    /* ─── COMPONENT: Icon Buttons ────────────────────────────────────────────── */
+    .icon-btn {
+      width: 28px; height: 28px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-overlay);
+      color: #8898B8;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { background: var(--bg-hover); color: #D0D8E8; }
+    .icon-btn.primary { color: var(--link); border-color: rgba(74,184,255,0.35); }
+    .icon-btn.danger  { color: var(--bad);  border-color: rgba(255,92,110,0.35); }
+    .icon-btn.success { color: var(--good); border-color: rgba(82,229,160,0.35); }
+
+    /* ─── COMPONENT: Link text ───────────────────────────────────────────────── */
+    .link-text {
+      color: var(--link); text-decoration: underline; cursor: pointer;
+      font-size: 13px;
+    }
+    .link-text:hover { opacity: 0.8; }
+
+    /* ─── COMPONENT: Cosmic Research Bar ─────────────────────────────────────── */
+    .cosmic-bar-wrap {
+      background: var(--bg-base);
+      border-radius: 3px;
+      height: 6px;
+      position: relative;
+      overflow: visible;
+    }
+    .cosmic-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      position: relative;
+    }
+    .cosmic-bar-marker {
+      position: absolute; top: -3px;
+      width: 2px; height: 12px;
+      background: var(--cosmic-upgrade);
+      border-radius: 1px;
+    }
+    .cosmic-row {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: 5px var(--sp-2);
+      border-radius: var(--r-sm);
+    }
+    .cosmic-row.changed { background: var(--cosmic-changed); }
+    .cosmic-name {
+      width: 80px; flex-shrink: 0;
+      font-size: 11px; font-weight: 600; color: #C0C8DC;
+    }
+    .cosmic-bar-col { flex: 1; }
+    .cosmic-values {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-muted); text-align: right;
+      width: 60px; flex-shrink: 0;
+    }
+
+    /* ─── COMPONENT: Solver Progress Bars ───────────────────────────────────── */
+    .solver-bars {
+      display: flex; gap: 2px; height: 8px;
+    }
+    .solver-bar-seg {
+      flex: 1; border-radius: 2px;
+    }
+
+    /* ─── COMPONENT: Stat Row ────────────────────────────────────────────────── */
+    .stat-row {
+      display: flex; align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(100,140,200,0.08);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-icon { width: 20px; font-size: 11px; }
+    .stat-name { flex: 1; font-size: 12px; color: #A0AABF; }
+    .stat-value { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+    .stat-bar-col { width: 80px; margin-left: var(--sp-2); }
+    .stat-bar {
+      height: 4px; border-radius: var(--r-pill);
+      background: var(--bg-base); overflow: hidden;
+    }
+    .stat-bar-fill { height: 100%; border-radius: var(--r-pill); }
+
+    /* ─── COMPONENT: Table ───────────────────────────────────────────────────── */
+    .param-table { width: 100%; border-collapse: collapse; }
+    .param-table td {
+      padding: 4px var(--sp-2);
+      font-size: 12px;
+      border-bottom: 1px solid rgba(100,140,200,0.08);
+    }
+    .param-table td:first-child { color: #8898B8; }
+    .param-table td:last-child  { color: #D0D8E8; font-weight: 500; text-align: right; }
+
+    /* ─── COMPONENT: Tooltip ─────────────────────────────────────────────────── */
+    .tooltip-preview {
+      background: var(--bg-overlay);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-md);
+      padding: var(--sp-2) var(--sp-3);
+      font-size: 12px; max-width: 220px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      color: #C8D0E0;
+    }
+
+    /* ─── CODE TOKEN ─────────────────────────────────────────────────────────── */
+    .token {
+      font-family: var(--font-mono); font-size: 11px;
+      background: var(--bg-overlay);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 1px 5px;
+      color: var(--link);
+    }
+
+    /* ─── DEMO GRID ──────────────────────────────────────────────────────────── */
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: var(--sp-3);
+      align-items: flex-start;
+    }
+
+    /* ─── MISC ───────────────────────────────────────────────────────────────── */
+    hr.ds { border: none; border-top: 1px solid var(--border); margin: var(--sp-6) 0; }
+
+    .tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1px 6px; border-radius: var(--r-pill);
+      background: rgba(74,184,255,0.12); color: var(--link);
+      border: 1px solid rgba(74,184,255,0.25);
+    }
+
+    /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-surface); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+  </style>
+</head>
+<body>
+
+<div class="ds-shell">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────────────── -->
+  <nav class="ds-sidebar">
+    <div class="ds-sidebar-logo">
+      <div class="logo-icon">🔨</div>
+      <div>
+        <div class="logo-text">Craftimizer</div>
+        <div class="logo-sub">Design System</div>
+      </div>
+    </div>
+
+    <div class="ds-nav-group">
+      <div class="ds-nav-label">Fundação</div>
+      <a class="ds-nav-link active" href="#colors">Cores</a>
+      <a class="ds-nav-link" href="#typography">Tipografia</a>
+      <a class="ds-nav-link" href="#spacing">Espaçamento</a>
+      <a class="ds-nav-link" href="#surfaces">Superfícies</a>
+    </div>
+
+    <div class="ds-nav-group">
+      <div class="ds-nav-label">Componentes</div>
+      <a class="ds-nav-link" href="#window">Janela do Plugin</a>
+      <a class="ds-nav-link" href="#group-panel">Group Panel</a>
+      <a class="ds-nav-link" href="#progress">Progress Bars</a>
+      <a class="ds-nav-link" href="#badges">Badges &amp; Pills</a>
+      <a class="ds-nav-link" href="#chips">State Chips</a>
+      <a class="ds-nav-link" href="#conditions">Condições</a>
+      <a class="ds-nav-link" href="#buttons">Botões</a>
+      <a class="ds-nav-link" href="#stats">Stat Rows</a>
+      <a class="ds-nav-link" href="#tables">Tabelas</a>
+      <a class="ds-nav-link" href="#tooltips">Tooltips</a>
+    </div>
+
+    <div class="ds-nav-group">
+      <div class="ds-nav-label">Screens</div>
+      <a class="ds-nav-link" href="#cosmic">Cosmic Tracker</a>
+      <a class="ds-nav-link" href="#solver-bars">Solver Bars</a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
+  <main class="ds-main">
+
+    <!-- ── PAGE HEADER ─────────────────────────────────────────────────── -->
+    <div style="margin-bottom: var(--sp-10);">
+      <h1 style="font-size: 32px; font-weight: 700; color: #E8EEF8; margin-bottom: var(--sp-2);">
+        Design System
+      </h1>
+      <p style="color: var(--text-muted); font-size: 14px; max-width: 560px;">
+        Vocabulário visual completo do plugin Craftimizer para FFXIV — cores, tipografia,
+        espaçamento e todos os componentes reutilizáveis usados nas telas do plugin.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         COLORS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="colors">
+      <h2 class="ds-section-title">Cores</h2>
+      <p class="ds-section-desc">
+        Paleta semântica derivada de <code>Colors.cs</code>. Cada cor carrega significado de jogo —
+        tipo de stat, categoria de ação ou estado de UI.
+      </p>
+
+      <!-- Stat Colors -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Stats de Crafting</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#52E5A0;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Progress</div>
+              <div class="swatch-hex">#52E5A0</div>
+              <div class="swatch-token">--progress</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#B07BFF;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Quality</div>
+              <div class="swatch-hex">#B07BFF</div>
+              <div class="swatch-token">--quality</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FFB84A;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Durability</div>
+              <div class="swatch-hex">#FFB84A</div>
+              <div class="swatch-token">--durability</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FF6C8A;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">CP</div>
+              <div class="swatch-hex">#FF6C8A</div>
+              <div class="swatch-token">--cp</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#42C4E8;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Collectability</div>
+              <div class="swatch-hex">#42C4E8</div>
+              <div class="swatch-token">--collectability</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#97DC60;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">HQ</div>
+              <div class="swatch-hex">#97DC60</div>
+              <div class="swatch-token">--hq</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Category Colors -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Categorias de Ação</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#52E5A0;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Synthesis</div>
+              <div class="swatch-hex">#52E5A0</div>
+              <div class="swatch-token">--action-synth</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#B07BFF;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Touch</div>
+              <div class="swatch-hex">#B07BFF</div>
+              <div class="swatch-token">--action-touch</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#4AB8FF;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Buff</div>
+              <div class="swatch-hex">#4AB8FF</div>
+              <div class="swatch-token">--action-buff</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FFB84A;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">Special</div>
+              <div class="swatch-hex">#FFB84A</div>
+              <div class="swatch-token">--action-special</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Condition Colors -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Condições de Crafting</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#C7C7C7;"></div>
+            <div class="swatch-info"><div class="swatch-name">Normal</div><div class="swatch-hex">#C7C7C7</div><div class="swatch-token">--cond-normal</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FFB84A;"></div>
+            <div class="swatch-info"><div class="swatch-name">Good</div><div class="swatch-hex">#FFB84A</div><div class="swatch-token">--cond-good</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FF6C8A;"></div>
+            <div class="swatch-info"><div class="swatch-name">Excellent</div><div class="swatch-hex">#FF6C8A</div><div class="swatch-token">--cond-excellent</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#8A99BB;"></div>
+            <div class="swatch-info"><div class="swatch-name">Poor</div><div class="swatch-hex">#8A99BB</div><div class="swatch-token">--cond-poor</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#4AB8FF;"></div>
+            <div class="swatch-info"><div class="swatch-name">Pliant</div><div class="swatch-hex">#4AB8FF</div><div class="swatch-token">--cond-pliant</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#B07BFF;"></div>
+            <div class="swatch-info"><div class="swatch-name">Malleable</div><div class="swatch-hex">#B07BFF</div><div class="swatch-token">--cond-malleable</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#52E5A0;"></div>
+            <div class="swatch-info"><div class="swatch-name">Sturdy</div><div class="swatch-hex">#52E5A0</div><div class="swatch-token">--cond-sturdy</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FF8C40;"></div>
+            <div class="swatch-info"><div class="swatch-name">Primed</div><div class="swatch-hex">#FF8C40</div><div class="swatch-token">--cond-primed</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cosmic Colors -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Cosmic Exploration</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#B07AFF;"></div>
+            <div class="swatch-info"><div class="swatch-name">Active</div><div class="swatch-hex">#B07AFF</div><div class="swatch-token">--cosmic-active</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#55B855;"></div>
+            <div class="swatch-info"><div class="swatch-name">Complete</div><div class="swatch-hex">#55B855</div><div class="swatch-token">--cosmic-complete</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#383847;"></div>
+            <div class="swatch-info"><div class="swatch-name">Locked</div><div class="swatch-hex">#383847</div><div class="swatch-token">--cosmic-locked</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#F0B830;"></div>
+            <div class="swatch-info"><div class="swatch-name">Mission</div><div class="swatch-hex">#F0B830</div><div class="swatch-token">--cosmic-mission</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#9973E6;"></div>
+            <div class="swatch-info"><div class="swatch-name">Upgrade</div><div class="swatch-hex">#9973E6</div><div class="swatch-token">--cosmic-upgrade</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FFD966;"></div>
+            <div class="swatch-info"><div class="swatch-name">Maxed</div><div class="swatch-hex">#FFD966</div><div class="swatch-token">--cosmic-maxed</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Semantic States -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Estados Semânticos</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#52E5A0;"></div>
+            <div class="swatch-info"><div class="swatch-name">Good</div><div class="swatch-hex">#52E5A0</div><div class="swatch-token">--good</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FF5C6E;"></div>
+            <div class="swatch-info"><div class="swatch-name">Bad</div><div class="swatch-hex">#FF5C6E</div><div class="swatch-token">--bad</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#4AB8FF;"></div>
+            <div class="swatch-info"><div class="swatch-name">Link / Info</div><div class="swatch-hex">#4AB8FF</div><div class="swatch-token">--link</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#50607A;"></div>
+            <div class="swatch-info"><div class="swatch-name">Text Muted</div><div class="swatch-hex">#50607A</div><div class="swatch-token">--text-muted</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solver Progress -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Solver — Progresso Colorful</div>
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch-color" style="background:#DE313D;"></div><div class="swatch-info"><div class="swatch-name">Stage 1</div><div class="swatch-hex">#DE313D</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#F59E1E;"></div><div class="swatch-info"><div class="swatch-name">Stage 2</div><div class="swatch-hex">#F59E1E</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#F7D600;"></div><div class="swatch-info"><div class="swatch-name">Stage 3</div><div class="swatch-hex">#F7D600</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#5EB05A;"></div><div class="swatch-info"><div class="swatch-name">Stage 4</div><div class="swatch-hex">#5EB05A</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#364DFA;"></div><div class="swatch-info"><div class="swatch-name">Stage 5</div><div class="swatch-hex">#364DFA</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#429EF0;"></div><div class="swatch-info"><div class="swatch-name">Stage 6</div><div class="swatch-hex">#429EF0</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#B37CE0;"></div><div class="swatch-info"><div class="swatch-name">Stage 7</div><div class="swatch-hex">#B37CE0</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         TYPOGRAPHY
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="typography">
+      <h2 class="ds-section-title">Tipografia</h2>
+      <p class="ds-section-desc">
+        Fonte principal: <span class="token">Inter</span> (UI) e <span class="token">JetBrains Mono</span> (valores numéricos).
+        No plugin real: fonte do jogo <span class="token">Axis</span> para dados de crafting.
+      </p>
+
+      <div class="card">
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">HeaderFont (2×)</div>
+            <div class="type-spec">28px / 700</div>
+          </div>
+          <div style="font-size: 28px; font-weight: 700; color: #E8EEF8;">Macro Editor</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">SubheaderFont (1.5×)</div>
+            <div class="type-spec">21px / 600</div>
+          </div>
+          <div style="font-size: 21px; font-weight: 600; color: #C8D0E0;">Character Stats</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Body / Default</div>
+            <div class="type-spec">14px / 400</div>
+          </div>
+          <div style="font-size: 14px; color: #D0D8E8;">Configure your crafting macro parameters here.</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Small / Label</div>
+            <div class="type-spec">12px / 500</div>
+          </div>
+          <div style="font-size: 12px; font-weight: 500; color: #A0AABF;">Recipe Level • Difficulty • Durability</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Caption / Muted</div>
+            <div class="type-spec">11px / 400</div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">Progress: 3200 / 3500 (91%)</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Mono / Value</div>
+            <div class="type-spec">12px mono / 600</div>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: #D0D8E8;">3482 / 560 CP</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Overline / Section</div>
+            <div class="type-spec">10px / 600 uppercase</div>
+          </div>
+          <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);">Craft Parameters</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         SPACING
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="spacing">
+      <h2 class="ds-section-title">Espaçamento</h2>
+      <p class="ds-section-desc">
+        Base de 4px. Todos os valores escalam com <span class="token">ImGuiHelpers.GlobalScale</span> no plugin real.
+      </p>
+
+      <div class="card">
+        <div class="spacing-row"><div class="spacing-label">sp-1 / 4px</div><div class="spacing-bar" style="width:4px;"></div><div class="spacing-val">gap mínimo, padding de badge</div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-2 / 8px</div><div class="spacing-bar" style="width:8px;"></div><div class="spacing-val">gap entre ícone e label</div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-3 / 12px</div><div class="spacing-bar" style="width:12px;"></div><div class="spacing-val">window padding horizontal</div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-4 / 16px</div><div class="spacing-bar" style="width:16px;"></div><div class="spacing-val">padding de group panel</div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-5 / 20px</div><div class="spacing-bar" style="width:20px;"></div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-6 / 24px</div><div class="spacing-bar" style="width:24px;"></div><div class="spacing-val">gap entre seções</div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-8 / 32px</div><div class="spacing-bar" style="width:32px;"></div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-10 / 40px</div><div class="spacing-bar" style="width:40px;"></div></div>
+        <div class="spacing-row"><div class="spacing-label">sp-12 / 48px</div><div class="spacing-bar" style="width:48px;"></div><div class="spacing-val">padding maior de página</div></div>
+      </div>
+
+      <div class="ds-subsection" style="margin-top: var(--sp-6);">
+        <div class="ds-subsection-title">Border Radius</div>
+        <div class="demo-row">
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-sm);margin:0 auto var(--sp-1);"></div>
+            <div class="swatch-hex">r-sm / 4px</div>
+            <div class="swatch-token">frames, botões</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-md);margin:0 auto var(--sp-1);"></div>
+            <div class="swatch-hex">r-md / 6px</div>
+            <div class="swatch-token">janelas, group panels</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-lg);margin:0 auto var(--sp-1);"></div>
+            <div class="swatch-hex">r-lg / 8px</div>
+            <div class="swatch-token">cards maiores</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:24px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-pill);margin:12px auto var(--sp-1);"></div>
+            <div class="swatch-hex">r-pill / 9999px</div>
+            <div class="swatch-token">badges, pills</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         SURFACES
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="surfaces">
+      <h2 class="ds-section-title">Superfícies</h2>
+      <p class="ds-section-desc">
+        Hierarquia de fundos em dark mode. Cada camada é ligeiramente mais clara — usada para
+        criar profundidade visual sem cores de destaque.
+      </p>
+
+      <div style="display:flex; gap: var(--sp-3); flex-wrap: wrap;">
+        <div class="swatch swatch-bg" style="width:160px;">
+          <div class="swatch-color" style="background:#060810;">bg-base</div>
+          <div class="swatch-info">
+            <div class="swatch-name">BgBase</div>
+            <div class="swatch-hex">#060810</div>
+            <div class="swatch-token">scrollbar track</div>
+          </div>
+        </div>
+        <div class="swatch swatch-bg" style="width:160px;">
+          <div class="swatch-color" style="background:#0D1120;">bg-surface</div>
+          <div class="swatch-info">
+            <div class="swatch-name">BgSurface</div>
+            <div class="swatch-hex">#0D1120</div>
+            <div class="swatch-token">WindowBg</div>
+          </div>
+        </div>
+        <div class="swatch swatch-bg" style="width:160px;">
+          <div class="swatch-color" style="background:#141928;">bg-elevated</div>
+          <div class="swatch-info">
+            <div class="swatch-name">BgElevated</div>
+            <div class="swatch-hex">#141928</div>
+            <div class="swatch-token">ChildBg, title bar</div>
+          </div>
+        </div>
+        <div class="swatch swatch-bg" style="width:160px;">
+          <div class="swatch-color" style="background:#1B2235;">bg-overlay</div>
+          <div class="swatch-info">
+            <div class="swatch-name">BgOverlay</div>
+            <div class="swatch-hex">#1B2235</div>
+            <div class="swatch-token">FrameBg, inputs</div>
+          </div>
+        </div>
+        <div class="swatch swatch-bg" style="width:160px;">
+          <div class="swatch-color" style="background:#212A40;">bg-hover</div>
+          <div class="swatch-info">
+            <div class="swatch-name">BgHover</div>
+            <div class="swatch-hex">#212A40</div>
+            <div class="swatch-token">FrameBgHovered</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--sp-4);">
+        <div class="swatch-token" style="font-size: 12px;">
+          Border: <span style="color: rgba(100,140,200,0.8);">rgba(100, 140, 200, 0.30)</span> — borda padrão azul translúcida
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         WINDOW COMPONENT
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="window">
+      <h2 class="ds-section-title">Janela do Plugin</h2>
+      <p class="ds-section-desc">
+        Shell base usado por todas as janelas. Title bar com ícone, label e botões de ação.
+      </p>
+
+      <div class="demo-row">
+        <!-- Macro Editor window skeleton -->
+        <div class="plugin-window" style="width: 320px;">
+          <div class="plugin-titlebar">
+            <span class="plugin-titlebar-icon"><i class="fa-solid fa-hammer"></i></span>
+            <span class="plugin-titlebar-label">Macro Editor</span>
+            <span class="plugin-titlebar-btn"><i class="fa-solid fa-gear"></i></span>
+            <span class="plugin-titlebar-btn"><i class="fa-solid fa-heart"></i></span>
+            <span class="plugin-titlebar-btn active"><i class="fa-solid fa-eye"></i></span>
+            <span class="plugin-titlebar-btn"><i class="fa-solid fa-minus"></i></span>
+          </div>
+          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">
+            Conteúdo da janela…
+          </div>
+        </div>
+
+        <!-- Synth Helper window skeleton -->
+        <div class="plugin-window" style="width: 220px;">
+          <div class="plugin-titlebar">
+            <span class="plugin-titlebar-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            <span class="plugin-titlebar-label">Synth Helper</span>
+            <span class="plugin-titlebar-btn"><i class="fa-solid fa-xmark"></i></span>
+          </div>
+          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">
+            Conteúdo…
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--sp-4); font-size: 12px; color: var(--text-muted);">
+        <strong style="color:#8898B8;">Anatomia:</strong>
+        BgElevated title bar → 1px border-bottom → BgSurface body → padding 10px×12px.
+        Label: <span class="token">#C8B8FF</span> (violet claro). Botão ativo: <span class="token">--link</span>.
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         GROUP PANEL
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="group-panel">
+      <h2 class="ds-section-title">Group Panel</h2>
+      <p class="ds-section-desc">
+        Container com borda e label flutuante na borda superior. Label colorida em <span class="token">--link</span>.
+      </p>
+
+      <div class="card">
+        <div class="group-panel">
+          <span class="group-panel-label">Craft Parameters</span>
+          <table class="param-table">
+            <tr><td>Recipe Level</td><td>690</td></tr>
+            <tr><td>Difficulty</td><td>6600</td></tr>
+            <tr><td>Quality</td><td>14040</td></tr>
+            <tr><td>Durability</td><td>70</td></tr>
+          </table>
+        </div>
+
+        <div class="group-panel" style="margin-top: var(--sp-6);">
+          <span class="group-panel-label">Character Stats</span>
+          <table class="param-table">
+            <tr><td>Craftsmanship</td><td style="color: var(--good);">4783</td></tr>
+            <tr><td>Control</td><td style="color: var(--good);">4071</td></tr>
+            <tr><td>CP</td><td>596</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         PROGRESS BARS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="progress">
+      <h2 class="ds-section-title">Progress Bars</h2>
+      <p class="ds-section-desc">
+        Barras de progresso para stats de crafting. Altura 14px com rounding suave.
+      </p>
+
+      <div class="card">
+        <!-- Progress -->
+        <div style="margin-bottom: var(--sp-3);">
+          <div class="prog-label">
+            <span style="color: var(--progress); font-weight: 600;">Progress</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">3200 / 3500</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:91%; background: var(--progress);">91%</div>
+          </div>
+        </div>
+        <!-- Quality -->
+        <div style="margin-bottom: var(--sp-3);">
+          <div class="prog-label">
+            <span style="color: var(--quality); font-weight: 600;">Quality</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">8420 / 14040</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:60%; background: var(--quality);">60%</div>
+          </div>
+        </div>
+        <!-- Durability -->
+        <div style="margin-bottom: var(--sp-3);">
+          <div class="prog-label">
+            <span style="color: var(--durability); font-weight: 600;">Durability</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">35 / 70</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:50%; background: var(--durability);">50%</div>
+          </div>
+        </div>
+        <!-- CP -->
+        <div style="margin-bottom: var(--sp-3);">
+          <div class="prog-label">
+            <span style="color: var(--cp); font-weight: 600;">CP</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">124 / 596</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:21%; background: var(--cp);">21%</div>
+          </div>
+        </div>
+        <!-- Collectability -->
+        <div>
+          <div class="prog-label">
+            <span style="color: var(--collectability); font-weight: 600;">Collectability</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">450 / 900</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:50%; background: var(--collectability);">50%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         BADGES / PILLS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="badges">
+      <h2 class="ds-section-title">Badges &amp; Pills</h2>
+      <p class="ds-section-desc">
+        Pills com border radius total. Fill: 14% opacidade. Border: 30% opacidade.
+        Padding: 2px vertical × 7px horizontal.
+      </p>
+
+      <div class="card">
+        <div class="demo-row">
+          <span class="badge" style="color: var(--action-synth); background: rgba(82,229,160,0.14); border-color: rgba(82,229,160,0.30);">
+            <span class="badge-dot" style="background: var(--action-synth);"></span>Synthesis
+          </span>
+          <span class="badge" style="color: var(--action-touch); background: rgba(176,123,255,0.14); border-color: rgba(176,123,255,0.30);">
+            <span class="badge-dot" style="background: var(--action-touch);"></span>Touch
+          </span>
+          <span class="badge" style="color: var(--action-buff); background: rgba(74,184,255,0.14); border-color: rgba(74,184,255,0.30);">
+            <span class="badge-dot" style="background: var(--action-buff);"></span>Buff
+          </span>
+          <span class="badge" style="color: var(--action-special); background: rgba(255,184,74,0.14); border-color: rgba(255,184,74,0.30);">
+            <span class="badge-dot" style="background: var(--action-special);"></span>Special
+          </span>
+        </div>
+
+        <hr class="ds" style="margin: var(--sp-3) 0;" />
+
+        <div class="demo-row">
+          <span class="badge" style="color: var(--good); background: rgba(82,229,160,0.14); border-color: rgba(82,229,160,0.30);">
+            ✓ HQ
+          </span>
+          <span class="badge" style="color: var(--bad); background: rgba(255,92,110,0.14); border-color: rgba(255,92,110,0.30);">
+            ✗ Failed
+          </span>
+          <span class="badge" style="color: var(--cosmic-maxed); background: rgba(255,217,102,0.14); border-color: rgba(255,217,102,0.30);">
+            ★ Specialist
+          </span>
+          <span class="badge" style="color: var(--link); background: rgba(74,184,255,0.14); border-color: rgba(74,184,255,0.30);">
+            Stage 3
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         STATE CHIPS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="chips">
+      <h2 class="ds-section-title">State Chips</h2>
+      <p class="ds-section-desc">
+        Indicadores de estado do solver com dot animado. Background escuro com borda sutil.
+      </p>
+
+      <div class="card">
+        <div class="demo-row">
+          <span class="chip">
+            <span class="chip-dot" style="background: var(--link);"></span>Solving…
+          </span>
+          <span class="chip">
+            <span class="chip-dot static" style="background: var(--good);"></span>Complete
+          </span>
+          <span class="chip">
+            <span class="chip-dot static" style="background: var(--durability);"></span>Suboptimal
+          </span>
+          <span class="chip">
+            <span class="chip-dot static" style="background: var(--bad);"></span>Failed
+          </span>
+          <span class="chip">
+            <span class="chip-dot static" style="background: var(--text-muted);"></span>Idle
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         CONDITIONS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="conditions">
+      <h2 class="ds-section-title">Condition Indicator</h2>
+      <p class="ds-section-desc">
+        Dot colorido com glow via box-shadow. Usado no SynthHelper para mostrar a condição
+        atual do crafting step.
+      </p>
+
+      <div class="card">
+        <div class="demo-row" style="flex-wrap: wrap; gap: var(--sp-4);">
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-normal); color: var(--cond-normal);"></div>
+            <span class="cond-label" style="color: var(--cond-normal);">Normal</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-good); color: var(--cond-good);"></div>
+            <span class="cond-label" style="color: var(--cond-good);">Good</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-excellent); color: var(--cond-excellent);"></div>
+            <span class="cond-label" style="color: var(--cond-excellent);">Excellent</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-poor); color: var(--cond-poor);"></div>
+            <span class="cond-label" style="color: var(--cond-poor);">Poor</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-pliant); color: var(--cond-pliant);"></div>
+            <span class="cond-label" style="color: var(--cond-pliant);">Pliant</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-malleable); color: var(--cond-malleable);"></div>
+            <span class="cond-label" style="color: var(--cond-malleable);">Malleable</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-sturdy); color: var(--cond-sturdy);"></div>
+            <span class="cond-label" style="color: var(--cond-sturdy);">Sturdy</span>
+          </div>
+          <div class="cond-indicator">
+            <div class="cond-dot" style="background: var(--cond-primed); color: var(--cond-primed);"></div>
+            <span class="cond-label" style="color: var(--cond-primed);">Primed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         BUTTONS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="buttons">
+      <h2 class="ds-section-title">Botões</h2>
+      <p class="ds-section-desc">
+        Icon buttons 28×28px com variantes semânticas. Usados na title bar e nas hotbar de ações.
+      </p>
+
+      <div class="card">
+        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Icon Buttons</div>
+        <div class="demo-row">
+          <span class="icon-btn"><i class="fa-solid fa-gear"></i></span>
+          <span class="icon-btn"><i class="fa-solid fa-rotate-right"></i></span>
+          <span class="icon-btn primary"><i class="fa-solid fa-play"></i></span>
+          <span class="icon-btn primary"><i class="fa-solid fa-eye"></i></span>
+          <span class="icon-btn success"><i class="fa-solid fa-check"></i></span>
+          <span class="icon-btn danger"><i class="fa-solid fa-trash"></i></span>
+          <span class="icon-btn danger"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+
+        <hr class="ds" style="margin: var(--sp-4) 0;" />
+
+        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Link Text</div>
+        <div class="demo-row">
+          <span class="link-text">Support the project ↗</span>
+          <span class="link-text">View on GitHub ↗</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         STAT ROWS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="stats">
+      <h2 class="ds-section-title">Stat Rows</h2>
+      <p class="ds-section-desc">
+        Linhas de stat com ícone, nome, valor numérico e mini barra de progresso.
+        Usadas no painel de stats do MacroEditor e SynthHelper.
+      </p>
+
+      <div class="card" style="max-width: 340px;">
+        <div class="stat-row">
+          <div class="stat-icon" style="color: var(--progress);">●</div>
+          <div class="stat-name">Progress</div>
+          <div class="stat-value" style="color: var(--progress);">3200</div>
+          <div class="stat-bar-col">
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:91%; background: var(--progress);"></div></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon" style="color: var(--quality);">●</div>
+          <div class="stat-name">Quality</div>
+          <div class="stat-value" style="color: var(--quality);">8420</div>
+          <div class="stat-bar-col">
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:60%; background: var(--quality);"></div></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon" style="color: var(--durability);">●</div>
+          <div class="stat-name">Durability</div>
+          <div class="stat-value" style="color: var(--durability);">35</div>
+          <div class="stat-bar-col">
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:50%; background: var(--durability);"></div></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon" style="color: var(--cp);">●</div>
+          <div class="stat-name">CP</div>
+          <div class="stat-value" style="color: var(--bad);">124</div>
+          <div class="stat-bar-col">
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:21%; background: var(--bad);"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         TABLES
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="tables">
+      <h2 class="ds-section-title">Tabelas de Parâmetros</h2>
+      <p class="ds-section-desc">
+        Tabela de duas colunas com borda vertical. Label esquerda muted, valor direita bold.
+      </p>
+
+      <div class="card" style="max-width: 320px;">
+        <table class="param-table" style="width: 100%;">
+          <tr><td>Recipe Level</td><td>690</td></tr>
+          <tr><td>Difficulty</td><td>6600</td></tr>
+          <tr><td>Quality Req.</td><td>14040</td></tr>
+          <tr><td>Durability</td><td>70</td></tr>
+          <tr><td>Craftsmanship</td><td style="color: var(--good);">4783 ✓</td></tr>
+          <tr><td>Control</td><td style="color: var(--good);">4071 ✓</td></tr>
+          <tr><td>CP</td><td>596</td></tr>
+          <tr><td>Expert Craft</td><td style="color: var(--text-muted);">No</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         TOOLTIPS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="tooltips">
+      <h2 class="ds-section-title">Tooltips</h2>
+      <p class="ds-section-desc">
+        Background BgOverlay com borda strong. Max-width 220px (ImGui wraps text).
+      </p>
+
+      <div class="card">
+        <div class="demo-row">
+          <div class="tooltip-preview">
+            <strong style="color: var(--quality);">Careful Synthesis</strong><br/>
+            <span style="color: var(--text-muted); font-size: 11px;">Touch — 7 CP</span><br/>
+            <span style="font-size: 12px; margin-top: 4px; display: block;">
+              Increases progress by 180% efficiency. Usable when Synthesizer is at 50 durability or higher.
+            </span>
+          </div>
+          <div class="tooltip-preview">
+            <strong style="color: var(--link);">Stage 3 / 7</strong><br/>
+            <span style="font-size: 12px; color: #C8D0E0;">
+              Solver is on iteration 3 of 7 parallel stages. Progress: 47%
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         COSMIC TRACKER SECTION
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="cosmic">
+      <h2 class="ds-section-title">Cosmic Tracker — Research Bars</h2>
+      <p class="ds-section-desc">
+        Barras de pesquisa de 6px de altura com marcador de threshold de upgrade.
+        Estados: locked, active, complete, maxed. Highlight amber ao ser atualizado (10s).
+      </p>
+
+      <div class="demo-row" style="align-items: flex-start; gap: var(--sp-6);">
+
+        <!-- Normal state window -->
+        <div class="plugin-window" style="width: 280px;">
+          <div class="plugin-titlebar">
+            <span class="plugin-titlebar-icon"><i class="fa-solid fa-star"></i></span>
+            <span class="plugin-titlebar-label">Cosmic Tool Tracker</span>
+            <span class="plugin-titlebar-btn"><i class="fa-solid fa-minus"></i></span>
+          </div>
+          <div class="plugin-body">
+            <!-- Job header -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-2);">
+              <span style="font-size:13px; font-weight:600; color:#E0E0F0;">Culinarian</span>
+              <span class="badge" style="color: var(--cosmic-mission); background: rgba(240,184,48,0.14); border-color: rgba(240,184,48,0.30); font-size: 9px;">
+                ★ Stellar Mission
+              </span>
+            </div>
+
+            <!-- Research bars -->
+            <div style="display:flex; flex-direction:column; gap: var(--sp-2);">
+
+              <!-- Active -->
+              <div class="cosmic-row changed">
+                <div class="cosmic-name">Techniques</div>
+                <div class="cosmic-bar-col">
+                  <div class="cosmic-bar-wrap">
+                    <div class="cosmic-bar-fill" style="width:68%; background: var(--cosmic-active);"></div>
+                    <div class="cosmic-bar-marker" style="left:80%;"></div>
+                  </div>
+                </div>
+                <div class="cosmic-values">340 / 500</div>
+              </div>
+
+              <!-- Complete -->
+              <div class="cosmic-row">
+                <div class="cosmic-name">Ingredients</div>
+                <div class="cosmic-bar-col">
+                  <div class="cosmic-bar-wrap">
+                    <div class="cosmic-bar-fill" style="width:100%; background: var(--cosmic-complete);"></div>
+                    <div class="cosmic-bar-marker" style="left:80%;"></div>
+                  </div>
+                </div>
+                <div class="cosmic-values" style="color: var(--cosmic-complete);">500 / 500</div>
+              </div>
+
+              <!-- Maxed -->
+              <div class="cosmic-row">
+                <div class="cosmic-name">Traditions</div>
+                <div class="cosmic-bar-col">
+                  <div class="cosmic-bar-wrap" style="background: rgba(255,217,102,0.15);">
+                    <div class="cosmic-bar-fill" style="width:100%; background: var(--cosmic-maxed);"></div>
+                  </div>
+                </div>
+                <div class="cosmic-values" style="color: var(--cosmic-maxed);">MAX</div>
+              </div>
+
+              <!-- Locked -->
+              <div class="cosmic-row">
+                <div class="cosmic-name" style="color: var(--text-muted);">Secrets</div>
+                <div class="cosmic-bar-col">
+                  <div class="cosmic-bar-wrap">
+                    <div class="cosmic-bar-fill" style="width:0%; background: var(--cosmic-locked);"></div>
+                  </div>
+                </div>
+                <div class="cosmic-values" style="color: var(--text-muted);">—</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="padding-top: var(--sp-2);">
+          <div class="ds-subsection-title">Estados</div>
+          <div style="display:flex; flex-direction:column; gap: var(--sp-2);">
+            <div class="cond-indicator">
+              <div class="cond-dot" style="background: var(--cosmic-active); color: var(--cosmic-active); width:10px; height:10px;"></div>
+              <span style="font-size:12px; color: var(--cosmic-active);">Active</span>
+              <span style="font-size:11px; color: var(--text-muted);">— pesquisa em andamento</span>
+            </div>
+            <div class="cond-indicator">
+              <div class="cond-dot" style="background: var(--cosmic-complete); color: var(--cosmic-complete); width:10px; height:10px;"></div>
+              <span style="font-size:12px; color: var(--cosmic-complete);">Complete</span>
+              <span style="font-size:11px; color: var(--text-muted);">— threshold atingido</span>
+            </div>
+            <div class="cond-indicator">
+              <div class="cond-dot" style="background: var(--cosmic-maxed); color: var(--cosmic-maxed); width:10px; height:10px;"></div>
+              <span style="font-size:12px; color: var(--cosmic-maxed);">Maxed</span>
+              <span style="font-size:11px; color: var(--text-muted);">— XP máximo atingido</span>
+            </div>
+            <div class="cond-indicator">
+              <div class="cond-dot" style="background: var(--cosmic-locked); width:10px; height:10px;"></div>
+              <span style="font-size:12px; color: var(--text-muted);">Locked</span>
+              <span style="font-size:11px; color: var(--text-muted);">— ainda não desbloqueado</span>
+            </div>
+            <div class="cond-indicator">
+              <div style="width:2px; height:12px; background: var(--cosmic-upgrade); border-radius:1px;"></div>
+              <span style="font-size:12px; color: var(--cosmic-upgrade);">Upgrade marker</span>
+              <span style="font-size:11px; color: var(--text-muted);">— threshold de upgrade</span>
+            </div>
+            <div class="cond-indicator">
+              <div style="width:10px; height:10px; background: var(--cosmic-changed); border: 1px solid rgba(240,184,48,0.3); border-radius:2px;"></div>
+              <span style="font-size:12px; color: var(--cosmic-mission);">Changed highlight</span>
+              <span style="font-size:11px; color: var(--text-muted);">— amber 12% por 10s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         SOLVER BARS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="solver-bars">
+      <h2 class="ds-section-title">Solver Progress Bars</h2>
+      <p class="ds-section-desc">
+        Barras segmentadas do solver MCTS/Raphael. Modo Colorful (7 cores) e Simple (6 tons de cinza).
+        Altura 8px, gap 2px entre segmentos.
+      </p>
+
+      <div class="card">
+        <div class="ds-subsection-title">Colorful (7 stages)</div>
+        <div class="solver-bars" style="margin-bottom: var(--sp-4);">
+          <div class="solver-bar-seg" style="background: var(--solver-1);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-2);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-3);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-4);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-5);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-6);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-7);"></div>
+        </div>
+
+        <div class="ds-subsection-title">Simple / Monochromatic</div>
+        <div class="solver-bars">
+          <div class="solver-bar-seg" style="background: #545454;"></div>
+          <div class="solver-bar-seg" style="background: #707070;"></div>
+          <div class="solver-bar-seg" style="background: #8F8F8F;"></div>
+          <div class="solver-bar-seg" style="background: #ADADAD;"></div>
+          <div class="solver-bar-seg" style="background: #CECECE;"></div>
+          <div class="solver-bar-seg" style="background: #EDEDED;"></div>
+        </div>
+
+        <hr class="ds" style="margin: var(--sp-4) 0;" />
+
+        <div class="ds-subsection-title">In-progress (4 of 7)</div>
+        <div class="solver-bars">
+          <div class="solver-bar-seg" style="background: var(--solver-1);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-2);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-3);"></div>
+          <div class="solver-bar-seg" style="background: var(--solver-4);"></div>
+          <div class="solver-bar-seg" style="background: var(--bg-hover);"></div>
+          <div class="solver-bar-seg" style="background: var(--bg-hover);"></div>
+          <div class="solver-bar-seg" style="background: var(--bg-hover);"></div>
+        </div>
+      </div>
+
+      <!-- Collectability thresholds -->
+      <div class="ds-subsection" style="margin-top: var(--sp-6);">
+        <div class="ds-subsection-title">Collectability Thresholds</div>
+        <div class="card">
+          <div style="display:flex; gap: var(--sp-3);">
+            <span class="badge" style="color: var(--collect-t1); background: rgba(120,199,238,0.14); border-color: rgba(120,199,238,0.30);">Threshold 1</span>
+            <span class="badge" style="color: var(--collect-t2); background: rgba(253,202,0,0.14); border-color: rgba(253,202,0,0.30);">Threshold 2</span>
+            <span class="badge" style="color: var(--collect-t3); background: rgba(191,255,191,0.14); border-color: rgba(191,255,191,0.30);">Threshold 3</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div style="margin-top: var(--sp-12); padding-top: var(--sp-6); border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px;">
+      Craftimizer Design System — derivado de <span class="token">Colors.cs</span>, <span class="token">Theme.cs</span> e <span class="token">ImGuiUtils.cs</span>.
+      Todas as medidas usam base 4px e escalam com <span class="token">ImGuiHelpers.GlobalScale</span> no plugin real.
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('.ds-section');
+  const links    = document.querySelectorAll('.ds-nav-link');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
