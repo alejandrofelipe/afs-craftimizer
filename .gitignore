@@ -7,12 +7,17 @@ bin/
 # Distribution artifacts
 dist/
 *.zip
+*.nupkg
+*.snupkg
 
 # Benchmark results
 BenchmarkDotNet.Artifacts/
 
 # Test results
-Test/TestResults/
+**/TestResults/
+coverage/
+*.coverage
+*.coveragexml
 
 # Backlog and design files (internal planning)
 backlog/
@@ -23,14 +28,31 @@ design/
 *.README.md
 
 # IDE and OS files
-.vscode/
-!.vscode/settings.json  # Versionar settings.json para configuração de modelo
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Package lock files (optional - remove if you want to track them)
-packages.lock.json
+# Environment / secrets
+.env
+.env.*
+*.secrets.json
+local.settings.json
+
+# .NET local tools cache
+.dotnet/
+
+# Log files
+*.log
+logs/
+
+# Claude conversation assets (images pasted inline)
+.claude/commands/image/
+
+# Node (caso ferramentas JS sejam adicionadas)
+node_modules/

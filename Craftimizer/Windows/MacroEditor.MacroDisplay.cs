@@ -243,18 +243,28 @@ public sealed partial class MacroEditor
         ImGui.Dummy(default);
         ImGui.GetWindowDrawList().AddLine(pos, pos + new Vector2(availSpace, 0), ImGui.GetColorU32(ImGuiCol.Border));
         ImGui.Dummy(default);
-        if (SolverRunning && SolverObject is { } solver)
+        ProgressBarComponent.ProgressSnapshot[] solverSnapshots;
+        lock (_solverSnapshots)
+            solverSnapshots = [.. _solverSnapshots];
+
+        if (solverSnapshots.Length > 0)
         {
-            var snapshot = ProgressBarComponent.FromSolver(solver, "Solver");
+            var chipState = solverSnapshots[0].State switch
+            {
+                ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
+                ProgressBarComponent.ProgressState.Cancelled => ImGuiUtils.SolverState.Failed,
+                _ => ImGuiUtils.SolverState.Solving
+            };
+            ImGuiUtils.DrawStateChip(chipState);
             var config = new ProgressBarComponent.VisualConfig(
                 Mode: ProgressBarComponent.DisplayMode.Horizontal,
                 ColorTheme: _plugin.Configuration.ProgressType,
                 Width: availSpace,
                 ShowPercentage: true,
-                ShowDetailedTooltip: true
+                ShowDetailedTooltip: true,
+                ShowSummaryWhenAggregated: true
             );
-            
-            ProgressBarComponent.DrawSingle(snapshot, config);
+            ProgressBarComponent.DrawAggregated(solverSnapshots, config);
         }
         DrawMacroActions(availSpace);
     }

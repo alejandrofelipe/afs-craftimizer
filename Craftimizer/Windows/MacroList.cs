@@ -153,61 +153,23 @@ public sealed class MacroList : Window, IDisposable
 
     private void DrawEmptyState()
     {
-        var availW = ImGui.GetContentRegionAvail().X;
-        var availH = ImGui.GetContentRegionAvail().Y;
-        var spacing = ImGui.GetStyle().ItemSpacing.Y;
-        var iconH = ImGui.GetTextLineHeight() * 1.8f;
-
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            var totalH = iconH + spacing
-                + ImGui.GetTextLineHeightWithSpacing()
-                + ImGui.GetTextLineHeight()
-                + spacing * 2 + ImGui.GetFrameHeight();
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + Math.Max(0f, (availH - totalH) / 2f));
-
-            using (ImRaii.PushFont(UiBuilder.IconFont))
-            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                ImGuiUtils.TextCentered(FontAwesomeIcon.Search.ToIconString(), availW);
-            ImGuiUtils.TextCentered($"No macros match \"{searchText}\"", availW);
-            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                ImGuiUtils.TextCentered("Try a different search term.", availW);
-
-            var btnW = 160f * ImGuiHelpers.GlobalScale;
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + spacing);
-            ImGuiUtils.AlignCentered(btnW, availW);
-            if (ImGui.Button("Clear Search", new(btnW, 0)))
-            {
-                searchText = string.Empty;
-                RefreshSearch();
-            }
+            ImGuiUtils.DrawEmptyState(
+                FontAwesomeIcon.Search,
+                $"No macros match \"{searchText}\"",
+                "Try a different search term.",
+                primaryButton: ("Clear Search", () => { searchText = string.Empty; RefreshSearch(); }),
+                buttonWidth: 160f);
         }
         else
         {
-            var btnW = 200f * ImGuiHelpers.GlobalScale;
-            var totalH = iconH + spacing
-                + ImGui.GetTextLineHeightWithSpacing()
-                + ImGui.GetTextLineHeight()
-                + spacing * 2 + ImGui.GetFrameHeight()
-                + spacing + ImGui.GetFrameHeight();
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + Math.Max(0f, (availH - totalH) / 2f));
-
-            using (ImRaii.PushFont(UiBuilder.IconFont))
-            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                ImGuiUtils.TextCentered(FontAwesomeIcon.Clipboard.ToIconString(), availW);
-            ImGuiUtils.TextCentered("No macros yet", availW);
-            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                ImGuiUtils.TextCentered("Create your first macro from the Macro Editor or Crafting Log.", availW);
-
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + spacing);
-            ImGuiUtils.AlignCentered(btnW, availW);
-            if (ImGui.Button("Open Crafting Log", new(btnW, 0)))
-                Plugin.Plugin.OpenCraftingLog();
-            ImGuiUtils.AlignCentered(btnW, availW);
-            Theme.PushPrimaryButton();
-            if (ImGui.Button("Open Macro Editor", new(btnW, 0)))
-                OpenEditor(null);
-            Theme.PopPrimaryButton();
+            ImGuiUtils.DrawEmptyState(
+                FontAwesomeIcon.Clipboard,
+                "No macros yet",
+                "Create your first macro from the Macro Editor or Crafting Log.",
+                primaryButton: ("Open Macro Editor", () => OpenEditor(null)),
+                secondaryButton: ("Open Crafting Log", Plugin.Plugin.OpenCraftingLog));
         }
     }
 

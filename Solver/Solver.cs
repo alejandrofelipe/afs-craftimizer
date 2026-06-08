@@ -510,18 +510,50 @@ public sealed class Solver : IDisposable
         var forksPerAction = Math.Max(1, Config.ForkCount / actionCount);
         var totalForks = actionCount * forksPerAction;
 
-        var iterCount = Config.Iterations / totalForks;
-        var maxIterCount = Math.Max(Config.Iterations, Config.MaxIterations) / totalForks;
-        maxProgress = iterCount * totalForks;
+        var useTimeLimit = Config.MaxTimeMs > 0;
+        int iterCount, maxIterCount;
+
+        if (useTimeLimit)
+        {
+            // Unlimited iterations; the CancellationToken timeout drives termination
+            iterCount = int.MaxValue / 2;
+            maxIterCount = int.MaxValue / 2;
+            maxProgress = Config.MaxTimeMs;
+        }
+        else
+        {
+            iterCount = Config.Iterations / totalForks;
+            maxIterCount = Math.Max(Config.Iterations, Config.MaxIterations) / totalForks;
+            maxProgress = iterCount * totalForks;
+        }
+
+        // Create a time-limit CTS linked to Token. CancelAfter fires after MaxTimeMs.
+        using var timeCts = useTimeLimit
+            ? CancellationTokenSource.CreateLinkedTokenSource(Token)
+            : null;
+        if (useTimeLimit)
+            timeCts!.CancelAfter(Config.MaxTimeMs);
+        var searchToken = timeCts?.Token ?? Token;
+
+        // For time mode, update progress via elapsed ms on a background task
+        var progressCts = useTimeLimit ? CancellationTokenSource.CreateLinkedTokenSource(Token) : null;
+        var progressTask = useTimeLimit ? Task.Run(async () =>
+        {
+            var sw = Stopwatch.StartNew();
+            while (!progressCts!.Token.IsCancellationRequested)
+            {
+                Interlocked.Exchange(ref progress, (int)Math.Min(sw.ElapsedMilliseconds, Config.MaxTimeMs));
+                try { await Task.Delay(50, progressCts.Token).ConfigureAwait(false); }
+                catch (OperationCanceledException) { break; }
+            }
+        }, progressCts!.Token) : null;
 
         var taskResults = new Task<(float MaxScore, int ActionIdx, SolverSolution Solution)>[totalForks];
         using var semaphore = new SemaphoreSlim(0, Config.MaxThreadCount);
-
         for (var i = 0; i < actionCount; i++)
         {
             var action = availableActions.ElementAt(i);
             var (_, childState) = sim.Execute(state, action);
-            var capturedAction = action;
             var capturedActionIdx = i;
 
             for (var j = 0; j < forksPerAction; j++)
@@ -532,7 +564,18 @@ public sealed class Solver : IDisposable
                     await semaphore.WaitAsync(Token).ConfigureAwait(false);
                     try
                     {
-                        solver.Search(iterCount, maxIterCount, ref progress, Token);
+                        if (useTimeLimit)
+                        {
+                            // Local counter per fork — avoids stomping the ms-based progress counter.
+                            var localProgress = 0;
+                            solver.Search(iterCount, maxIterCount, ref localProgress, searchToken);
+                        }
+                        else
+                            solver.Search(iterCount, maxIterCount, ref progress, searchToken);
+                    }
+                    catch (OperationCanceledException) when (useTimeLimit && !Token.IsCancellationRequested)
+                    {
+                        // Time budget exhausted — return best result found so far.
                     }
                     finally
                     {
@@ -546,6 +589,14 @@ public sealed class Solver : IDisposable
 
         semaphore.Release(Config.MaxThreadCount);
         await Task.WhenAll(taskResults).WaitAsync(Token).ConfigureAwait(false);
+
+        progressCts?.Cancel();
+        if (progressTask != null)
+        {
+            try { await progressTask.ConfigureAwait(false); }
+            catch (OperationCanceledException) { }
+        }
+        progressCts?.Dispose();
 
         Token.ThrowIfCancellationRequested();
 

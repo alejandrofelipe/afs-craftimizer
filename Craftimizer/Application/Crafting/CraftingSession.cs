@@ -287,6 +287,9 @@ public sealed class CraftingSession : IDisposable
         if (!canUseDelineations)
             config = config.FilterSpecialistActions();
 
+        if (config.QualityTargetToMaxCollectability && RecipeData != null)
+            config = config.WithResolvedQualityTarget(RecipeData.RecipeInfo.MaxQuality, RecipeData.CollectableThresholds);
+
         token.ThrowIfCancellationRequested();
 
         var solver = new Solver.Solver(config, state) { Token = token };

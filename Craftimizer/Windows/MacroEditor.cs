@@ -91,6 +91,8 @@ public sealed partial class MacroEditor : Window, IDisposable
     private bool SolverRunning => (!SolverTask?.Completed) ?? false;
     private Solver.Solver? SolverObject { get; set; }
     private int? SolverStartStepCount { get; set; }
+    private readonly List<ProgressBarComponent.ProgressSnapshot> _solverSnapshots = [];
+    private CancellationTokenSource? _snapshotUpdateCts;
 
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
@@ -320,6 +322,8 @@ public sealed partial class MacroEditor : Window, IDisposable
 
     public void Dispose()
     {
+        _snapshotUpdateCts?.Cancel();
+        _snapshotUpdateCts?.Dispose();
         _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         _plugin.WindowSystem.RemoveWindow(this);
 

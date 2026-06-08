@@ -1,5 +1,8 @@
 using Craftimizer.Simulator.Actions;
+using System;
 using System.Collections.Frozen;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Craftimizer.Solver;
@@ -88,6 +91,36 @@ public readonly record struct SolverConfig
 
     public SolverConfig FilterSpecialistActions() =>
         this with { ActionPool = ActionPool.Where(action => !SpecialistActions.Contains(action)).ToArray() };
+
+    /// <summary>
+    /// Resolves <see cref="QualityTargetToMaxCollectability"/> into a concrete
+    /// <see cref="QualityTargetPercent"/> value using recipe-specific data.
+    /// Must be called from plugin code (which has access to RecipeData) before
+    /// passing the config to the solver.
+    /// </summary>
+    /// <param name="maxQuality">RecipeInfo.MaxQuality</param>
+    /// <param name="collectableThresholds">RecipeData.CollectableThresholds (collectability units)</param>
+    public SolverConfig WithResolvedQualityTarget(int maxQuality, IReadOnlyList<int?>? collectableThresholds)
+    {
+        if (!QualityTargetToMaxCollectability || maxQuality <= 0 || collectableThresholds == null)
+            return this;
+
+        var maxCollectability = maxQuality / 10;
+        if (maxCollectability <= 0)
+            return this;
+
+        var maxThreshold = collectableThresholds
+            .Where(t => t.HasValue)
+            .Select(t => t!.Value)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        if (maxThreshold <= 0)
+            return this;
+
+        var resolvedPercent = Math.Clamp((float)maxThreshold / maxCollectability, 0.01f, 1.0f);
+        return this with { QualityTargetPercent = resolvedPercent, QualityTargetToMaxCollectability = false };
+    }
 
     public static readonly ActionType[] DeterministicActionPool = OptimizeActionPool(new[]
     {
