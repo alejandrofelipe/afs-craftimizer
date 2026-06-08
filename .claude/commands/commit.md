@@ -3,7 +3,34 @@
 Prepara e executa o commit completo de uma mudança no Craftimizer:
 atualiza README, faz version bump, cria commit com mensagem estruturada, cria tag e faz push.
 
-**Uso:** `/commit <descrição curta do que foi feito>`
+**Uso:**
+```
+/commit <descrição curta do que foi feito>
+/commit <nível> <descrição curta do que foi feito>
+```
+
+**Níveis de bump disponíveis** (mesmo que `bump-version.ps1 -Type`):
+
+| Nível | Efeito | Quando usar |
+|---|---|---|
+| `major` | X+1.0.0.0 | Breaking change, rewrite, remoção de API |
+| `minor` | X.Y+1.0.0 | Nova feature (`feat`) |
+| `patch` | X.Y.Z+1.0 | Correção de bug relevante (`fix`) |
+| `build` | X.Y.Z.W+1 | Refactor, chore, polish, docs (padrão) |
+
+**Exemplos:**
+```
+/commit minor adicionar empty state reutilizável
+/commit patch corrigir crash no RecipeNote
+/commit build ajustar títulos das janelas
+/commit major rewrite do solver
+/commit remover prefixo das janelas   ← auto-detecta: chore → build
+```
+
+Se nenhum nível for fornecido como primeiro token, auto-detectar com base no diff:
+- `feat` → `minor`
+- `fix` → `patch`
+- `refactor` / `chore` / `docs` / `style` → `build`
 
 O argumento `$ARGUMENTS` descreve a mudança — se omitido, inspecionar o `git diff` para inferir.
 
@@ -11,7 +38,14 @@ O argumento `$ARGUMENTS` descreve a mudança — se omitido, inspecionar o `git 
 
 ## Instruções
 
-### Passo 1 — Atualizar o README
+### Passo 1 — Parsear argumentos
+
+Verificar se o primeiro token de `$ARGUMENTS` é um dos níveis válidos: `major`, `minor`, `patch`, `build`.
+
+- **Se sim:** usar esse nível explicitamente; o restante do texto é a descrição.
+- **Se não:** a string completa é a descrição; o nível será determinado no Passo 2 via auto-detecção.
+
+### Passo 2 — Atualizar o README
 
 Executar o fluxo do comando `/update-readme`:
 - Avaliar se a mudança merece nova entrada em "Diferenças deste Fork"
@@ -20,21 +54,28 @@ Executar o fluxo do comando `/update-readme`:
 
 > A linha de versão do README será atualizada **após** o bump, no Passo 3.
 
-### Passo 2 — Fazer o version bump
+### Passo 3 — Fazer o version bump
 
-Executar o fluxo do comando `/version-bump`:
-- Determinar o tipo da mudança com base em `$ARGUMENTS` e/ou `git diff`:
-  - `feat` → bump minor (X.Y+1.0.0)
-  - `fix` / `refactor` / `chore` → bump patch (X.Y.Z.W+1)
-- Atualizar `Craftimizer/Craftimizer.csproj` com a nova versão
-- Ler a versão resultante como `$VERSION`
+- Se nível foi fornecido explicitamente no Passo 1, usar diretamente.
+- Caso contrário, auto-detectar com base na descrição e/ou `git diff`:
+  - `feat` → `minor`
+  - `fix` → `patch`
+  - `refactor` / `chore` / `docs` → `build`
+
+Executar o script:
+```powershell
+.\scripts\bump-version.ps1 -Type <nível>
+```
+
+O script atualiza `Craftimizer/Craftimizer.csproj` e exibe `Version bumped: X.Y.Z.W → X.Y.Z.W`.
+Ler a nova versão como `$VERSION`.
 
 Após o bump, atualizar também a linha de versão no README:
 ```
 **Versão atual:** $VERSION · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 ```
 
-### Passo 3 — Determinar tipo do commit e escopo
+### Passo 4 — Determinar tipo do commit e escopo
 
 Com base em `$ARGUMENTS` e/ou `git diff`:
 
@@ -47,7 +88,7 @@ Com base em `$ARGUMENTS` e/ou `git diff`:
 | Documentação | `docs` | — |
 | Breaking change | `feat!` ou `fix!` | idem |
 
-### Passo 4 — Montar mensagem de commit
+### Passo 5 — Montar mensagem de commit
 
 Usar este template:
 
@@ -89,7 +130,7 @@ Version: 2.10.3.0
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
 
-### Passo 5 — Staging e commit
+### Passo 6 — Staging e commit
 
 ```powershell
 # Staged o que foi modificado (código + README + .csproj)
@@ -101,7 +142,7 @@ git add Craftimizer/Craftimizer.csproj
 git commit -m "<mensagem montada no Passo 4>"
 ```
 
-### Passo 6 — Criar tag de versão
+### Passo 7 — Criar tag de versão
 
 ```powershell
 git tag -a "v$VERSION" -m "Release $VERSION - <título curto>"
@@ -111,7 +152,7 @@ O título curto da tag deve ser o mesmo do commit, sem o prefixo convencional.
 
 **Exemplo:** `git tag -a v2.10.3.0 -m "Release 2.10.3.0 - Cosmic Tool progress em tempo real"`
 
-### Passo 7 — Push do commit e da tag
+### Passo 8 — Push do commit e da tag
 
 ```powershell
 git push origin main
@@ -120,7 +161,7 @@ git push origin "v$VERSION"
 
 > Usar `git push origin main --tags` apenas se houver múltiplas tags novas para subir de uma vez.
 
-### Passo 8 — Confirmar ao usuário
+### Passo 9 — Confirmar ao usuário
 
 Reportar:
 - Versão commitada: `vX.Y.Z.W`
