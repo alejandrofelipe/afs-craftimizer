@@ -20,7 +20,9 @@ public sealed class Plugin : IDalamudPlugin
     public string Author { get; }
     public string BuildConfiguration { get; }
     public ILoadedTextureIcon Icon { get; }
-    public const string SupportLink = "https://ko-fi.com/camora";
+    public const string SupportLink     = "https://ko-fi.com/camora";
+    public const string OriginalAuthor  = "Asriel (WorkingRobot)";
+    public const string OriginalRepoLink = "https://github.com/WorkingRobot/Craftimizer";
 
     public WindowSystem WindowSystem { get; }
     public Settings SettingsWindow { get; }

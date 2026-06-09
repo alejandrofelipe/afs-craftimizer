@@ -53,12 +53,10 @@ public sealed partial class Settings
 
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.Link))
                 {
-                    ImGuiUtils.AlignCentered(ImGui.CalcTextSize($"Support me on Ko-fi!").X);
-                    ImGui.TextUnformatted($"Support me on ");
+                    ImGuiUtils.AlignCentered(ImGui.CalcTextSize("Support the original author on Ko-fi").X);
+                    ImGui.TextUnformatted("Support the original author on ");
                     ImGui.SameLine(0, 0);
                     ImGuiUtils.Hyperlink("Ko-fi", PluginClass.SupportLink);
-                    ImGui.SameLine(0, 0);
-                    ImGui.TextUnformatted("!");
                 }
             }
         }
