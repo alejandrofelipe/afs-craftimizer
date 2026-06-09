@@ -30,7 +30,12 @@ public sealed class Plugin : IDalamudPlugin
     public MacroEditor? EditorWindow { get; private set; }
     public MacroClipboard? ClipboardWindow { get; private set; }
     public CosmicTracker CosmicTrackerWindow { get; }
-    
+    public FeatureHubWindow FeatureHubWindow { get; }
+    public CraftingListWindow CraftingListWindow { get; }
+    public CraftingListAddWindow CraftingListAddWindow { get; }
+    public CraftingListDetailWindow CraftingListDetailWindow { get; }
+    public CraftingListMergeWindow CraftingListMergeWindow { get; }
+
 #if DEBUG
     public ProgressBarTestWindow? TestWindow { get; private set; }
 #endif
@@ -96,6 +101,11 @@ public sealed class Plugin : IDalamudPlugin
         SynthHelperWindow = new(this);
         ListWindow = new(this);
         CosmicTrackerWindow = new(this);
+        CraftingListWindow = new(this);
+        CraftingListAddWindow = new(this);
+        CraftingListDetailWindow = new(this);
+        CraftingListMergeWindow = new(this);
+        FeatureHubWindow = new(this);
 
 #if DEBUG
         TestWindow = new(Configuration);
@@ -241,6 +251,11 @@ public sealed class Plugin : IDalamudPlugin
         GearWearTracker.Dispose();
         CosmicToolTracker.Dispose();
         CosmicTrackerWindow.Dispose();
+        FeatureHubWindow.Dispose();
+        CraftingListWindow.Dispose();
+        CraftingListAddWindow.Dispose();
+        CraftingListDetailWindow.Dispose();
+        CraftingListMergeWindow.Dispose();
         Icon.Dispose();
         TeleportHelper.Dispose();
         MarketboardHelper.Dispose();

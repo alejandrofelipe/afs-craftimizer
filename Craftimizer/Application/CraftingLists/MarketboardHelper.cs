@@ -28,16 +28,21 @@ public sealed class MarketboardHelper : IDisposable
     private readonly CraftingListRepository _repo;
     private ICallGateSubscriber<uint, uint, string?>? _ipc;
 
+    /// <summary>True while the Universalis IPC gate is available; flips false on first failure.</summary>
+    public bool IsIpcAvailable { get; private set; }
+
     public MarketboardHelper(IDalamudPluginInterface pi, CraftingListRepository repo)
     {
         _repo = repo;
         try
         {
             _ipc = pi.GetIpcSubscriber<uint, uint, string?>("Universalis.PriceData");
+            IsIpcAvailable = true;
         }
         catch
         {
             _ipc = null;
+            IsIpcAvailable = false;
         }
     }
 
@@ -82,6 +87,7 @@ public sealed class MarketboardHelper : IDisposable
             catch
             {
                 _ipc = null;
+                IsIpcAvailable = false;
             }
         }
 

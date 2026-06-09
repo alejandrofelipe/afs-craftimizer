@@ -406,6 +406,74 @@ public sealed partial class Settings
             );
         }
 
+        ImGuiHelpers.ScaledDummy(5);
+
+        using (var panel = ImRaii2.GroupPanel("Crafting Lists", -1, out _))
+        {
+            DrawOption(
+                "Habilitar Listas de Coleta",
+                "Ativa o sistema de planejamento de materiais de crafting.",
+                Config.EnableCraftingLists,
+                v => Config.EnableCraftingLists = v,
+                ref isDirty);
+
+            DrawOption(
+                "Apagar listas concluídas automaticamente",
+                "⚠ Esta ação não pode ser desfeita.",
+                Config.AutoDeleteCompletedLists,
+                v => Config.AutoDeleteCompletedLists = v,
+                ref isDirty);
+
+            ImGuiHelpers.ScaledDummy(4);
+            DrawSectionTitle("INVENTÁRIO");
+
+            DrawOption(
+                "Verificar inventário ao abrir lista",
+                "Sincroniza automaticamente o inventário quando uma lista é aberta.",
+                Config.AutoSyncInventoryOnOpen,
+                v => Config.AutoSyncInventoryOnOpen = v,
+                ref isDirty);
+
+            DrawOption(
+                "Incluir retainers na verificação",
+                "ℹ Só funciona para retainers visitados nessa sessão.",
+                Config.IncludeRetainersInSync,
+                v => Config.IncludeRetainersInSync = v,
+                ref isDirty);
+
+            ImGuiHelpers.ScaledDummy(4);
+            DrawSectionTitle("TELEPORTE");
+
+            var teleporterStatus = _plugin.TeleportHelper.IsAvailable;
+            using (ImRaii.PushColor(ImGuiCol.Text, teleporterStatus ? Colors.Progress : Colors.Bad))
+                ImGui.TextUnformatted(teleporterStatus ? "✓ Teleporter ativo" : "✗ Teleporter não encontrado");
+
+            ImGuiHelpers.ScaledDummy(4);
+            DrawSectionTitle("PREÇOS");
+
+            DrawOption(
+                "Mostrar preços de compra dos materiais",
+                "Exibe colunas de preço de servidor e DC via Universalis.",
+                Config.ShowMarketPrices,
+                v => Config.ShowMarketPrices = v,
+                ref isDirty);
+
+            if (Config.ShowMarketPrices)
+            {
+                DrawOption(
+                    "Atualizar a cada (min)",
+                    "TTL do cache de preços em minutos.",
+                    Config.MarketPriceCacheTtlMinutes,
+                    1, 120,
+                    v => Config.MarketPriceCacheTtlMinutes = v,
+                    ref isDirty);
+
+                var universalisStatus = _plugin.MarketboardHelper.IsIpcAvailable;
+                using (ImRaii.PushColor(ImGuiCol.Text, universalisStatus ? Colors.Progress : Colors.TextMuted))
+                    ImGui.TextUnformatted(universalisStatus ? "✓ Via plugin Universalis" : "○ Via REST API (online)");
+            }
+        }
+
         if (isDirty)
             Config.Save();
     }
