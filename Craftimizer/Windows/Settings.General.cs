@@ -369,34 +369,6 @@ public sealed partial class Settings
             ImGuiHelpers.ScaledDummy(3);
 
             DrawOption(
-                "Enable Gear Wear Tracking (Experimental)",
-                "Learn how much gear durability each recipe consumes over time. The plugin will monitor your gear condition before and after each craft, building a database of wear rates per recipe. After ~10 crafts of the same recipe, predictions become accurate. Data is stored locally and never shared.",
-                Config.EnableGearWearTracking,
-                v => Config.EnableGearWearTracking = v,
-                ref isDirty,
-                "🔬 Tracks gear wear to predict crafts remaining.\n\nHow it works:\n• Monitors gear condition before/after each craft\n• Stores average wear rate per recipe\n• Predicts remaining crafts with confidence level\n• Requires 10+ samples per recipe for accuracy"
-            );
-
-            if (Config.EnableGearWearTracking && Config.GearWearData.Count > 0)
-            {
-                ImGuiHelpers.ScaledDummy(2);
-                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                {
-                    ImGui.TextWrapped($"Tracking data: {Config.GearWearData.Count} recipes monitored, {Config.GearWearData.Values.Sum(s => s.SampleCount)} crafts recorded.");
-                }
-
-                if (ImGui.Button("Clear Tracking Data", OptionButtonSize))
-                {
-                    Config.GearWearData.Clear();
-                    isDirty = true;
-                }
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip("Reset all collected gear wear data. Tracking will start fresh.");
-            }
-
-            ImGuiHelpers.ScaledDummy(3);
-
-            DrawOption(
                 "Enable Cosmic Tool Tracking",
                 "Mostra o progresso de research data da Cosmic Tool no Crafting Log e no Macro Editor durante Stellar Missions (Patch 7.21+). Atualiza em tempo real após entregar um collectable. Não requer outros plugins instalados.",
                 Config.EnableCosmicToolTracking,
@@ -404,74 +376,6 @@ public sealed partial class Settings
                 ref isDirty,
                 "Cosmic Tool Progress Tracking\n\n• Research data atual / necessário exibido inline\n• Atualiza ao entregar collectables (Stellar Missions)\n• Funciona em Sinus Ardorum e Auxesia (Patch 7.51+)\n• Nenhum plugin externo necessário"
             );
-        }
-
-        ImGuiHelpers.ScaledDummy(5);
-
-        using (var panel = ImRaii2.GroupPanel("Crafting Lists", -1, out _))
-        {
-            DrawOption(
-                "Habilitar Listas de Coleta",
-                "Ativa o sistema de planejamento de materiais de crafting.",
-                Config.EnableCraftingLists,
-                v => Config.EnableCraftingLists = v,
-                ref isDirty);
-
-            DrawOption(
-                "Apagar listas concluídas automaticamente",
-                "⚠ Esta ação não pode ser desfeita.",
-                Config.AutoDeleteCompletedLists,
-                v => Config.AutoDeleteCompletedLists = v,
-                ref isDirty);
-
-            ImGuiHelpers.ScaledDummy(4);
-            DrawSectionTitle("INVENTÁRIO");
-
-            DrawOption(
-                "Verificar inventário ao abrir lista",
-                "Sincroniza automaticamente o inventário quando uma lista é aberta.",
-                Config.AutoSyncInventoryOnOpen,
-                v => Config.AutoSyncInventoryOnOpen = v,
-                ref isDirty);
-
-            DrawOption(
-                "Incluir retainers na verificação",
-                "ℹ Só funciona para retainers visitados nessa sessão.",
-                Config.IncludeRetainersInSync,
-                v => Config.IncludeRetainersInSync = v,
-                ref isDirty);
-
-            ImGuiHelpers.ScaledDummy(4);
-            DrawSectionTitle("TELEPORTE");
-
-            var teleporterStatus = _plugin.TeleportHelper.IsAvailable;
-            using (ImRaii.PushColor(ImGuiCol.Text, teleporterStatus ? Colors.Progress : Colors.Bad))
-                ImGui.TextUnformatted(teleporterStatus ? "✓ Teleporter ativo" : "✗ Teleporter não encontrado");
-
-            ImGuiHelpers.ScaledDummy(4);
-            DrawSectionTitle("PREÇOS");
-
-            DrawOption(
-                "Mostrar preços de compra dos materiais",
-                "Exibe colunas de preço de servidor e DC via Universalis.",
-                Config.ShowMarketPrices,
-                v => Config.ShowMarketPrices = v,
-                ref isDirty);
-
-            if (Config.ShowMarketPrices)
-            {
-                DrawOption(
-                    "Atualizar a cada (min)",
-                    "TTL do cache de preços em minutos.",
-                    Config.MarketPriceCacheTtlMinutes,
-                    1, 120,
-                    v => Config.MarketPriceCacheTtlMinutes = v,
-                    ref isDirty);
-
-                var universalisStatus = _plugin.MarketboardHelper.IsIpcAvailable;
-                using (ImRaii.PushColor(ImGuiCol.Text, universalisStatus ? Colors.Progress : Colors.TextMuted))
-                    ImGui.TextUnformatted(universalisStatus ? "✓ Via plugin Universalis" : "○ Via REST API (online)");
-            }
         }
 
         if (isDirty)

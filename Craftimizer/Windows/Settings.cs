@@ -265,6 +265,7 @@ public sealed partial class Settings : Window, IDisposable
             if (Config.EnableSynthHelper)
                 DrawTabSynthHelper();
             DrawTabMacroEditor();
+            DrawTabExperimental();
             DrawTabAbout();
 
             ImGui.EndTabBar();
