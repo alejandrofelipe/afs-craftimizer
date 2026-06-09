@@ -46,10 +46,31 @@ public enum IngredientKind
     Crystal
 }
 
-/// <summary>A gathering location for a base material (populated by GatheringLocator in a future sub-backlog).</summary>
+/// <summary>A gathering location for a base material (populated by GatheringLocator).</summary>
 public sealed record GatheringLocation(
+    uint TerritoryTypeId,
     string ZoneName,
-    string AetheryteClosest);
+    float MapX,
+    float MapY,
+    uint NearestAetheryteId,
+    string NearestAetheryteName,
+    GatheringKind Kind);
+
+/// <summary>The kind of gathering node (or other acquisition method) for a material.</summary>
+public enum GatheringKind { Mining, Botany, Fishing, Mob, Vendor, Unknown }
+
+/// <summary>A marketboard price snapshot for an item, persisted in the price cache.</summary>
+public sealed record MarketPrice(
+    uint ItemId,
+    int PriceCurrentServer,
+    int PriceCheapestServer,
+    string CheapestServerName,
+    int TotalAvailable,
+    DateTime CachedAt)
+{
+    public bool IsStale(int ttlMinutes) =>
+        DateTime.UtcNow - CachedAt > TimeSpan.FromMinutes(ttlMinutes);
+}
 
 /// <summary>A fully resolved ingredient: what it is, how much is needed, and where to get it.</summary>
 public sealed record ResolvedIngredient(

@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.14.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.15.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -60,6 +60,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Novo algoritmo de solver **Next Action Forked**: avalia cada próxima ação em paralelo via MCTS, oferecendo respostas mais rápidas e melhor adaptação a condições em tempo real no Synthesis Helper
 - CosmicTracker atualiza instantaneamente ao trocar de job (sem aguardar o ciclo de auto-refresh de 5 s)
 - **Fundação da Lista de Coleta (P0):** camada de dados completa — `CraftingListRepository` (SQLite), `InventoryScanner` (bags + saddlebag + retainers via FFXIVClientStructs), `IngredientResolver` (resolução recursiva da árvore de ingredientes com consciência de inventário) e `CraftingListManager` (CRUD, sync, merge/split, auto-delete de listas concluídas); sem UI ainda (sub-backlog de UI em andamento)
+- **Lista de Coleta P1 — helpers de dados:** `RecipeSearchHelper` (índice em memória para busca por nome/job), `RecipeRestrictionChecker` (detecta livros mestre, specialist, quest unlock e receitas Expert via Lumina), `GatheringLocator` (resolve zona, aetheryte e tipo de nó de coleta por item), `TeleportHelper` (IPC com plugin Teleporter, graceful fallback), `MarketboardHelper` (preços Universalis via IPC + REST com cache SQLite TTL-configurável) e `ExportHelper` (serialização para texto plano, `/echo` e clipboard)
 
 ## Instalação
 

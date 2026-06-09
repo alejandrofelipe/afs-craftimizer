@@ -45,6 +45,11 @@ public sealed class Plugin : IDalamudPlugin
     public Ipc Ipc { get; }
     public CraftingListRepository CraftingListRepository { get; }
     public CraftingListManager CraftingListManager { get; }
+    public RecipeSearchHelper RecipeSearchHelper { get; }
+    public RecipeRestrictionChecker RecipeRestrictionChecker { get; }
+    public GatheringLocator GatheringLocator { get; }
+    public TeleportHelper TeleportHelper { get; }
+    public MarketboardHelper MarketboardHelper { get; }
     public AttributeCommandManager AttributeCommandManager { get; }
 
     public Plugin(IDalamudPluginInterface pluginInterface)
@@ -69,6 +74,11 @@ public sealed class Plugin : IDalamudPlugin
         CommunityMacros = new();
         CraftingListRepository = new(pluginInterface);
         CraftingListManager = new(CraftingListRepository, this);
+        RecipeSearchHelper = new();
+        RecipeRestrictionChecker = new();
+        GatheringLocator = new();
+        TeleportHelper = new(pluginInterface);
+        MarketboardHelper = new(pluginInterface, CraftingListRepository);
         Ipc = new(pluginInterface);
         AttributeCommandManager = new(this);
 
@@ -232,6 +242,8 @@ public sealed class Plugin : IDalamudPlugin
         CosmicToolTracker.Dispose();
         CosmicTrackerWindow.Dispose();
         Icon.Dispose();
+        TeleportHelper.Dispose();
+        MarketboardHelper.Dispose();
         CraftingListManager.Dispose();
         CraftingListRepository.Dispose();
         MacroRepository.Dispose();

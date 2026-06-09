@@ -64,8 +64,20 @@ public sealed class CraftingListRepository : IDisposable
                 UNIQUE(list_id, item_id)
             )
             """);
+        Exec("""
+            CREATE TABLE IF NOT EXISTS market_price_cache (
+                item_id         INTEGER NOT NULL,
+                world_or_dc     TEXT    NOT NULL,
+                price_per_unit  INTEGER NOT NULL,
+                total_quantity  INTEGER NOT NULL,
+                cheapest_server TEXT    NOT NULL DEFAULT '',
+                cached_at       INTEGER NOT NULL,
+                PRIMARY KEY (item_id, world_or_dc)
+            )
+            """);
         Exec("CREATE INDEX IF NOT EXISTS idx_recipes_list  ON crafting_list_recipes(list_id)");
         Exec("CREATE INDEX IF NOT EXISTS idx_progress_list ON material_progress(list_id)");
+        Exec("CREATE INDEX IF NOT EXISTS idx_prices_item   ON market_price_cache(item_id)");
     }
 
     // ── Lists ─────────────────────────────────────────────────────────────────
@@ -313,6 +325,44 @@ public sealed class CraftingListRepository : IDisposable
             (int)r.GetInt64(3),
             (int)r.GetInt64(4),
             FromUnix(r.GetInt64(5)));
+
+    // ── Market price cache ──────────────────────────────────────────────────────
+
+    public MarketPrice? GetCachedPrice(uint itemId, string worldOrDc)
+    {
+        using var cmd = Command(
+            "SELECT price_per_unit, total_quantity, cheapest_server, cached_at " +
+            "FROM market_price_cache WHERE item_id=$itemId AND world_or_dc=$wdc");
+        cmd.Parameters.AddWithValue("$itemId", (long)itemId);
+        cmd.Parameters.AddWithValue("$wdc", worldOrDc);
+        using var r = cmd.ExecuteReader();
+        if (!r.Read())
+            return null;
+        return new MarketPrice(
+            itemId,
+            r.GetInt32(0),
+            r.GetInt32(0),
+            r.GetString(2),
+            r.GetInt32(1),
+            DateTimeOffset.FromUnixTimeSeconds(r.GetInt64(3)).UtcDateTime);
+    }
+
+    public void SavePrice(uint itemId, string worldOrDc, int pricePerUnit, int totalQuantity, string cheapestServer)
+    {
+        using var cmd = Command("""
+            INSERT INTO market_price_cache (item_id, world_or_dc, price_per_unit, total_quantity, cheapest_server, cached_at)
+            VALUES ($itemId, $wdc, $price, $qty, $server, $at)
+            ON CONFLICT(item_id, world_or_dc) DO UPDATE SET
+                price_per_unit=$price, total_quantity=$qty, cheapest_server=$server, cached_at=$at
+            """);
+        cmd.Parameters.AddWithValue("$itemId", (long)itemId);
+        cmd.Parameters.AddWithValue("$wdc", worldOrDc);
+        cmd.Parameters.AddWithValue("$price", pricePerUnit);
+        cmd.Parameters.AddWithValue("$qty", totalQuantity);
+        cmd.Parameters.AddWithValue("$server", cheapestServer);
+        cmd.Parameters.AddWithValue("$at", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        cmd.ExecuteNonQuery();
+    }
 
     // ── Transactions & helpers ──────────────────────────────────────────────────
 
