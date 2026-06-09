@@ -32,6 +32,8 @@ Se não for possível determinar com certeza, perguntar ao usuário: "É um bug,
   - "Mostrar tempo estimado de craft" → `mostrar-tempo-estimado-craft.md`
   - "Calcular custo de materiais" → `calcular-custo-materiais.md`
 
+> **Mockups HTML e arquivos de design** (`.html`, `.fig`, imagens de referência) devem ser criados em `mockup/`, nunca em `backlog/`. O arquivo de backlog pode referenciar o mockup com um link relativo, ex: `[Mockup](../mockup/nome-da-feature-mockup.html)`.
+
 ### 3. Pesquisar na internet (quando relevante)
 
 Antes de criar o arquivo, use `WebSearch` e/ou `WebFetch` se a feature ou bug envolver:

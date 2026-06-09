@@ -75,6 +75,20 @@ Após o bump, atualizar também a linha de versão no README:
 **Versão atual:** $VERSION · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 ```
 
+### Passo 3.5 — Atualizar backlog/PROGRESS.md
+
+Verificar se a mudança implementa um item rastreado em `backlog/PROGRESS.md`:
+
+1. Inspecionar a descrição do commit, os arquivos do diff e os nomes de arquivos `backlog/*.md` que sejam relevantes para identificar o item correspondente na tabela **Pendente**
+2. Se um item correspondente existir em **Pendente**:
+   - Adicionar uma linha na tabela **Histórico Completo** com o título curto do item e a versão `$VERSION`
+   - Remover a linha correspondente da tabela **Pendente**
+   - Atualizar a data "Última revisão" para hoje
+   - Incluir `backlog/PROGRESS.md` no staging do Passo 6
+3. Se nenhum item de backlog for identificado (ex: hotfix, chore, polish), pular este passo
+
+---
+
 ### Passo 4 — Determinar tipo do commit e escopo
 
 Com base em `$ARGUMENTS` e/ou `git diff`:
@@ -133,33 +147,46 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ### Passo 6 — Staging e commit
 
 ```powershell
-# Staged o que foi modificado (código + README + .csproj)
+# Staged o que foi modificado (código + README + .csproj + PROGRESS.md se atualizado)
 git add <arquivos alterados>
 git add README.md
 git add Craftimizer/Craftimizer.csproj
+# Se o Passo 3.5 atualizou o PROGRESS.md:
+git add backlog/PROGRESS.md
 
 # Commit
 git commit -m "<mensagem montada no Passo 4>"
 ```
 
-### Passo 7 — Criar tag de versão
+### Passo 7 — Push do commit
+
+```powershell
+git push origin main
+```
+
+Se o push falhar por o remote estar à frente (ex: `[rejected] … fetch first`):
+
+```powershell
+git pull --rebase origin main
+git push origin main
+```
+
+Verificar que o push foi aceito antes de continuar. **Não criar a tag até o push ter sucesso.**
+
+### Passo 8 — Criar e subir a tag (somente após push bem-sucedido)
+
+Só depois de confirmar que `git push origin main` foi aceito:
 
 ```powershell
 git tag -a "v$VERSION" -m "Release $VERSION - <título curto>"
+git push origin "v$VERSION"
 ```
 
 O título curto da tag deve ser o mesmo do commit, sem o prefixo convencional.
 
 **Exemplo:** `git tag -a v2.10.3.0 -m "Release 2.10.3.0 - Cosmic Tool progress em tempo real"`
 
-### Passo 8 — Push do commit e da tag
-
-```powershell
-git push origin main
-git push origin "v$VERSION"
-```
-
-> Usar `git push origin main --tags` apenas se houver múltiplas tags novas para subir de uma vez.
+> Nunca usar `git push origin main --tags` — isso sobe todas as tags locais de uma vez e pode publicar tags de trabalho em progresso acidentalmente.
 
 ### Passo 9 — Confirmar ao usuário
 

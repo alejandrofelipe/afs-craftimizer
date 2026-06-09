@@ -16,6 +16,20 @@ public sealed partial class Settings
 
         var isDirty = false;
 
+        DrawSectionTitle("SIMULATION");
+
+        DrawOption(
+            "Reliability Trial Count",
+            "When testing for reliability of a macro in the editor, this many trials will be " +
+            "run. You should set this value to at least 100 to get a reliable spread of data. " +
+            "If it's too low, you may not find an outlier, and the average might be skewed.",
+            Config.ReliabilitySimulationCount,
+            5,
+            5000,
+            v => Config.ReliabilitySimulationCount = v,
+            ref isDirty
+        );
+
         DrawSectionTitle("SOLVER CONFIGURATION");
 
         var solverConfig = Config.EditorSolverConfig;

@@ -40,17 +40,6 @@ public sealed partial class Settings
         );
 
         DrawOption(
-            "Show Only One Macro Stat in Crafting Log",
-            "Only one stat will be shown for a macro. If a craft will be finished, quality " +
-            "is shown. Otherwise, progress is shown. Durability and remaining CP will be " +
-            "hidden.",
-            Config.ShowOptimalMacroStat,
-            v => Config.ShowOptimalMacroStat = v,
-            ref isDirty,
-            "Shows HQ% or progress — whichever is most relevant for each macro."
-        );
-
-        DrawOption(
             "Check For Delineations",
             "Your inventory will be checked to ensure that you have delineations available " +
             "before suggesting any specialist actions.",
@@ -58,18 +47,6 @@ public sealed partial class Settings
             v => Config.CheckDelineations = v,
             ref isDirty,
             "Checks inventory before the solver suggests specialist job actions."
-        );
-
-        DrawOption(
-            "Reliability Trial Count",
-            "When testing for reliability of a macro in the editor, this many trials will be " +
-            "run. You should set this value to at least 100 to get a reliable spread of data. " +
-            "If it's too low, you may not find an outlier, and the average might be skewed.",
-            Config.ReliabilitySimulationCount,
-            5,
-            5000,
-            v => Config.ReliabilitySimulationCount = v,
-            ref isDirty
         );
 
         DrawOption(
@@ -299,50 +276,6 @@ public sealed partial class Settings
 
         ImGuiHelpers.ScaledDummy(5);
 
-        using (var panel = ImRaii2.GroupPanel("Icon Cache Management", -1, out _))
-        {
-            DrawOption(
-                "Enable Automatic Cache Cleanup",
-                "Unload unused icons after inactivity period. Disable for maximum performance on high-memory systems.",
-                Config.EnableIconCacheEviction,
-                v => Config.EnableIconCacheEviction = v,
-                ref isDirty,
-                "Automatically frees memory by unloading icons not recently used."
-            );
-
-            if (Config.EnableIconCacheEviction)
-            {
-                DrawOption(
-                    "Sliding Expiration (min)",
-                    "Icon unloaded if not accessed for this duration. Lower values save more memory but may cause brief loading delays.",
-                    Config.IconCacheSlidingExpirationMinutes,
-                    1, 60,
-                    v => Config.IconCacheSlidingExpirationMinutes = v,
-                    ref isDirty
-                );
-
-                DrawOption(
-                    "Max Cache Time (min)",
-                    "Icon unloaded after this time, even if accessed frequently. Prevents memory buildup in long sessions.",
-                    Config.IconCacheAbsoluteExpirationMinutes,
-                    5, 120,
-                    v => Config.IconCacheAbsoluteExpirationMinutes = v,
-                    ref isDirty
-                );
-            }
-
-            DrawOption(
-                "Cache Size Limit",
-                "Maximum icons in cache (0 = unlimited). Recommended: 1024 for typical use, 2048 for power users.",
-                Config.IconCacheSizeLimit,
-                0, 4096,
-                v => Config.IconCacheSizeLimit = v,
-                ref isDirty
-            );
-        }
-
-        ImGuiHelpers.ScaledDummy(5);
-
         using (var panel = ImRaii2.GroupPanel("Gear Durability Warning", -1, out _))
         {
             DrawOption(
@@ -366,16 +299,6 @@ public sealed partial class Settings
                 );
             }
 
-            ImGuiHelpers.ScaledDummy(3);
-
-            DrawOption(
-                "Enable Cosmic Tool Tracking",
-                "Mostra o progresso de research data da Cosmic Tool no Crafting Log e no Macro Editor durante Stellar Missions (Patch 7.21+). Atualiza em tempo real após entregar um collectable. Não requer outros plugins instalados.",
-                Config.EnableCosmicToolTracking,
-                v => Config.EnableCosmicToolTracking = v,
-                ref isDirty,
-                "Cosmic Tool Progress Tracking\n\n• Research data atual / necessário exibido inline\n• Atualiza ao entregar collectables (Stellar Missions)\n• Funciona em Sinus Ardorum e Auxesia (Patch 7.51+)\n• Nenhum plugin externo necessário"
-            );
         }
 
         if (isDirty)

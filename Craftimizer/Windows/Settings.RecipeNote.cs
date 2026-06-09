@@ -77,6 +77,28 @@ public sealed partial class Settings
             );
         }
 
+        DrawOption(
+            "Show Only One Macro Stat in Crafting Log",
+            "Only one stat will be shown for a macro. If a craft will be finished, quality " +
+            "is shown. Otherwise, progress is shown. Durability and remaining CP will be " +
+            "hidden.",
+            Config.ShowOptimalMacroStat,
+            v => Config.ShowOptimalMacroStat = v,
+            ref isDirty,
+            "Shows HQ% or progress — whichever is most relevant for each macro."
+        );
+
+        DrawSectionTitle("COSMIC TOOL TRACKING");
+
+        DrawOption(
+            "Enable Cosmic Tool Tracking",
+            "Mostra o progresso de research data da Cosmic Tool no Crafting Log e no Macro Editor durante Stellar Missions (Patch 7.21+). Atualiza em tempo real após entregar um collectable. Não requer outros plugins instalados.",
+            Config.EnableCosmicToolTracking,
+            v => Config.EnableCosmicToolTracking = v,
+            ref isDirty,
+            "Cosmic Tool Progress Tracking\n\n• Research data atual / necessário exibido inline\n• Atualiza ao entregar collectables (Stellar Missions)\n• Funciona em Sinus Ardorum e Auxesia (Patch 7.51+)\n• Nenhum plugin externo necessário"
+        );
+
         DrawSectionTitle("SOLVER CONFIGURATION");
 
         var solverConfig = Config.RecipeNoteSolverConfig;

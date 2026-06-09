@@ -152,6 +152,60 @@ public sealed partial class Settings
 
         ImGuiHelpers.ScaledDummy(10);
 
+        // ── Feature: Cache de Ícones ──────────────────────────────────────────
+
+        DrawSectionTitle("CACHE DE ÍCONES");
+
+        using (ImRaii2.GroupPanel("Icon Cache Management", -1, out _))
+        {
+            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                ImGui.TextWrapped("Controla o ciclo de vida dos ícones em memória. " +
+                                  "A maioria dos usuários não precisa ajustar estas opções.");
+
+            ImGuiHelpers.ScaledDummy(4);
+
+            DrawOption(
+                "Enable Automatic Cache Cleanup",
+                "Unload unused icons after inactivity period. Disable for maximum performance on high-memory systems.",
+                Config.EnableIconCacheEviction,
+                v => Config.EnableIconCacheEviction = v,
+                ref isDirty,
+                "Automatically frees memory by unloading icons not recently used."
+            );
+
+            if (Config.EnableIconCacheEviction)
+            {
+                DrawOption(
+                    "Sliding Expiration (min)",
+                    "Icon unloaded if not accessed for this duration. Lower values save more memory but may cause brief loading delays.",
+                    Config.IconCacheSlidingExpirationMinutes,
+                    1, 60,
+                    v => Config.IconCacheSlidingExpirationMinutes = v,
+                    ref isDirty
+                );
+
+                DrawOption(
+                    "Max Cache Time (min)",
+                    "Icon unloaded after this time, even if accessed frequently. Prevents memory buildup in long sessions.",
+                    Config.IconCacheAbsoluteExpirationMinutes,
+                    5, 120,
+                    v => Config.IconCacheAbsoluteExpirationMinutes = v,
+                    ref isDirty
+                );
+            }
+
+            DrawOption(
+                "Cache Size Limit",
+                "Maximum icons in cache (0 = unlimited). Recommended: 1024 for typical use, 2048 for power users.",
+                Config.IconCacheSizeLimit,
+                0, 4096,
+                v => Config.IconCacheSizeLimit = v,
+                ref isDirty
+            );
+        }
+
+        ImGuiHelpers.ScaledDummy(10);
+
         if (isDirty)
             Config.Save();
     }

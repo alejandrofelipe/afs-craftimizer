@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.17.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.18.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -61,7 +61,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - CosmicTracker atualiza instantaneamente ao trocar de job (sem aguardar o ciclo de auto-refresh de 5 s)
 - **Fundação da Lista de Coleta (P0):** camada de dados completa — `CraftingListRepository` (SQLite), `InventoryScanner` (bags + saddlebag + retainers via FFXIVClientStructs), `IngredientResolver` (resolução recursiva da árvore de ingredientes com consciência de inventário) e `CraftingListManager` (CRUD, sync, merge/split, auto-delete de listas concluídas); sem UI ainda (sub-backlog de UI em andamento)
 - **Lista de Coleta P1 — helpers de dados:** `RecipeSearchHelper` (índice em memória para busca por nome/job), `RecipeRestrictionChecker` (detecta livros mestre, specialist, quest unlock e receitas Expert via Lumina), `GatheringLocator` (resolve zona, aetheryte e tipo de nó de coleta por item), `TeleportHelper` (IPC com plugin Teleporter, graceful fallback), `MarketboardHelper` (preços Universalis via IPC + REST com cache SQLite TTL-configurável) e `ExportHelper` (serialização para texto plano, `/echo` e clipboard)
-- Aba **"Experimental"** nas Settings: agrupa opções de uso avançado ou instável (Listas de Coleta e Gear Wear Tracking) separadas das opções estáveis da aba General, com banner de aviso e sub-seções claramente rotuladas
+- Aba **"Experimental"** nas Settings: agrupa opções de uso avançado ou instável (Listas de Coleta, Gear Wear Tracking e Icon Cache Management) separadas das opções estáveis da aba General, com banner de aviso e sub-seções claramente rotuladas
+- **Reorganização de conteúdo das Settings:** "Show Only One Macro Stat" e "Cosmic Tool Tracking" movidos para a aba Crafting Log; "Reliability Trial Count" movido para Macro Editor; opções de cache de ícones movidas para a aba Experimental
 - Empty states em janelas que ficavam em branco: CosmicTracker com filtro "ocultar concluídos" e todos os tipos já completos; `CraftingListMergeWindow` sem listas candidatas; `CraftingListDetailWindow` com lista vazia (sem receitas ainda)
 - **Lista de Coleta P2 — UI completa:** `FeatureHubWindow` (ícone flutuante permanente com popup de features), `CraftingListWindow` (lista paginada com fuzzy search, ordenação, filtros e context menu), `CraftingListAddWindow` (modal de adição com `SearchableCombo`, avisos de restrição e preview de materiais), `CraftingListDetailWindow` (vista detalhada/simples com barras de progresso, teleporte, preços DC, export e modo de seleção para split), `CraftingListMergeWindow` (modal de mescla com preview) e painel de Settings integrado
 
