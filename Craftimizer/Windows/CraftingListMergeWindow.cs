@@ -74,11 +74,17 @@ public sealed class CraftingListMergeWindow : Window, IDisposable
         {
             if (box)
             {
-                foreach (var list in candidates)
-                {
-                    if (ImGui.Selectable(list.Name, _destId == list.Id))
-                        _destId = list.Id;
-                }
+                if (candidates.Count == 0)
+                    ImGuiUtils.DrawEmptyState(
+                        FontAwesomeIcon.ListAlt,
+                        "Nenhuma lista disponível",
+                        "Crie outra lista antes de mesclar.");
+                else
+                    foreach (var list in candidates)
+                    {
+                        if (ImGui.Selectable(list.Name, _destId == list.Id))
+                            _destId = list.Id;
+                    }
             }
         }
 

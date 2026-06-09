@@ -157,8 +157,8 @@ public sealed class CosmicTracker : Window, IDisposable
         {
             ImGuiUtils.DrawEmptyState(
                 FontAwesomeIcon.Star,
-                "No data yet",
-                "Enter any Cosmic Exploration map.");
+                "Sem dados ainda",
+                "Entre em qualquer mapa de Cosmic Exploration.");
             return;
         }
 
@@ -166,6 +166,7 @@ public sealed class CosmicTracker : Window, IDisposable
         var minimized = _plugin.Configuration.CosmicTrackerMinimized;
         var now       = DateTime.UtcNow;
 
+        var anyRendered = false;
         for (var t = 0; t < 7; t++)
         {
             var td = p.Types[t];
@@ -174,6 +175,7 @@ public sealed class CosmicTracker : Window, IDisposable
             if (_hideComplete && state is ImGuiUtils.ResearchTypeState.Complete
                                        or ImGuiUtils.ResearchTypeState.Maxed) continue;
 
+            anyRendered = true;
             if (minimized)
                 ImGuiUtils.DrawResearchTypeRowMinimized(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth);
             else
@@ -182,6 +184,12 @@ public sealed class CosmicTracker : Window, IDisposable
                 ImGuiUtils.DrawResearchTypeRow(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth, delta);
             }
         }
+
+        if (!anyRendered)
+            ImGuiUtils.DrawEmptyState(
+                FontAwesomeIcon.CheckCircle,
+                "Tudo concluído",
+                "Todos os tipos de pesquisa foram completados.\nDesative o filtro para visualizá-los.");
 
         if (!minimized && p.MissionActive)
         {

@@ -302,6 +302,12 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         using (ImRaii2.GroupPanel("Receitas", -1, out _))
         {
+            if (_recipes.Count == 0)
+                ImGuiUtils.DrawEmptyState(
+                    FontAwesomeIcon.PlusCircle,
+                    "Lista vazia",
+                    "Adicione receitas para começar.");
+
             foreach (var recipe in _recipes)
             {
                 using var id = ImRaii.PushId(recipe.Id.ToString());
