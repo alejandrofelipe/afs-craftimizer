@@ -176,6 +176,7 @@ public sealed unsafe class CosmicToolTracker : IDisposable
         //   max    = Stages[S-1].MaxAmount      — cap for current stage
         //   needed = Stages[S].RequiredAmount   — threshold to advance to S+1
         var hasLuminaData    = false;
+        var hasLumNext       = false;
         byte maxStage        = 0;
         WKSCosmoToolDataAmount.StagesStruct lumCur  = default; // Stages[stage-1] → max cap
         WKSCosmoToolDataAmount.StagesStruct lumNext = default; // Stages[stage]   → required threshold
@@ -192,7 +193,10 @@ public sealed unsafe class CosmicToolTracker : IDisposable
             }
             var siNext = stage; // stage is 1-based, so this is the next stage's 0-based index
             if (siNext < da.Stages.Count)
-                lumNext = da.Stages[siNext];
+            {
+                lumNext    = da.Stages[siNext];
+                hasLumNext = true;
+            }
         }
 
         for (var t = 0; t < 7; t++)
@@ -203,8 +207,8 @@ public sealed unsafe class CosmicToolTracker : IDisposable
             ushort needed = 0, max = 0;
             if (available && hasLuminaData)
             {
-                if (t < lumNext.RequiredAmount.Count) needed = lumNext.RequiredAmount[t];
-                if (t < lumCur.MaxAmount.Count)       max    = lumCur.MaxAmount[t];
+                if (hasLumNext && t < lumNext.RequiredAmount.Count) needed = lumNext.RequiredAmount[t];
+                if (t < lumCur.MaxAmount.Count)                     max    = lumCur.MaxAmount[t];
             }
             types[t] = new ResearchTypeData(current, needed, max, available);
             if (available)
