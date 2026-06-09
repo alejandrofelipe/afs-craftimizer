@@ -130,6 +130,27 @@ public partial class Configuration
 
     public MacroCopyConfiguration MacroCopy { get; set; } = new();
 
+    /// <summary>Enable the Crafting Lists feature (default: off).</summary>
+    public bool EnableCraftingLists { get; set; }
+
+    /// <summary>Auto-delete completed lists (default: off).</summary>
+    public bool AutoDeleteCompletedLists { get; set; }
+
+    /// <summary>Auto-sync inventory when opening a list (default: on).</summary>
+    public bool AutoSyncInventoryOnOpen { get; set; } = true;
+
+    /// <summary>Show market board price columns (default: on).</summary>
+    public bool ShowMarketPrices { get; set; } = true;
+
+    /// <summary>Include retainer inventory in sync (default: on).</summary>
+    public bool IncludeRetainersInSync { get; set; } = true;
+
+    /// <summary>Market price cache TTL in minutes (default: 15).</summary>
+    public int MarketPriceCacheTtlMinutes { get; set; } = 15;
+
+    /// <summary>Crafting list view mode: 0=Detailed, 1=Simple.</summary>
+    public int CraftingListViewMode { get; set; }
+
     /// <summary>
     /// Enable automatic icon cache cleanup (default: true)
     /// </summary>

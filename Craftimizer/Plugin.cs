@@ -1,3 +1,5 @@
+using Craftimizer.Application.CraftingLists;
+using Craftimizer.Data;
 using Craftimizer.Simulator;
 using Craftimizer.Simulator.Actions;
 using Craftimizer.Utils;
@@ -41,6 +43,8 @@ public sealed class Plugin : IDalamudPlugin
     public CosmicToolTracker CosmicToolTracker { get; }
     public CommunityMacros CommunityMacros { get; }
     public Ipc Ipc { get; }
+    public CraftingListRepository CraftingListRepository { get; }
+    public CraftingListManager CraftingListManager { get; }
     public AttributeCommandManager AttributeCommandManager { get; }
 
     public Plugin(IDalamudPluginInterface pluginInterface)
@@ -63,6 +67,8 @@ public sealed class Plugin : IDalamudPlugin
         GearWearTracker = new(this);
         CosmicToolTracker = new(this);
         CommunityMacros = new();
+        CraftingListRepository = new(pluginInterface);
+        CraftingListManager = new(CraftingListRepository, this);
         Ipc = new(pluginInterface);
         AttributeCommandManager = new(this);
 
@@ -226,6 +232,8 @@ public sealed class Plugin : IDalamudPlugin
         CosmicToolTracker.Dispose();
         CosmicTrackerWindow.Dispose();
         Icon.Dispose();
+        CraftingListManager.Dispose();
+        CraftingListRepository.Dispose();
         MacroRepository.Dispose();
     }
 }
