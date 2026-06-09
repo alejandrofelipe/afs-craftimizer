@@ -79,6 +79,7 @@ public sealed unsafe class CosmicToolTracker : IDisposable
 
         Service.ClientState.TerritoryChanged += OnTerritoryChanged;
         Service.ClientState.Login += OnLogin;
+        Service.ClientState.ClassJobChanged += OnClassJobChanged;
         Service.Framework.Update += OnFrameworkUpdate;
 
         // Schedule initial snapshot on the framework (main) thread.
@@ -107,6 +108,8 @@ public sealed unsafe class CosmicToolTracker : IDisposable
     }
 
     private void OnTerritoryChanged(uint _) => RefreshSnapshot();
+
+    private void OnClassJobChanged(uint _) => RefreshSnapshot();
 
     private void OnLogin()
         => _ = Service.Framework.RunOnTick(RefreshSnapshot, delayTicks: 30);
@@ -233,6 +236,7 @@ public sealed unsafe class CosmicToolTracker : IDisposable
         Service.Framework.Update -= OnFrameworkUpdate;
         Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
         Service.ClientState.Login -= OnLogin;
+        Service.ClientState.ClassJobChanged -= OnClassJobChanged;
         _loadHook?.Dispose();
         _reportHook?.Dispose();
         _abandonHook?.Dispose();

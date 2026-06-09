@@ -153,7 +153,14 @@ public sealed class CosmicTracker : Window, IDisposable
 
     public override void Draw()
     {
-        if (_progress is not { } p) return;
+        if (_progress is not { } p)
+        {
+            ImGuiUtils.DrawEmptyState(
+                FontAwesomeIcon.Star,
+                "No data yet",
+                "Enter any Cosmic Exploration map.");
+            return;
+        }
 
         var barWidth  = 280f * ImGuiHelpers.GlobalScale;
         var minimized = _plugin.Configuration.CosmicTrackerMinimized;

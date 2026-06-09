@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.13.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.13.1.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -58,6 +58,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Sync com upstream v2.11: correção de GC corruption em `NodeScoresBuffer`, fix de crash por RNG compartilhado entre threads no solver, solver não gera mais ações supérfluas após progress completo
 - Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade, liberando CP e steps para macros mais eficientes em crafts onde 100% não é necessário
 - Novo algoritmo de solver **Next Action Forked**: avalia cada próxima ação em paralelo via MCTS, oferecendo respostas mais rápidas e melhor adaptação a condições em tempo real no Synthesis Helper
+- CosmicTracker atualiza instantaneamente ao trocar de job (sem aguardar o ciclo de auto-refresh de 5 s)
 
 ## Instalação
 
