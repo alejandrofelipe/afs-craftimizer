@@ -90,7 +90,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         _treeLoading = true;
         try
         {
-            _tree = await _plugin.CraftingListManager.ResolveIngredientsAsync(id);
+            _tree = await _plugin.CraftingListManager.ResolveIngredientsAsync(id).ConfigureAwait(false);
             if (_plugin.Configuration.ShowMarketPrices)
                 _ = LoadPricesAsync();
         }
@@ -104,7 +104,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         if (_listId is not { } id)
             return;
-        await _plugin.CraftingListManager.SyncWithInventoryAsync(id, _plugin.Configuration.IncludeRetainersInSync);
+        await _plugin.CraftingListManager.SyncWithInventoryAsync(id, _plugin.Configuration.IncludeRetainersInSync).ConfigureAwait(false);
         _lastSyncTime = DateTime.UtcNow;
         RefreshData();
     }
@@ -129,7 +129,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 if (_prices.ContainsKey(itemId))
                     continue;
                 var price = await _plugin.MarketboardHelper.GetPriceAsync(
-                    itemId, worldId, dcName, _plugin.Configuration.MarketPriceCacheTtlMinutes);
+                    itemId, worldId, dcName, _plugin.Configuration.MarketPriceCacheTtlMinutes).ConfigureAwait(false);
                 _prices[itemId] = price;
             }
         }
@@ -344,7 +344,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     using (ImRaii.PushColor(ImGuiCol.Text, Colors.Durability))
                         ImGui.TextUnformatted(FontAwesomeIcon.ExclamationCircle.ToIconString());
                     if (ImGui.IsItemHovered())
-                        ImGuiUtils.TooltipWrapped(string.Join("\n", restrictions.Select(r => r.Title)));
+                        ImGuiUtils.TooltipWrapped(string.Join('\n', restrictions.Select(r => r.Title)));
                 }
 
                 ImGui.SameLine();

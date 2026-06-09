@@ -148,7 +148,7 @@ public sealed class CraftingListMergeWindow : Window, IDisposable
 
         return combined.Values
             .Select(v => $"{v.Name} ×{v.Qty}")
-            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
 

@@ -22,7 +22,6 @@ public sealed class CraftingListWindow : Window, IDisposable
     private readonly PluginClass _plugin;
     private string _searchQuery = string.Empty;
     private bool _showOnlyPending;
-    private bool _hideCompleted;
     private int _page;
     private const int PageSize = 15;
 
@@ -119,7 +118,7 @@ public sealed class CraftingListWindow : Window, IDisposable
                 foreach (var list in pageItems)
                     DrawListRow(list);
 
-                if (!_hideCompleted && completed.Count > 0)
+                if (completed.Count > 0)
                 {
                     ImGui.Separator();
                     using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))

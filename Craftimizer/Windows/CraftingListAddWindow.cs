@@ -23,7 +23,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
 
     private readonly PluginClass _plugin;
 
-    private AddMode _mode;
+
     private uint? _prefilledRecipeId;
     private Guid? _targetListId;
     private RecipeSearchResult? _selectedRecipe;
@@ -42,7 +42,6 @@ public sealed class CraftingListAddWindow : Window, IDisposable
 
     public void OpenWithRecipe(uint recipeId)
     {
-        _mode = AddMode.AutoDetect;
         _prefilledRecipeId = recipeId;
         _targetListId = null;
         _selectedRecipe = _plugin.RecipeSearchHelper.Index.FirstOrDefault(r => r.RecipeId == recipeId);
@@ -54,7 +53,6 @@ public sealed class CraftingListAddWindow : Window, IDisposable
 
     public void OpenManualSearch(Guid? targetListId)
     {
-        _mode = AddMode.ManualSearch;
         _prefilledRecipeId = null;
         _targetListId = targetListId;
         _selectedRecipe = null;
@@ -99,7 +97,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
 
         // ── Recipe selection ────────────────────────────────────────────────────
         ImGui.TextUnformatted("Receita");
-        var selected = _selectedRecipe ?? _plugin.RecipeSearchHelper.Index.FirstOrDefault()!;
+        var selected = _selectedRecipe ?? _plugin.RecipeSearchHelper.Index[0];
         if (_focusSearch)
         {
             ImGui.SetKeyboardFocusHere();
@@ -209,7 +207,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
         {
             if (string.IsNullOrWhiteSpace(_newListName))
                 return;
-            var newList = await _plugin.CraftingListManager.CreateListAsync(_newListName.Trim());
+            var newList = await _plugin.CraftingListManager.CreateListAsync(_newListName.Trim()).ConfigureAwait(false);
             listId = newList.Id;
         }
         else
@@ -221,7 +219,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
             listId = existing.Id;
         }
 
-        await _plugin.CraftingListManager.AddRecipeToListAsync(listId, recipe.RecipeId, _quantityBuffer);
+        await _plugin.CraftingListManager.AddRecipeToListAsync(listId, recipe.RecipeId, _quantityBuffer).ConfigureAwait(false);
         IsOpen = false;
     }
 
