@@ -1,5 +1,6 @@
 // Craftimizer.UI/ImGuiUtils.Charts.cs
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Craftimizer.Utils;
@@ -36,6 +37,95 @@ public static partial class ImGuiUtils
             drawList.PathStroke(fillColor, ImDrawFlags.None, strokeW);
             drawList.AddCircleFilled(center + new Vector2(MathF.Cos(StartAngle) * radius, MathF.Sin(StartAngle) * radius), capR, fillColor);
             drawList.AddCircleFilled(center + new Vector2(MathF.Cos(fillEnd)    * radius, MathF.Sin(fillEnd)    * radius), capR, fillColor);
+        }
+    }
+
+    /// <summary>
+    /// Data for a single arc column in <see cref="DrawBarRow"/>.
+    /// </summary>
+    /// <param name="Name">Label displayed below the arc.</param>
+    /// <param name="Color">Arc and value text color.</param>
+    /// <param name="Value">Current value.</param>
+    /// <param name="Max">Maximum value.</param>
+    /// <param name="Caption">If set, replaces the "value/max" text inside the arc.</param>
+    /// <param name="TooltipContent">Invoked inside BeginTooltip/EndTooltip when hovering the arc. Null = no tooltip.</param>
+    public readonly record struct BarData(
+        string Name,
+        Vector4 Color,
+        float Value,
+        float Max,
+        string? Caption = null,
+        Action? TooltipContent = null
+    );
+
+    /// <summary>
+    /// Draws a horizontal row of circular arc columns: arc + centered value/max text + name label.
+    /// </summary>
+    public static void DrawBarRow(IReadOnlyList<BarData> bars, float? totalWidth = null)
+    {
+        if (bars.Count == 0) return;
+
+        var style    = ImGui.GetStyle();
+        var spacingX = style.ItemSpacing.X;
+        var spacingY = style.ItemSpacing.Y;
+        var arcSize  = ImGui.GetFrameHeight() * 3f;
+        var totalW   = totalWidth ?? ImGui.GetContentRegionAvail().X;
+        var n        = bars.Count;
+        var colW     = (totalW - spacingX * (n - 1)) / n;
+        var colH     = arcSize + spacingY + ImGui.GetTextLineHeight();
+
+        var origin = ImGui.GetCursorScreenPos();
+        ImGui.Dummy(new Vector2(totalW, colH));
+        var dl = ImGui.GetWindowDrawList();
+
+        for (var i = 0; i < n; i++)
+        {
+            var bar  = bars[i];
+            var colX = origin.X + i * (colW + spacingX);
+            var frac = bar.Max > 0 ? Math.Clamp(bar.Value / bar.Max, 0f, 1f) : 0f;
+
+            var arcPos = new Vector2(colX + (colW - arcSize) * 0.5f, origin.Y);
+            DrawStatArc(dl, arcPos, arcSize, frac, bar.Color);
+
+            if (bar.TooltipContent != null &&
+                ImGui.IsMouseHoveringRect(arcPos, arcPos + new Vector2(arcSize)))
+            {
+                ImGui.BeginTooltip();
+                bar.TooltipContent();
+                ImGui.EndTooltip();
+            }
+
+            var mutedCol = ImGui.GetColorU32(ImGuiCol.TextDisabled);
+            var statCol  = ImGui.GetColorU32(bar.Color);
+            var center   = arcPos + new Vector2(arcSize * 0.5f, arcSize * 0.5f);
+
+            var font       = ImGui.GetFont();
+            var baseFontSz = ImGui.GetFontSize();
+            var valFontSz  = arcSize * 0.22f;
+            var maxFontSz  = arcSize * 0.16f;
+            var valScale   = valFontSz / baseFontSz;
+            var maxScale   = maxFontSz / baseFontSz;
+
+            var valStr = bar.Caption ?? $"{bar.Value:0}";
+            var valSz  = ImGui.CalcTextSize(valStr) * valScale;
+
+            if (bar.Caption is null)
+            {
+                var maxStr = $"/{bar.Max:0}";
+                var maxSz  = ImGui.CalcTextSize(maxStr) * maxScale;
+                const float innerGap = 1f;
+                var blockH  = valSz.Y + innerGap + maxSz.Y;
+                var startY  = center.Y - blockH * 0.5f;
+                dl.AddText(font, valFontSz, new Vector2(center.X - valSz.X * 0.5f, startY),                      statCol, valStr);
+                dl.AddText(font, maxFontSz, new Vector2(center.X - maxSz.X * 0.5f, startY + valSz.Y + innerGap), mutedCol, maxStr);
+            }
+            else
+            {
+                dl.AddText(font, valFontSz, new Vector2(center.X - valSz.X * 0.5f, center.Y - valSz.Y * 0.5f), statCol, valStr);
+            }
+
+            var nameSz = ImGui.CalcTextSize(bar.Name);
+            dl.AddText(new Vector2(colX + (colW - nameSz.X) * 0.5f, origin.Y + arcSize + spacingY), mutedCol, bar.Name);
         }
     }
 }

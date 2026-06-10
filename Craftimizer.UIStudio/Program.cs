@@ -8,4 +8,5 @@ StudioApp.Run(
     new EmptyStateStory(),
     new ProgressBarStory(),
     new ChartsStory(),
+    new BarsStory(),
 ]);
