@@ -5,4 +5,6 @@ StudioApp.Run(
 [
     new ColorsStory(),
     new ThemeStory(),
+    new EmptyStateStory(),
+    new ProgressBarStory(),
 ]);
