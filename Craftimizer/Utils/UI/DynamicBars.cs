@@ -81,33 +81,4 @@ internal static class DynamicBars
         ImGuiUtils.DrawBarRow(mapped, totalWidth);
     }
 
-    /// <summary>
-    /// Legacy method for drawing progress bars. Use ProgressBarComponent instead for new code.
-    /// This method is kept for backward compatibility during migration.
-    /// </summary>
-    [Obsolete("Use ProgressBarComponent.DrawProgressBarCompat() or ProgressBarComponent.DrawSingle() instead")]
-    public static void DrawProgressBar(Solver.Solver solver, ProgressBarType progressType, float? availSpace = null)
-    {
-        // Delegate to ProgressBarComponent for consistency
-        SolverProgressBar.DrawProgressBarCompat(solver, progressType, availSpace);
-    }
-
-    /// <summary>
-    /// Legacy method for drawing progress bar tooltips. Use ProgressBarComponent tooltips instead.
-    /// This method is kept for backward compatibility during migration.
-    /// </summary>
-    [Obsolete("Tooltip is now handled automatically by ProgressBarComponent")]
-    public static void DrawProgressBarTooltip(Solver.Solver solver)
-    {
-        string tooltip;
-        if (solver.IsIndeterminate)
-            tooltip = "Initializing";
-        else
-        {
-            tooltip = $"Solver Progress: {solver.ProgressValue:N0} / {solver.ProgressMax:N0}";
-            if (solver.ProgressValue > solver.ProgressMax)
-                tooltip += $"\n\nThis is taking longer than expected. Check to see if your gear stats are good and the solver settings are adequate.";
-        }
-        ImGuiUtils.TooltipWrapped(tooltip);
-    }
 }
