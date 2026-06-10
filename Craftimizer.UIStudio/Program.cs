@@ -1,3 +1,8 @@
 using Craftimizer.UIStudio;
+using Craftimizer.UIStudio.Stories;
 
-StudioApp.Run([]);
+StudioApp.Run(
+[
+    new ColorsStory(),
+    new ThemeStory(),
+]);
