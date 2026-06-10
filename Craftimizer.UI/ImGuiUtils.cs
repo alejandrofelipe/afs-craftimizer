@@ -138,7 +138,7 @@ internal static partial class ImGuiUtils
 
     private static Vector2 GetIconSize(FontAwesomeIcon icon)
     {
-        using var font = ImRaii.PushFont(UiBuilder.IconFont);
+        using var font = ImRaii.PushFont(UiServices.Current.IconFont);
         return ImGui.CalcTextSize(icon.ToIconString());
     }
 
@@ -164,7 +164,7 @@ internal static partial class ImGuiUtils
             iconOffset = Vector2.Zero;
         }
 
-        ImGui.GetWindowDrawList().AddText(UiBuilder.IconFont, UiBuilder.IconFont.FontSize * ImGuiHelpers.GlobalScale * scale, offset + iconOffset, ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled), icon.ToIconString());
+        ImGui.GetWindowDrawList().AddText(UiServices.Current.IconFont, UiServices.Current.IconFont.FontSize * UiServices.Current.GlobalScale * scale, offset + iconOffset, ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled), icon.ToIconString());
     }
 
     public static bool IconButtonSquare(FontAwesomeIcon icon, float size = -1)
@@ -213,16 +213,16 @@ internal static partial class ImGuiUtils
 
     public static void Tooltip(string text)
     {
-        using var _font = ImRaii.PushFont(UiBuilder.DefaultFont);
+        using var _font = ImRaii.PushFont(UiServices.Current.DefaultFont);
         using var _tooltip = ImRaii.Tooltip();
         ImGui.TextUnformatted(text);
     }
 
     public static void TooltipWrapped(string text, float width = 300)
     {
-        using var _font = ImRaii.PushFont(UiBuilder.DefaultFont);
+        using var _font = ImRaii.PushFont(UiServices.Current.DefaultFont);
         using var _tooltip = ImRaii.Tooltip();
-        using var _wrap = ImRaii2.TextWrapPos(width * ImGuiHelpers.GlobalScale);
+        using var _wrap = ImRaii2.TextWrapPos(width * UiServices.Current.GlobalScale);
         ImGui.TextUnformatted(text);
     }
 
@@ -242,7 +242,7 @@ internal static partial class ImGuiUtils
             currentWrapWidth = wrapPosX - currentPos;
 
         var textBuf = text.AsSpan();
-        var lineSize = font.CalcWordWrapPositionA(ImGuiHelpers.GlobalScale, textBuf, currentWrapWidth);
+        var lineSize = ImGuiExtras.CalcWordWrapPositionA(font, UiServices.Current.GlobalScale, textBuf, currentWrapWidth) ?? 0;
         if (lineSize == 0)
             lineSize = textBuf.Length;
         var lineBuf = textBuf[..lineSize];

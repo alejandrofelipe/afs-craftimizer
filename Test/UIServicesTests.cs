@@ -30,5 +30,7 @@ public class UIServicesTests
     {
         public float GlobalScale => 1.0f;
         public ImFontPtr IconFont => default;
+        public ImFontPtr DefaultFont => default;
+        public void OpenLink(string url) { }
     }
 }

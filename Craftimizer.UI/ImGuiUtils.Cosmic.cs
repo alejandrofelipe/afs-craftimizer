@@ -99,12 +99,12 @@ internal static partial class ImGuiUtils
                 : 0f;
 
             DrawResearchTypeBar(fillFraction, upgradeFraction, upgradeColor, state,
-                new Vector2(barWidth, 6f * ImGuiHelpers.GlobalScale));
+                new Vector2(barWidth, 6f * UiServices.Current.GlobalScale));
         }
         else
         {
             DrawResearchTypeBar(0f, 0f, Colors.CosmicLocked, state,
-                new Vector2(barWidth, 6f * ImGuiHelpers.GlobalScale));
+                new Vector2(barWidth, 6f * UiServices.Current.GlobalScale));
         }
 
         // ── Sub-limits ───────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ internal static partial class ImGuiUtils
         {
             var bottomRight = new Vector2(topLeft.X + barWidth, ImGui.GetCursorScreenPos().Y);
             drawList.ChannelsSetCurrent(0);
-            drawList.AddRectFilled(topLeft, bottomRight, highlightColor, 4f * ImGuiHelpers.GlobalScale);
+            drawList.AddRectFilled(topLeft, bottomRight, highlightColor, 4f * UiServices.Current.GlobalScale);
         }
 
         drawList.ChannelsMerge();
@@ -163,7 +163,7 @@ internal static partial class ImGuiUtils
         string label, int current, int needed, int max,
         ResearchTypeState state, float barWidth)
     {
-        var labelWidth   = 60f * ImGuiHelpers.GlobalScale;
+        var labelWidth   = 60f * UiServices.Current.GlobalScale;
         var barAreaWidth = barWidth - labelWidth - ImGui.GetStyle().ItemSpacing.X;
 
         var labelColor = state switch
@@ -194,7 +194,7 @@ internal static partial class ImGuiUtils
                 : 0f;
 
             DrawResearchTypeBar(fillFraction, upgradeFraction, markerColor, state,
-                new Vector2(barAreaWidth, 8f * ImGuiHelpers.GlobalScale));
+                new Vector2(barAreaWidth, 8f * UiServices.Current.GlobalScale));
         }
 
         if (ImGui.IsItemHovered())
@@ -219,7 +219,7 @@ internal static partial class ImGuiUtils
     {
         var pos      = ImGui.GetCursorScreenPos();
         var drawList = ImGui.GetWindowDrawList();
-        var scale    = ImGuiHelpers.GlobalScale;
+        var scale    = UiServices.Current.GlobalScale;
 
         var rounding = size.Y * 0.5f;
 

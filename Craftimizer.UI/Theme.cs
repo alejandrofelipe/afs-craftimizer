@@ -34,9 +34,9 @@ internal static class Theme
         ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab,        BgOverlay);
         ImGui.PushStyleColor(ImGuiCol.ScrollbarGrabHovered, BgHover);
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,  new Vector2(12f, 8f) * ImGuiHelpers.GlobalScale);
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f * ImGuiHelpers.GlobalScale);
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding,  6f * ImGuiHelpers.GlobalScale);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,  new Vector2(12f, 8f) * UiServices.Current.GlobalScale);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f * UiServices.Current.GlobalScale);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding,  6f * UiServices.Current.GlobalScale);
     }
 
     public static void Pop()

@@ -193,7 +193,7 @@ internal static partial class ImGuiUtils
         ImGuiListClipperPtr imGuiListClipperPtr;
         unsafe
         {
-            imGuiListClipperPtr = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
+            imGuiListClipperPtr = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
         }
         try
         {

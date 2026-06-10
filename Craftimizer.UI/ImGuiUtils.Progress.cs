@@ -52,7 +52,7 @@ internal static partial class ImGuiUtils
     /// </summary>
     public static Vector2 CalcBadgePillSize(string text)
     {
-        var padding = new Vector2(7f, 2f) * ImGuiHelpers.GlobalScale;
+        var padding = new Vector2(7f, 2f) * UiServices.Current.GlobalScale;
         return ImGui.CalcTextSize(text) + padding * 2;
     }
 
@@ -62,7 +62,7 @@ internal static partial class ImGuiUtils
     /// </summary>
     public static void DrawBadgePill(string text, Vector4 foreColor)
     {
-        var padding    = new Vector2(7f, 2f) * ImGuiHelpers.GlobalScale;
+        var padding    = new Vector2(7f, 2f) * UiServices.Current.GlobalScale;
         var textSize   = ImGui.CalcTextSize(text);
         var totalSize  = textSize + padding * 2;
         var rounding   = totalSize.Y / 2f;

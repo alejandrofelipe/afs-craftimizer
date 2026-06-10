@@ -7,6 +7,7 @@ public interface IUiServices
 {
     float GlobalScale { get; }
     ImFontPtr IconFont { get; }
+    ImFontPtr DefaultFont { get; }
     void OpenLink(string url);
 }
 

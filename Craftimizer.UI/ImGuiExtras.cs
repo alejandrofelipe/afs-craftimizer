@@ -201,7 +201,7 @@ internal static unsafe class ImGuiExtras
         }
         GetUtf8(text, utf8TextBytes, utf8TextByteCount);
 
-        var ret = ImGuiNative.CalcWordWrapPositionA(font, scale, utf8TextBytes, utf8TextBytes + utf8TextByteCount, wrap_width);
+        var ret = ImGuiNative.ImFont_CalcWordWrapPositionA(font.NativePtr, scale, utf8TextBytes, utf8TextBytes + utf8TextByteCount, wrap_width);
 
         int? retVal = null;
         if (utf8TextBytes <= ret && ret <= utf8TextBytes + utf8TextByteCount)
@@ -217,12 +217,12 @@ internal static unsafe class ImGuiExtras
     }
 
     public static unsafe bool SetDragDropPayload<T>(string type, T data) where T : unmanaged =>
-        ImGui.SetDragDropPayload(type, MemoryMarshal.AsBytes(new ReadOnlySpan<T>(&data, 1)));
+        ImGui.SetDragDropPayload(type, (IntPtr)(&data), (uint)sizeof(T));
 
     public static unsafe bool AcceptDragDropPayload<T>(string type, out T data) where T : unmanaged
     {
         var payload = ImGui.AcceptDragDropPayload(type);
-        if (payload.IsNull || payload.DataSize != sizeof(T))
+        if (payload.NativePtr == null || payload.DataSize != sizeof(T))
         {
             data = default;
             return false;

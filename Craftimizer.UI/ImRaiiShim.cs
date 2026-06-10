@@ -104,4 +104,32 @@ public static class ImRaii
         ImGui.BeginTooltip();
         return new TooltipDisposable();
     }
+
+    public struct PopupDisposable : IDisposable
+    {
+        private readonly bool _success;
+        private bool _disposed;
+        internal PopupDisposable(bool success) { _success = success; _disposed = false; }
+        public static implicit operator bool(PopupDisposable d) => d._success;
+        public void Dispose() { if (!_disposed) { if (_success) ImGui.EndPopup(); _disposed = true; } }
+    }
+
+    public struct ChildDisposable : IDisposable
+    {
+        private bool _disposed;
+        public static implicit operator bool(ChildDisposable _) => true;
+        public void Dispose() { if (!_disposed) { ImGui.EndChild(); _disposed = true; } }
+    }
+
+    public static PopupDisposable Popup(string id, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
+    {
+        var success = ImGui.BeginPopup(id, flags);
+        return new PopupDisposable(success);
+    }
+
+    public static ChildDisposable Child(string id, Vector2 size = default, bool border = false, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
+    {
+        ImGui.BeginChild(id, size, border ? ImGuiChildFlags.Border : ImGuiChildFlags.None, flags);
+        return new ChildDisposable();
+    }
 }

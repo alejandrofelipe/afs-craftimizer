@@ -17,7 +17,7 @@ internal static partial class ImGuiUtils
         var availH   = ImGui.GetContentRegionAvail().Y;
         var spacing  = ImGui.GetStyle().ItemSpacing.Y;
         var iconH    = ImGui.GetTextLineHeight() * 1.8f;
-        var btnW     = buttonWidth * ImGuiHelpers.GlobalScale;
+        var btnW     = buttonWidth * UiServices.Current.GlobalScale;
         var btnCount = (primaryButton != null ? 1 : 0) + (secondaryButton != null ? 1 : 0);
 
         var totalH = iconH + spacing + ImGui.GetTextLineHeightWithSpacing();
@@ -33,7 +33,7 @@ internal static partial class ImGuiUtils
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + MathF.Max(0f, (availH - totalH) / 2f));
 
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using (ImRaii.PushFont(UiServices.Current.IconFont))
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
             TextCentered(icon.ToIconString(), availW);
 
