@@ -140,13 +140,27 @@ public sealed partial class Settings
                     ImGui.TextWrapped($"Dados coletados: {Config.GearWearData.Count} receitas monitoradas, " +
                                       $"{Config.GearWearData.Values.Sum(s => s.SampleCount)} crafts registrados.");
 
-                if (ImGui.Button("Limpar dados de rastreamento", OptionButtonSize))
+                if (_confirmClearGearWear)
                 {
-                    Config.GearWearData.Clear();
-                    isDirty = true;
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                        ImGui.TextWrapped("Tem certeza? Esta ação não pode ser desfeita.");
+                    if (ImGui.Button("Confirmar limpeza", OptionButtonSize))
+                    {
+                        Config.GearWearData.Clear();
+                        isDirty = true;
+                        _confirmClearGearWear = false;
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.Button("Cancelar"))
+                        _confirmClearGearWear = false;
                 }
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip("Apaga todos os dados de desgaste coletados. O rastreamento reinicia do zero.");
+                else
+                {
+                    if (ImGui.Button("Limpar dados de rastreamento", OptionButtonSize))
+                        _confirmClearGearWear = true;
+                    if (ImGui.IsItemHovered())
+                        ImGuiUtils.Tooltip("Apaga todos os dados de desgaste coletados. O rastreamento reinicia do zero.");
+                }
             }
         }
 

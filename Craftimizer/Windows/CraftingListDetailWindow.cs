@@ -37,6 +37,9 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     // Quantity debounce: recipeId -> (pending value, last-changed game time)
     private readonly Dictionary<Guid, (int Value, double LastChanged)> _quantityEdits = new();
 
+    // Inline remove confirmation: set to recipe id when ✕ is first clicked
+    private Guid? _pendingRemoveId;
+
     // Selection mode (for split / move)
     private bool _selectionMode;
     private readonly HashSet<Guid> _selectedRecipeIds = new();
@@ -65,6 +68,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         _selectionMode = false;
         _selectedRecipeIds.Clear();
         _isRenaming = false;
+        _pendingRemoveId = null;
         RefreshData();
         IsOpen = true;
         BringToFront();
@@ -349,11 +353,33 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
                 ImGui.SameLine();
                 var availX = ImGui.GetContentRegionAvail().X;
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight()));
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Times))
+                var btnPad  = ImGui.GetStyle().ItemSpacing.X;
+                if (_pendingRemoveId == recipe.Id)
                 {
-                    _ = _plugin.CraftingListManager.RemoveRecipeFromListAsync(recipe.Id);
-                    RefreshData();
+                    var confirmW = ImGui.CalcTextSize("Remover?").X
+                        + ImGui.CalcTextSize("Sim").X
+                        + ImGui.CalcTextSize("Não").X
+                        + ImGui.GetStyle().FramePadding.X * 4
+                        + btnPad * 2;
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - confirmW - btnPad));
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                        ImGui.TextUnformatted("Remover?");
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("Sim"))
+                    {
+                        _ = _plugin.CraftingListManager.RemoveRecipeFromListAsync(recipe.Id);
+                        _pendingRemoveId = null;
+                        RefreshData();
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("Não"))
+                        _pendingRemoveId = null;
+                }
+                else
+                {
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight() - btnPad));
+                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Times))
+                        _pendingRemoveId = recipe.Id;
                 }
             }
 

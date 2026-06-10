@@ -33,6 +33,7 @@ public sealed partial class Settings : Window, IDisposable
     private static Vector2 OptionButtonSize => new(OptionWidth, ImGui.GetFrameHeight());
 
     private string? SelectedTab { get; set; }
+    private bool _confirmClearGearWear;
 
     private IFontHandle HeaderFont { get; }
     private IFontHandle SubheaderFont { get; }
