@@ -11,6 +11,20 @@ public static partial class ImGuiUtils
 
     public enum ResearchTypeState { Locked, Active, Complete, Maxed }
 
+    public enum ResearchTypeRowMode { Full, Minimized }
+
+    private static (float Fill, float Upgrade) GetResearchTypeFractions(
+        ResearchTypeState state, int current, int needed, int max)
+    {
+        if (state == ResearchTypeState.Locked)
+            return (0f, 0f);
+        var fill    = max > 0 ? Math.Clamp((float)current / max, 0f, 1f) : 0f;
+        var upgrade = (state != ResearchTypeState.Maxed && max > 0)
+            ? Math.Clamp((float)needed / max, 0f, 1f)
+            : 0f;
+        return (fill, upgrade);
+    }
+
     private static (Vector4 Label, Vector4 Num, Vector4 Marker) GetResearchTypeColors(ResearchTypeState state) => state switch
     {
         ResearchTypeState.Active   => (Colors.CosmicActive,   Colors.CosmicActive   with { W = 0.8f }, Colors.CosmicUpgrade),
@@ -30,8 +44,14 @@ public static partial class ImGuiUtils
     public static void DrawResearchTypeRow(
         string label, int current, int needed, int max,
         ResearchTypeState state, float barWidth,
+        ResearchTypeRowMode mode = ResearchTypeRowMode.Full,
         int? delta = null)
     {
+        if (mode == ResearchTypeRowMode.Minimized)
+        {
+            DrawResearchTypeRowMinimized(label, current, needed, max, state, barWidth);
+            return;
+        }
         var (labelColor, numColor, upgradeColor) = GetResearchTypeColors(state);
 
         using var id       = ImRaii.PushId(label);
@@ -92,22 +112,9 @@ public static partial class ImGuiUtils
         }
 
         // ── Bar ──────────────────────────────────────────────────────────────
-        if (state != ResearchTypeState.Locked)
-        {
-            var fillFraction    = max > 0 ? Math.Clamp((float)current / max, 0f, 1f) : 0f;
-            // No upgrade marker when maxed — bar is already full
-            var upgradeFraction = (state != ResearchTypeState.Maxed && max > 0)
-                ? Math.Clamp((float)needed / max, 0f, 1f)
-                : 0f;
-
-            DrawResearchTypeBar(fillFraction, upgradeFraction, upgradeColor, state,
-                new Vector2(barWidth, 6f * UiServices.Current.GlobalScale));
-        }
-        else
-        {
-            DrawResearchTypeBar(0f, 0f, Colors.CosmicLocked, state,
-                new Vector2(barWidth, 6f * UiServices.Current.GlobalScale));
-        }
+        var (fillFraction, upgradeFraction) = GetResearchTypeFractions(state, current, needed, max);
+        DrawResearchTypeBar(fillFraction, upgradeFraction, upgradeColor, state,
+            new Vector2(barWidth, 6f * UiServices.Current.GlobalScale));
 
         // ── Sub-limits ───────────────────────────────────────────────────────
         if (state == ResearchTypeState.Locked)
@@ -161,7 +168,7 @@ public static partial class ImGuiUtils
     /// Compact row for minimized mode: fixed-width label + wide bar only.
     /// Numbers are shown in a tooltip on hover.
     /// </summary>
-    public static void DrawResearchTypeRowMinimized(
+    private static void DrawResearchTypeRowMinimized(
         string label, int current, int needed, int max,
         ResearchTypeState state, float barWidth)
     {
@@ -178,10 +185,7 @@ public static partial class ImGuiUtils
 
             ImGui.SameLine(labelWidth);
 
-            var fillFraction    = max > 0 ? Math.Clamp((float)current / max, 0f, 1f) : 0f;
-            var upgradeFraction = (state != ResearchTypeState.Maxed && max > 0)
-                ? Math.Clamp((float)needed / max, 0f, 1f)
-                : 0f;
+            var (fillFraction, upgradeFraction) = GetResearchTypeFractions(state, current, needed, max);
 
             DrawResearchTypeBar(fillFraction, upgradeFraction, markerColor, state,
                 new Vector2(barAreaWidth, 8f * UiServices.Current.GlobalScale));

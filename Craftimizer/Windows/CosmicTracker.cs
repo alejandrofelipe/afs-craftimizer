@@ -177,11 +177,11 @@ public sealed class CosmicTracker : Window, IDisposable
 
             anyRendered = true;
             if (minimized)
-                ImGuiUtils.DrawResearchTypeRowMinimized(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth);
+                ImGuiUtils.DrawResearchTypeRow(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth, ImGuiUtils.ResearchTypeRowMode.Minimized);
             else
             {
                 var delta = (now < _highlightUntil[t]) ? _deltas[t] : (int?)null;
-                ImGuiUtils.DrawResearchTypeRow(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth, delta);
+                ImGuiUtils.DrawResearchTypeRow(TypeLabels[t], td.Current, td.Needed, td.Max, state, barWidth, delta: delta);
             }
         }
 
