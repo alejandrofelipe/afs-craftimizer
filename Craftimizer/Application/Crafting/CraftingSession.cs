@@ -230,7 +230,7 @@ public sealed class CraftingSession : IDisposable
         {
             // Preserve current progress in snapshot before cancelling
             var algorithmName = _plugin.Configuration.SynthHelperSolverConfig.Algorithm.ToString();
-            var snapshot = ProgressBarComponent.FromSolver(SolverObject, algorithmName) with
+            var snapshot = SolverProgressBar.FromSolver(SolverObject, algorithmName) with
             {
                 State = ProgressBarComponent.ProgressState.Cancelled
             };
@@ -321,7 +321,7 @@ public sealed class CraftingSession : IDisposable
         {
             _solverSnapshots.Clear();
             var algorithmName = config.Algorithm.ToString();
-            _solverSnapshots.Add(ProgressBarComponent.FromSolver(solver, algorithmName) with
+            _solverSnapshots.Add(SolverProgressBar.FromSolver(solver, algorithmName) with
             {
                 State = ProgressBarComponent.ProgressState.Completed
             });
@@ -411,7 +411,7 @@ public sealed class CraftingSession : IDisposable
             try
             {
                 // Update snapshot from current solver state
-                var snapshot = ProgressBarComponent.FromSolver(solver, algorithmName);
+                var snapshot = SolverProgressBar.FromSolver(solver, algorithmName);
                 
                 lock (_solverSnapshots)
                 {

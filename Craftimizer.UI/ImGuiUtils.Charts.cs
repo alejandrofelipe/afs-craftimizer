@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
     private static float Lerp(float a, float b, float t) =>
         MathF.FusedMultiplyAdd(b - a, t, a);

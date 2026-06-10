@@ -575,19 +575,19 @@ public sealed unsafe class RecipeNote : Window, IDisposable
             if (hasSplendorous)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png").Handle, new Vector2(imageSize), "Splendorous Tool");
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.splendorous.png").Handle.Handle, new Vector2(imageSize), "Splendorous Tool");
             }
 
             if (hasSpecialist)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png").Handle, new Vector2(imageSize), "Specialist", Colors.SpecialistGold);
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.specialist.png").Handle.Handle, new Vector2(imageSize), "Specialist", Colors.SpecialistGold);
             }
 
             if (shouldHaveManip)
             {
                 ImGui.SameLine(0, 3);
-                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png").Handle, new Vector2(imageSize), "No Manipulation (Missing Job Quest)");
+                ImGuiUtils.DrawBadge(Service.IconManager.GetAssemblyTextureCached("Graphics.no_manip.png").Handle.Handle, new Vector2(imageSize), "No Manipulation (Missing Job Quest)");
             }
         }
 
@@ -943,7 +943,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                         if (state.Solver is not { } solver)
                             throw new ArgumentNullException(nameof(state), "Solver should not be null");
 
-                        var snapshot = ProgressBarComponent.FromSolver(solver, "Solver");
+                        var snapshot = SolverProgressBar.FromSolver(solver, "Solver");
                         var config = new ProgressBarComponent.VisualConfig(
                             Mode: ProgressBarComponent.DisplayMode.Horizontal,
                             ColorTheme: _plugin.Configuration.ProgressType,
@@ -1021,7 +1021,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                 // ── Row 1: 2×2 arc grid | action slots ──────────────────────────
                 ImGui.TableNextRow(ImGuiTableRowFlags.None, windowHeight);
                 ImGui.TableSetColumnIndex(0);
-                ImGuiUtils.DrawMacroStatArcs(simState, windowHeight, asGrid: true);
+                PluginImGuiUtils.DrawMacroStatArcs(simState, windowHeight, asGrid: true);
 
                 ImGui.TableSetColumnIndex(1);
                 {
@@ -1082,12 +1082,12 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                     // Edit + Copy buttons anchored to the right
                     var editX = cellStart.X + cellAvailW - iconH * 2 - spacing.X;
                     ImGui.SetCursorPos(new Vector2(editX, cellStart.Y));
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Edit, iconH))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, iconH))
                         _plugin.OpenMacroEditor(CharacterStats!, RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), CalculateIngredientHqCounts(), actions, state.MacroEditorSetter);
                     if (ImGui.IsItemHovered())
                         ImGuiUtils.Tooltip("Open in Macro Editor");
                     ImGui.SameLine(0, spacing.X);
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Paste, iconH))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, iconH))
                         MacroCopy.Copy(actions, _plugin);
                     if (ImGui.IsItemHovered())
                         ImGuiUtils.Tooltip("Copy to Clipboard");

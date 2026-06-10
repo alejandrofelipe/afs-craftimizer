@@ -2,26 +2,17 @@ using Craftimizer.Plugin;
 
 namespace Craftimizer.Utils;
 
-// Plugin-side members of ProgressBarComponent that depend on the Solver project.
-// The pure-UI portion lives in Craftimizer.UI/ProgressBarComponent.cs.
-public static partial class ProgressBarComponent
+// Solver-specific progress bar helpers.
+// Uses ProgressBarComponent from Craftimizer.UI via project reference.
+internal static class SolverProgressBar
 {
-    #region Helpers para Migração
-
-    /// <summary>
-    /// Converte um objeto Solver para ProgressSnapshot.
-    /// Helper de migração do sistema antigo DynamicBars para ProgressBarComponent.
-    /// </summary>
-    /// <param name="solver">Instância do solver em execução</param>
-    /// <param name="nameOverride">Nome customizado para exibição (default: "Solver")</param>
-    /// <returns>Snapshot imutável com estado atual do solver</returns>
-    public static ProgressSnapshot FromSolver(Solver.Solver solver, string? nameOverride = null)
+    public static ProgressBarComponent.ProgressSnapshot FromSolver(Solver.Solver solver, string? nameOverride = null)
     {
         var state = solver.IsIndeterminate
-            ? ProgressState.Indeterminate
-            : (solver.ProgressValue >= solver.ProgressMax ? ProgressState.Completed : ProgressState.InProgress);
+            ? ProgressBarComponent.ProgressState.Indeterminate
+            : (solver.ProgressValue >= solver.ProgressMax ? ProgressBarComponent.ProgressState.Completed : ProgressBarComponent.ProgressState.InProgress);
 
-        return new ProgressSnapshot(
+        return new ProgressBarComponent.ProgressSnapshot(
             Name: nameOverride ?? "Solver",
             CurrentValue: solver.ProgressValue,
             MaxValue: solver.ProgressMax,
@@ -30,27 +21,17 @@ public static partial class ProgressBarComponent
         );
     }
 
-    /// <summary>
-    /// Wrapper de compatibilidade com DynamicBars.DrawProgressBar existente.
-    /// Mantido para transição gradual. Novo código deve usar DrawSingle ou DrawAggregated.
-    /// </summary>
-    /// <param name="solver">Instância do solver em execução</param>
-    /// <param name="progressType">Tipo de barra de progresso (Colorful/Simple/None)</param>
-    /// <param name="availSpace">Espaço disponível em pixels (null = usar espaço disponível)</param>
     public static void DrawProgressBarCompat(
         Solver.Solver solver,
-        Configuration.ProgressBarType progressType,
+        ProgressBarType progressType,
         float? availSpace = null)
     {
         var snapshot = FromSolver(solver);
-        var config = new VisualConfig(
-            Mode: progressType == Configuration.ProgressBarType.None ? DisplayMode.Compact : DisplayMode.Horizontal,
-            ColorTheme: progressType == Configuration.ProgressBarType.Simple ? ProgressBarType.Simple : ProgressBarType.Colorful,
+        var config = new ProgressBarComponent.VisualConfig(
+            Mode: progressType == ProgressBarType.None ? ProgressBarComponent.DisplayMode.Compact : ProgressBarComponent.DisplayMode.Horizontal,
+            ColorTheme: progressType == ProgressBarType.Simple ? ProgressBarType.Simple : ProgressBarType.Colorful,
             Width: availSpace
         );
-
-        DrawSingle(snapshot, config);
+        ProgressBarComponent.DrawSingle(snapshot, config);
     }
-
-    #endregion
 }

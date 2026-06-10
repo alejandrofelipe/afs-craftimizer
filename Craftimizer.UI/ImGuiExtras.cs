@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Craftimizer.Utils;
 
-internal static unsafe class ImGuiExtras
+public static unsafe class ImGuiExtras
 {
     // https://github.com/ImGuiNET/ImGui.NET/blob/069363672fed940ebdaa02f9b032c282b66467c7/src/CodeGenerator/definitions/cimgui/definitions.json#L25394
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
@@ -165,12 +165,12 @@ internal static unsafe class ImGuiExtras
         }
     }
 
-    public static unsafe bool ButtonBehavior(Vector4 bb, uint id, out bool hovered, out bool held, ImGuiButtonFlags flags)
+    public static unsafe bool ButtonBehavior(Vector4 bb, uint id, out bool hovered, out bool held, int flags)
     {
         fixed (bool* hoveredPtr = &hovered)
         fixed (bool* heldPtr = &held)
         {
-            return igButtonBehavior(bb, id, hoveredPtr, heldPtr, flags);
+            return igButtonBehavior(bb, id, hoveredPtr, heldPtr, (ImGuiButtonFlags)flags);
         }
     }
 
@@ -234,7 +234,7 @@ internal static unsafe class ImGuiExtras
 
 // https://github.com/ocornut/imgui/blob/v1.88/imgui_internal.h#L758
 [Flags]
-internal enum ImGuiItemFlags
+public enum ImGuiItemFlags
 {
     None = 0,
     NoTabStop = 1 << 0, // Disable keyboard tabbing. This is a "lighter" version of ImGuiItemFlags_NoNav.

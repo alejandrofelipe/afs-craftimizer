@@ -156,7 +156,7 @@ public sealed class MacroList : Window, IDisposable
         if (!string.IsNullOrWhiteSpace(searchText))
         {
             ImGuiUtils.DrawEmptyState(
-                FontAwesomeIcon.Search,
+                (int)FontAwesomeIcon.Search,
                 $"No macros match \"{searchText}\"",
                 "Try a different search term.",
                 primaryButton: ("Clear Search", () => { searchText = string.Empty; RefreshSearch(); }),
@@ -165,7 +165,7 @@ public sealed class MacroList : Window, IDisposable
         else
         {
             ImGuiUtils.DrawEmptyState(
-                FontAwesomeIcon.Clipboard,
+                (int)FontAwesomeIcon.Clipboard,
                 "No macros yet",
                 "Create your first macro from the Macro Editor or Crafting Log.",
                 primaryButton: ("Open Macro Editor", () => OpenEditor(null)),
@@ -173,7 +173,7 @@ public sealed class MacroList : Window, IDisposable
         }
     }
 
-    private const int MacrosPerPage = UIConstants.MacrosPerPage;
+    private const int MacrosPerPage = 20; // UIConstants.MacrosPerPage
     private string searchText = string.Empty;
     private List<Macro> sortedMacros = null!;
     private bool isUnsorted = true;
@@ -242,23 +242,23 @@ public sealed class MacroList : Window, IDisposable
                 if (stateNullable is { } state)
                 {
                     ImGui.TableNextColumn();
-                    ImGuiUtils.DrawMacroStatArcs(state, windowHeight);
+                    PluginImGuiUtils.DrawMacroStatArcs(state, windowHeight);
                 }
 
                 ImGui.TableNextColumn();
                 {
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Edit, miniRowHeight))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, miniRowHeight))
                         OpenEditor(macro);
                     if (ImGui.IsItemHovered())
                         ImGuiUtils.Tooltip("Open in Macro Editor");
                     ImGui.SameLine(0, spacing);
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.PencilAlt, miniRowHeight))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.PencilAlt, miniRowHeight))
                         ShowRenamePopup(macro);
                     DrawRenamePopup(macro);
                     if (ImGui.IsItemHovered())
                         ImGuiUtils.Tooltip("Rename");
 
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Paste, miniRowHeight))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, miniRowHeight))
                         MacroCopy.Copy(macro.Actions, _plugin);
                     if (ImGui.IsItemHovered())
                         ImGuiUtils.Tooltip("Copy to Clipboard");
@@ -266,7 +266,7 @@ public sealed class MacroList : Window, IDisposable
                     Theme.PushDangerButton();
                     using (var _disabled = ImRaii.Disabled(!ImGui.GetIO().KeyShift))
                     {
-                        if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Trash, miniRowHeight))
+                        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Trash, miniRowHeight))
                             _plugin.MacroRepository.Remove(macro);
                     }
                     Theme.PopDangerButton();

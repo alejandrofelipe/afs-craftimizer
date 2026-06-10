@@ -62,6 +62,7 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin(IDalamudPluginInterface pluginInterface)
     {
         Service.Initialize(pluginInterface);
+        UiServices.Current = new DalamudUiServices(pluginInterface);
 
         WindowSystem = new("Craftimizer");
         MacroRepository = new(pluginInterface);

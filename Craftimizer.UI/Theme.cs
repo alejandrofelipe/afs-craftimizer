@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static class Theme
+public static class Theme
 {
     private static readonly Vector4 BgSurface  = new(0.051f, 0.067f, 0.125f, 1f); // #0D1120
     private static readonly Vector4 BgElevated = new(0.078f, 0.098f, 0.157f, 1f); // #141928

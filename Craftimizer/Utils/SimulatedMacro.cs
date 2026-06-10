@@ -17,7 +17,7 @@ internal sealed class SimulatedMacro
         public sealed class Param
         {
             private List<int> DataList { get; }
-            private ImGuiUtils.ViolinData? ViolinData { get; set; }
+            private PluginImGuiUtils.ViolinData? ViolinData { get; set; }
 
             public int Max { get; private set; }
             public int Min { get; private set; }
@@ -51,7 +51,7 @@ internal sealed class SimulatedMacro
                 Average = (float)DataList.Average();
             }
 
-            public ImGuiUtils.ViolinData? GetViolinData(float barMax, int resolution, double bandwidth) =>
+            public PluginImGuiUtils.ViolinData? GetViolinData(float barMax, int resolution, double bandwidth) =>
                 ViolinData ??=
                     Min != Max ?
                         new(DataList, 0, barMax, resolution, bandwidth) :

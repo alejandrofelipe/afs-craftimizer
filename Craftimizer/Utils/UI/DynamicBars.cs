@@ -69,7 +69,7 @@ internal static class DynamicBars
             var frac = bar.Max > 0 ? Math.Clamp(bar.Value / bar.Max, 0f, 1f) : 0f;
 
             var arcPos = new Vector2(colX + (colW - arcSize) * 0.5f, origin.Y);
-            ImGuiUtils.DrawStatArc(dl, arcPos, arcSize, frac, bar.Color);
+            PluginImGuiUtils.DrawStatArc(dl, arcPos, arcSize, frac, bar.Color);
 
             if (bar.Reliability is { } reliability &&
                 ImGui.IsMouseHoveringRect(arcPos, arcPos + new Vector2(arcSize, arcSize)))
@@ -138,10 +138,10 @@ internal static class DynamicBars
     /// This method is kept for backward compatibility during migration.
     /// </summary>
     [Obsolete("Use ProgressBarComponent.DrawProgressBarCompat() or ProgressBarComponent.DrawSingle() instead")]
-    public static void DrawProgressBar(Solver.Solver solver, Configuration.ProgressBarType progressType, float? availSpace = null)
+    public static void DrawProgressBar(Solver.Solver solver, ProgressBarType progressType, float? availSpace = null)
     {
         // Delegate to ProgressBarComponent for consistency
-        ProgressBarComponent.DrawProgressBarCompat(solver, progressType, availSpace);
+        SolverProgressBar.DrawProgressBarCompat(solver, progressType, availSpace);
     }
 
     /// <summary>

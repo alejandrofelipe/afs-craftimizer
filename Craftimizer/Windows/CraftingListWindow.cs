@@ -88,7 +88,7 @@ public sealed class CraftingListWindow : Window, IDisposable
         if (_plugin.CraftingListManager.Lists.Count == 0)
         {
             ImGuiUtils.DrawEmptyState(
-                FontAwesomeIcon.ListAlt,
+                (int)FontAwesomeIcon.ListAlt,
                 "Nenhuma lista",
                 "Crie sua primeira lista de coleta",
                 ("+ Nova Lista", CreateNewList));
@@ -133,13 +133,13 @@ public sealed class CraftingListWindow : Window, IDisposable
         if (totalPages > 1)
         {
             using (ImRaii.Disabled(_page <= 0))
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.ChevronLeft))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.ChevronLeft))
                     _page--;
             ImGui.SameLine();
             ImGui.TextUnformatted($"Página {_page + 1} / {totalPages}");
             ImGui.SameLine();
             using (ImRaii.Disabled(_page >= totalPages - 1))
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.ChevronRight))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.ChevronRight))
                     _page++;
         }
 

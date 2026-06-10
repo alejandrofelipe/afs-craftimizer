@@ -77,7 +77,7 @@ public sealed class CraftingListMergeWindow : Window, IDisposable
             {
                 if (candidates.Count == 0)
                     ImGuiUtils.DrawEmptyState(
-                        FontAwesomeIcon.ListAlt,
+                        (int)FontAwesomeIcon.ListAlt,
                         "Nenhuma lista disponível",
                         "Crie outra lista antes de mesclar.");
                 else

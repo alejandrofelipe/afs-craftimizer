@@ -55,7 +55,7 @@ public sealed class MacroClipboard : Window, IDisposable
         ImGui.SetCursorPos(buttonCursor);
         {
             using var color = ImRaii.PushColor(ImGuiCol.Button, ImGui.GetColorU32(buttonActive ? ImGuiCol.ButtonActive : ImGuiCol.ButtonHovered), buttonHovered);
-            ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Paste);
+            ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste);
             if (buttonClicked)
             {
                 ImGui.SetClipboardText(macro);

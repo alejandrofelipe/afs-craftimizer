@@ -7,7 +7,7 @@ using System.Numerics;
 /// rules that previously existed as inline magic numbers scattered across
 /// the Windows classes.
 /// </summary>
-internal static class UIConstants
+public static class UIConstants
 {
     // ── Window sizing ─────────────────────────────────────────────────────────
     public const float SynthHelperWidth   = 494f;

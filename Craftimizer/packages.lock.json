@@ -64,6 +64,11 @@
           "System.IO.Hashing": "8.0.0"
         }
       },
+      "ImGui.NET": {
+        "type": "Transitive",
+        "resolved": "1.90.9.1",
+        "contentHash": "eNi87ev4LZsvc+8B6Z+weyruYOoYw1rw6XZIFbqF7+iVh/P8pb3xeKW/tzDnWtjZYMLgiSczU9g+uwru3byA1A=="
+      },
       "Microsoft.Data.Sqlite.Core": {
         "type": "Transitive",
         "resolved": "9.0.5",
@@ -154,9 +159,20 @@
           "DotNext": "[5.26.1, )",
           "Raphael.Net": "[4.1.0, )"
         }
+      },
+      "craftimizer.ui": {
+        "type": "Project",
+        "dependencies": {
+          "ImGui.NET": "[1.90.9.1, )"
+        }
       }
     },
     "net10.0-windows7.0/win-x64": {
+      "ImGui.NET": {
+        "type": "Transitive",
+        "resolved": "1.90.9.1",
+        "contentHash": "eNi87ev4LZsvc+8B6Z+weyruYOoYw1rw6XZIFbqF7+iVh/P8pb3xeKW/tzDnWtjZYMLgiSczU9g+uwru3byA1A=="
+      },
       "Raphael.Net": {
         "type": "Transitive",
         "resolved": "4.1.0",

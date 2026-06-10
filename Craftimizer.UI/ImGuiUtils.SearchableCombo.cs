@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
     private sealed class SearchableComboData<T> where T : IEquatable<T>
     {

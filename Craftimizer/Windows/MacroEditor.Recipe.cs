@@ -77,11 +77,13 @@ public sealed partial class MacroEditor
             var recipe = new RecipeWrapper(RecipeData.Recipe);
             using var lockedFontHandle = AxisFont.Available ? AxisFont.Lock() : null;
             var fontHandle = lockedFontHandle?.ImFont ?? ImGui.GetFont();
+            global::ImGuiNET.ImFontPtr netFont;
+            unsafe { netFont = new((nint)fontHandle.Handle); }
             if (ImGuiUtils.SearchableCombo(
                 "combo",
                 ref recipe,
                 searchableRecipes,
-                fontHandle,
+                netFont,
                 ImGui.GetContentRegionAvail().X - rightSideWidth,
                 r => r.Recipe.ItemResult.Value.Name.ToString(),
                 r => r.Recipe.RowId.ToString(),

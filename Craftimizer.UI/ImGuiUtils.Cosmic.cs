@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
     // ── Cosmic Exploration UI helpers ─────────────────────────────────────────
     // Usados exclusivamente por Windows/CosmicTracker.cs.

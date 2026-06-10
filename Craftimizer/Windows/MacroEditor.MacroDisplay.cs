@@ -29,7 +29,7 @@ public sealed partial class MacroEditor
                 var availSize = totalW - spacing - ImGui.GetFrameHeight();
                 var size      = ImGui.GetFrameHeight() + spacing + ImGui.CalcTextSize(condition.Name()).X;
                 ImGuiUtils.AlignCentered(size, availSize);
-                ImGuiUtils.DrawConditionIndicator(condition, spacing);
+                PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
             }
             if (ImGui.IsItemHovered())
                 ImGuiUtils.Tooltip(condition.Description(CharacterStats.HasSplendorousBuff));
@@ -39,7 +39,7 @@ public sealed partial class MacroEditor
             using (var disabled = ImRaii.Disabled(SolverRunning))
             {
                 using var tint = ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled), !_plugin.Configuration.ConditionRandomness);
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Dice))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Dice))
                 {
                     _plugin.Configuration.ConditionRandomness ^= true;
                     _plugin.Configuration.Save();

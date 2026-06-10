@@ -1,20 +1,46 @@
 using Craftimizer.Simulator;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImPlot;
-using Dalamud.Interface.Utility.Raii;
 using MathNet.Numerics.Statistics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+internal static partial class PluginImGuiUtils
 {
+    public static void DrawStatArc(ImDrawListPtr drawList, Vector2 screenPos, float size, float frac, Vector4 color)
+    {
+        const float StartAngle = 2.269f;
+        const float SweepAngle = 4.887f;
+
+        var center  = screenPos + new Vector2(size * 0.5f, size * 0.5f);
+        var strokeW = MathF.Max(2f, size * 0.16f);
+        var radius  = size * 0.5f - strokeW * 0.5f - 1f;
+        var capR    = strokeW * 0.5f;
+
+        var trackColor = ImGui.GetColorU32(color with { W = 0.20f });
+        var fillColor  = ImGui.GetColorU32(color);
+
+        drawList.PathArcTo(center, radius, StartAngle, StartAngle + SweepAngle, 32);
+        drawList.PathStroke(trackColor, ImDrawFlags.None, strokeW);
+        drawList.AddCircleFilled(center + new Vector2(MathF.Cos(StartAngle) * radius, MathF.Sin(StartAngle) * radius), capR, trackColor);
+        drawList.AddCircleFilled(center + new Vector2(MathF.Cos(StartAngle + SweepAngle) * radius, MathF.Sin(StartAngle + SweepAngle) * radius), capR, trackColor);
+
+        if (frac > 0.005f)
+        {
+            var fillEnd = StartAngle + SweepAngle * MathF.Min(frac, 1f);
+            drawList.PathArcTo(center, radius, StartAngle, fillEnd, 32);
+            drawList.PathStroke(fillColor, ImDrawFlags.None, strokeW);
+            drawList.AddCircleFilled(center + new Vector2(MathF.Cos(StartAngle) * radius, MathF.Sin(StartAngle) * radius), capR, fillColor);
+            drawList.AddCircleFilled(center + new Vector2(MathF.Cos(fillEnd) * radius, MathF.Sin(fillEnd) * radius), capR, fillColor);
+        }
+    }
+
     public static void DrawMacroStatArcs(in SimulationState state, float windowHeight, bool asGrid = false)
     {
         var style    = ImGui.GetStyle();
@@ -40,7 +66,11 @@ internal static partial class ImGuiUtils
             var pos = new Vector2(origin.X + col * (arcSize + spacingX), origin.Y + row * (arcSize + spacingY));
             DrawStatArc(dl, pos, arcSize, Math.Clamp(frac, 0f, 1f), color);
             if (ImGui.IsMouseHoveringRect(pos, pos + new Vector2(arcSize)))
-                Tooltip(tip);
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(tip);
+                ImGui.EndTooltip();
+            }
         }
 
         if (asGrid)
@@ -97,11 +127,11 @@ internal static partial class ImGuiUtils
 
     public static void ViolinPlot(in ViolinData data, Vector2 size)
     {
-        using var padding = ImRaii2.PushStyle(ImPlotStyleVar.Padding, Vector2.Zero);
-        using var plotBg = ImRaii2.PushColor(ImPlotCol.Bg, Vector4.Zero);
-        using var fill = ImRaii2.PushColor(ImPlotCol.Fill, new Vector4(1f, 1f, 1f, .5f));
+        using var padding = ImRaiiPlot.PushStyle(ImPlotStyleVar.Padding, Vector2.Zero);
+        using var plotBg = ImRaiiPlot.PushColor(ImPlotCol.Bg, Vector4.Zero);
+        using var fill = ImRaiiPlot.PushColor(ImPlotCol.Fill, new Vector4(1f, 1f, 1f, .5f));
 
-        using var plot = ImRaii2.Plot("##violin", size, ImPlotFlags.CanvasOnly | ImPlotFlags.NoInputs | ImPlotFlags.NoChild | ImPlotFlags.NoFrame);
+        using var plot = ImRaiiPlot.Plot("##violin", size, ImPlotFlags.CanvasOnly | ImPlotFlags.NoInputs | ImPlotFlags.NoChild | ImPlotFlags.NoFrame);
         if (plot)
         {
             ImPlot.SetupAxes([], [], ImPlotAxisFlags.NoDecorations, ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit);

@@ -56,13 +56,6 @@ public class MacroCopyConfiguration
 [JsonObjectCreationHandling(JsonObjectCreationHandling.Populate)]
 public partial class Configuration
 {
-    public enum ProgressBarType
-    {
-        Colorful,
-        Simple,
-        None
-    }
-
     [JsonInclude] [JsonPropertyName("Macros")]
     internal List<Macro> macros { get; private set; } = [];
 

@@ -67,7 +67,7 @@ public sealed partial class MacroEditor
         }
 
         ImGui.SameLine();
-        if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Paste))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste))
             MacroCopy.Copy(Macro.Actions.ToArray(), _plugin);
         if (ImGui.IsItemHovered())
             ImGuiUtils.Tooltip("Copy to Clipboard");
@@ -75,7 +75,7 @@ public sealed partial class MacroEditor
         ImGui.SameLine();
         using (var _disabled = ImRaii.Disabled(SolverRunning))
         {
-            if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.FileImport))
+            if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.FileImport))
                 ShowImportPopup();
         }
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -87,7 +87,7 @@ public sealed partial class MacroEditor
             ImGui.SameLine();
             using (var _disabled = ImRaii.Disabled(SolverRunning))
             {
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Undo))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Undo))
                 {
                     SolverStartStepCount = null;
                     Macro.Clear();
@@ -105,7 +105,7 @@ public sealed partial class MacroEditor
             Theme.PushDangerButton();
             using (var _disabled = ImRaii.Disabled(SolverRunning))
             {
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Trash))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Trash))
                 {
                     SolverStartStepCount = null;
                     Macro.Clear();
@@ -177,7 +177,7 @@ public sealed partial class MacroEditor
                 ImGuiUtils.TextCentered("Paste your macro here");
                 {
                     using var font = ImRaii.PushFont(UiBuilder.MonoFont);
-                    ImGuiUtils.InputTextMultilineWithHint("", ExampleMacro, ref popupImportText, 2048, new(availWidth, ImGui.GetTextLineHeight() * 15 + ImGui.GetStyle().FramePadding.Y), ImGuiInputTextFlags.AutoSelectAll);
+                    ImGuiUtils.InputTextMultilineWithHint("", ExampleMacro, ref popupImportText, 2048, new(availWidth, ImGui.GetTextLineHeight() * 15 + ImGui.GetStyle().FramePadding.Y), (int)ImGuiInputTextFlags.AutoSelectAll);
                 }
                 using (var _disabled = ImRaii.Disabled(popupImportUrlTokenSource != null))
                     submittedText = ImGui.Button("Import", new(availWidth, 0));

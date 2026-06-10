@@ -141,7 +141,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
         {
             var mode = (DisplayMode)_selectedMode;
             var state = (ProgressState)_selectedState;
-            var theme = (Configuration.ProgressBarType)_selectedTheme;
+            var theme = (ProgressBarType)_selectedTheme;
             
             var config = new VisualConfig(
                 Mode: mode,
@@ -175,7 +175,7 @@ public sealed class ProgressBarTestWindow : Window, IDisposable
         if (ImGui.CollapsingHeader("Aggregated Progress Tests", ImGuiTreeNodeFlags.DefaultOpen))
         {
             var mode = (DisplayMode)_selectedMode;
-            var theme = (Configuration.ProgressBarType)_selectedTheme;
+            var theme = (ProgressBarType)_selectedTheme;
             
             var config = new VisualConfig(
                 Mode: mode,

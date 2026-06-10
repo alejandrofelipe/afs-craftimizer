@@ -371,7 +371,7 @@ public sealed unsafe class SynthHelper : Window, IDisposable
                 var id = ImGui.GetID($"###ButtonContainer");
                 var isClipped = !ImGuiExtras.ItemAdd(bb, id, out _, 0);
 
-                isPressed = ImGuiExtras.ButtonBehavior(bb, id, out isHovered, out isHeld, ImGuiButtonFlags.None);
+                isPressed = ImGuiExtras.ButtonBehavior(bb, id, out isHovered, out isHeld, (int)ImGuiButtonFlags.None);
             }
             ImGui.ImageButton(action.GetIcon(Session.RecipeData!.ClassJob).Handle, new(imageSize), default, Vector2.One, 0, default, failedAction ? new(1, 1, 1, ImGui.GetStyle().DisabledAlpha) : Vector4.One);
             if (isPressed && i == 0)
@@ -595,7 +595,7 @@ public sealed unsafe class SynthHelper : Window, IDisposable
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                     ImGui.TextUnformatted("CONDITION");
                 ImGui.SameLine(0, spacing * 2);
-                ImGuiUtils.DrawConditionIndicator(condition, spacing);
+                PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
             }
             if (ImGui.IsItemHovered())
                 ImGuiUtils.Tooltip(condition.Description(Session.CharacterStats!.HasSplendorousBuff));

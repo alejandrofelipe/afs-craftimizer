@@ -69,7 +69,7 @@ public sealed partial class MacroEditor
         lock (_solverSnapshots)
         {
             _solverSnapshots.Clear();
-            _solverSnapshots.Add(ProgressBarComponent.FromSolver(solver, config.Algorithm.ToString()) with
+            _solverSnapshots.Add(SolverProgressBar.FromSolver(solver, config.Algorithm.ToString()) with
             {
                 State = ProgressBarComponent.ProgressState.Completed
             });
@@ -87,7 +87,7 @@ public sealed partial class MacroEditor
         {
             try
             {
-                var snapshot = ProgressBarComponent.FromSolver(solver, algorithmName);
+                var snapshot = SolverProgressBar.FromSolver(solver, algorithmName);
                 lock (_solverSnapshots)
                 {
                     _solverSnapshots.Clear();

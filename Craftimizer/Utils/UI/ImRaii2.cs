@@ -1,32 +1,31 @@
-using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImPlot;
 using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-public static partial class ImRaii2
+internal static class ImRaiiPlot
 {
-    public static RaiiObject Plot(string title_id, Vector2 size, ImPlotFlags flags)
+    public static ImRaii2.RaiiObject Plot(string title_id, Vector2 size, ImPlotFlags flags)
     {
         var success = ImPlot.BeginPlot(title_id, size, flags);
-        return new RaiiObject(ImPlot.EndPlot, success, true);
+        return new ImRaii2.RaiiObject(ImPlot.EndPlot, success, true);
     }
 
-    public static RaiiObject PushStyle(ImPlotStyleVar idx, Vector2 val)
+    public static ImRaii2.RaiiObject PushStyle(ImPlotStyleVar idx, Vector2 val)
     {
         ImPlot.PushStyleVar(idx, val);
-        return new RaiiObject(ImPlot.PopStyleVar, true, false);
+        return new ImRaii2.RaiiObject(ImPlot.PopStyleVar, true, false);
     }
 
-    public static RaiiObject PushStyle(ImPlotStyleVar idx, float val)
+    public static ImRaii2.RaiiObject PushStyle(ImPlotStyleVar idx, float val)
     {
         ImPlot.PushStyleVar(idx, val);
-        return new RaiiObject(ImPlot.PopStyleVar, true, false);
+        return new ImRaii2.RaiiObject(ImPlot.PopStyleVar, true, false);
     }
 
-    public static RaiiObject PushColor(ImPlotCol idx, Vector4 col)
+    public static ImRaii2.RaiiObject PushColor(ImPlotCol idx, Vector4 col)
     {
         ImPlot.PushStyleColor(idx, col);
-        return new RaiiObject(ImPlot.PopStyleColor, true, false);
+        return new ImRaii2.RaiiObject(ImPlot.PopStyleColor, true, false);
     }
 }

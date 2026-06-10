@@ -225,21 +225,21 @@ public sealed partial class Settings : Window, IDisposable
             _ => "Unknown"
         };
 
-    private static string GetProgressBarTypeName(Configuration.ProgressBarType type) =>
+    private static string GetProgressBarTypeName(ProgressBarType type) =>
         type switch
         {
-            Configuration.ProgressBarType.Colorful => "Colorful",
-            Configuration.ProgressBarType.Simple => "Simple",
-            Configuration.ProgressBarType.None => "None",
+            ProgressBarType.Colorful => "Colorful",
+            ProgressBarType.Simple => "Simple",
+            ProgressBarType.None => "None",
             _ => "Unknown",
         };
 
-    private static string GetProgressBarTooltip(Configuration.ProgressBarType type) =>
+    private static string GetProgressBarTooltip(ProgressBarType type) =>
         type switch
         {
-            Configuration.ProgressBarType.Colorful => "Colorful, rainbow colors",
-            Configuration.ProgressBarType.Simple => "Simple, grayscale colors",
-            Configuration.ProgressBarType.None => "No progress bar; only percent completion is shown",
+            ProgressBarType.Colorful => "Colorful, rainbow colors",
+            ProgressBarType.Simple => "Simple, grayscale colors",
+            ProgressBarType.None => "No progress bar; only percent completion is shown",
             _ => "Unknown"
         };
 

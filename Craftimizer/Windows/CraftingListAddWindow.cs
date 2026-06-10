@@ -107,7 +107,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
             "##recipeSearch",
             ref selected,
             _plugin.RecipeSearchHelper.Index,
-            UiBuilder.DefaultFont,
+            UiServices.Current.DefaultFont,
             320 * scale,
             r => r.ItemName,
             r => r.RecipeId.ToString(),

@@ -3,8 +3,17 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
+    // Overload for cross-assembly use: Dalamud.Interface.FontAwesomeIcon is int-based.
+    public static void DrawEmptyState(
+        int icon,
+        string title,
+        string? subtitle = null,
+        (string Label, Action Clicked)? primaryButton = null,
+        (string Label, Action Clicked)? secondaryButton = null,
+        float buttonWidth = 200f) => DrawEmptyState((FontAwesomeIcon)(ushort)icon, title, subtitle, primaryButton, secondaryButton, buttonWidth);
+
     public static void DrawEmptyState(
         FontAwesomeIcon icon,
         string title,

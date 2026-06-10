@@ -156,7 +156,7 @@ public sealed class CosmicTracker : Window, IDisposable
         if (_progress is not { } p)
         {
             ImGuiUtils.DrawEmptyState(
-                FontAwesomeIcon.Star,
+                (int)FontAwesomeIcon.Star,
                 "Sem dados ainda",
                 "Entre em qualquer mapa de Cosmic Exploration.");
             return;
@@ -187,7 +187,7 @@ public sealed class CosmicTracker : Window, IDisposable
 
         if (!anyRendered)
             ImGuiUtils.DrawEmptyState(
-                FontAwesomeIcon.CheckCircle,
+                (int)FontAwesomeIcon.CheckCircle,
                 "Tudo concluído",
                 "Todos os tipos de pesquisa foram completados.\nDesative o filtro para visualizá-los.");
 

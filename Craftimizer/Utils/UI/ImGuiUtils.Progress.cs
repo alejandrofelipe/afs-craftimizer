@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+internal static partial class PluginImGuiUtils
 {
     // ── Condition indicator ───────────────────────────────────────────────────
 

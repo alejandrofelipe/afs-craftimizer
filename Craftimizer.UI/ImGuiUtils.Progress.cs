@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
     // ── Solver state chip ─────────────────────────────────────────────────────
 
@@ -92,6 +92,10 @@ internal static partial class ImGuiUtils
         if (ImGui.IsItemHovered())
             Tooltip(tooltip);
     }
+
+    // Overload for cross-assembly use: Dalamud ImTextureID.Handle is ulong (pointer-sized on x64).
+    public static void DrawBadge(ulong handle, Vector2 size, string tooltip, Vector4? tint = null)
+        => DrawBadge((nint)(long)handle, size, tooltip, tint);
 
     // ── Progress bar ──────────────────────────────────────────────────────────
 

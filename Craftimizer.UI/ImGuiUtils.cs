@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Craftimizer.Utils;
 
-internal static partial class ImGuiUtils
+public static partial class ImGuiUtils
 {
     private static readonly Stack<(Vector2 Min, Vector2 Max, float TopPadding)> GroupPanelLabelStack = new();
 
@@ -130,10 +130,10 @@ internal static partial class ImGuiUtils
 
     // ── Text / Layout helpers ─────────────────────────────────────────────────
 
-    public static bool InputTextMultilineWithHint(string label, string hint, ref string input, int maxLength, Vector2 size, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None, ImGuiInputTextCallback? callback = null, IntPtr user_data = default)
+    public static bool InputTextMultilineWithHint(string label, string hint, ref string input, int maxLength, Vector2 size, int flags = 0, ImGuiInputTextCallback? callback = null, IntPtr user_data = default)
     {
-        const ImGuiInputTextFlags Multiline = (ImGuiInputTextFlags)(1 << 26);
-        return ImGuiExtras.InputTextEx(label, hint, ref input, maxLength, size, flags | Multiline, callback, user_data);
+        const int Multiline = 1 << 26;
+        return ImGuiExtras.InputTextEx(label, hint, ref input, maxLength, size, (ImGuiInputTextFlags)(flags | Multiline), callback, user_data);
     }
 
     private static Vector2 GetIconSize(FontAwesomeIcon icon)
@@ -166,6 +166,9 @@ internal static partial class ImGuiUtils
 
         ImGui.GetWindowDrawList().AddText(UiServices.Current.IconFont, UiServices.Current.IconFont.FontSize * UiServices.Current.GlobalScale * scale, offset + iconOffset, ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled), icon.ToIconString());
     }
+
+    // Overload for cross-assembly use: Dalamud.Interface.FontAwesomeIcon is int-based.
+    public static bool IconButtonSquare(int icon, float size = -1) => IconButtonSquare((FontAwesomeIcon)(ushort)icon, size);
 
     public static bool IconButtonSquare(FontAwesomeIcon icon, float size = -1)
     {

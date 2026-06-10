@@ -13,7 +13,7 @@ public static partial class ImRaii2
         public readonly bool Success;
         private bool _disposed;
 
-        internal RaiiObject(Action endAction, bool success, bool conditionalEnd)
+        public RaiiObject(Action endAction, bool success, bool conditionalEnd)
         {
             _endAction = endAction;
             _conditionalEnd = conditionalEnd;
@@ -49,3 +49,4 @@ public static partial class ImRaii2
         return new RaiiObject(ImGui.PopTextWrapPos, true, false);
     }
 }
+

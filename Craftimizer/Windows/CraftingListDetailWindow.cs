@@ -169,7 +169,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         if (_listId is not { } || _list is not { } list)
         {
-            ImGuiUtils.DrawEmptyState(FontAwesomeIcon.ListAlt, "Nenhuma lista aberta", null);
+            ImGuiUtils.DrawEmptyState((int)FontAwesomeIcon.ListAlt, "Nenhuma lista aberta", null);
             return;
         }
 
@@ -308,7 +308,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         {
             if (_recipes.Count == 0)
                 ImGuiUtils.DrawEmptyState(
-                    FontAwesomeIcon.PlusCircle,
+                    (int)FontAwesomeIcon.PlusCircle,
                     "Lista vazia",
                     "Adicione receitas para começar.");
 
@@ -378,7 +378,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 else
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight() - btnPad));
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Times))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Times))
                         _pendingRemoveId = recipe.Id;
                 }
             }
@@ -492,7 +492,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 var inCombat = Service.Condition[ConditionFlag.InCombat];
                 using (ImRaii.Disabled(!_plugin.TeleportHelper.IsAvailable || inCombat))
                 {
-                    if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.LocationArrow))
+                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.LocationArrow))
                         _plugin.TeleportHelper.TeleportTo(loc.NearestAetheryteId);
                 }
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -628,7 +628,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     private void DrawFooter()
     {
-        if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Sync))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Sync))
             _ = SyncInventoryAsync();
         if (ImGui.IsItemHovered())
             ImGuiUtils.Tooltip("Sincronizar inventário");
@@ -651,7 +651,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             ImGui.SameLine();
             using (ImRaii.Disabled(_pricesLoading))
             {
-                if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Redo))
+                if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Redo))
                 {
                     _prices.Clear();
                     _ = LoadPricesAsync();

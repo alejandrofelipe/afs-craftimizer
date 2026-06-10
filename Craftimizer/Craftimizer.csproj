@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
     <Authors>alejandrofelipe (fork de Asriel Camora)</Authors>
-    <Version>2.18.1.0</Version>
+    <Version>2.18.1.1</Version>
     <PackageProjectUrl>https://github.com/WorkingRobot/Craftimizer.git</PackageProjectUrl>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -45,6 +45,7 @@
     </PackageReference>
     <ProjectReference Include="..\Simulator\Craftimizer.Simulator.csproj" />
     <ProjectReference Include="..\Solver\Craftimizer.Solver.csproj" />
+    <ProjectReference Include="..\Craftimizer.UI\Craftimizer.UI.csproj" />
   </ItemGroup>
 
 </Project>

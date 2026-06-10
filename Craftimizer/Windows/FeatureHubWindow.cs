@@ -43,7 +43,7 @@ public sealed class FeatureHubWindow : Window, IDisposable
             _firstFrame = false;
         }
 
-        if (ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Boxes))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Boxes))
             ImGui.OpenPopup("##FeatureHubPopup");
         if (ImGui.IsItemHovered())
             ImGuiUtils.Tooltip("Ferramentas Craftimizer");
