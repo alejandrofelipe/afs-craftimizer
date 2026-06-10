@@ -214,20 +214,22 @@ public static partial class ImGuiUtils
         }
     }
 
-    public static void Tooltip(string text)
+    public static void Tooltip(string text, float? wrapWidth = null)
     {
         using var _font = ImRaii.PushFont(UiServices.Current.DefaultFont);
         using var _tooltip = ImRaii.Tooltip();
-        ImGui.TextUnformatted(text);
+        if (wrapWidth.HasValue)
+        {
+            using var _wrap = ImRaii2.TextWrapPos(wrapWidth.Value * UiServices.Current.GlobalScale);
+            ImGui.TextUnformatted(text);
+        }
+        else
+        {
+            ImGui.TextUnformatted(text);
+        }
     }
 
-    public static void TooltipWrapped(string text, float width = 300)
-    {
-        using var _font = ImRaii.PushFont(UiServices.Current.DefaultFont);
-        using var _tooltip = ImRaii.Tooltip();
-        using var _wrap = ImRaii2.TextWrapPos(width * UiServices.Current.GlobalScale);
-        ImGui.TextUnformatted(text);
-    }
+    public static void TooltipWrapped(string text, float width = 300) => Tooltip(text, width);
 
     public static void TextWrappedTo(string text, float wrapPosX = default, float basePosX = default)
     {
