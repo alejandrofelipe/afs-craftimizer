@@ -7,4 +7,5 @@ StudioApp.Run(
     new ThemeStory(),
     new EmptyStateStory(),
     new ProgressBarStory(),
+    new ChartsStory(),
 ]);
