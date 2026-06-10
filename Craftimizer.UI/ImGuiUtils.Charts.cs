@@ -24,24 +24,39 @@ public static partial class ImGuiUtils
 
         var trackColor = ImGui.GetColorU32(color with { W = 0.20f });
         var fillColor  = ImGui.GetColorU32(color);
+        // Shorten each stroke by delta so cap circles sit tangent to (not overlapping) the stroke.
+        var delta = capR / radius;
+        var endAngle = StartAngle + SweepAngle;
 
-        static void DrawCaps(ImDrawListPtr dl, Vector2 c, float r, float a0, float a1, float cR, uint col)
+        Vector2 ArcPt(float a) => center + new Vector2(MathF.Cos(a) * radius, MathF.Sin(a) * radius);
+        void Cap(float a, uint col) => drawList.AddCircleFilled(ArcPt(a), capR, col);
+        void Stroke(float a0, float a1, uint col)
         {
-            dl.AddCircleFilled(c + new Vector2(MathF.Cos(a0) * r, MathF.Sin(a0) * r), cR, col);
-            dl.AddCircleFilled(c + new Vector2(MathF.Cos(a1) * r, MathF.Sin(a1) * r), cR, col);
+            if (a1 > a0 + 0.001f)
+            {
+                drawList.PathArcTo(center, radius, a0, a1, 32);
+                drawList.PathStroke(col, ImDrawFlags.None, strokeW);
+            }
         }
 
-        drawList.PathArcTo(center, radius, StartAngle, StartAngle + SweepAngle, 32);
-        drawList.PathStroke(trackColor, ImDrawFlags.None, strokeW);
-        DrawCaps(drawList, center, radius, StartAngle, StartAngle + SweepAngle, capR, trackColor);
-
-        if (frac > 0.005f)
+        if (frac <= 0.005f)
         {
-            var fillEnd = StartAngle + SweepAngle * MathF.Min(frac, 1f);
-            drawList.PathArcTo(center, radius, StartAngle, fillEnd, 32);
-            drawList.PathStroke(fillColor, ImDrawFlags.None, strokeW);
-            DrawCaps(drawList, center, radius, StartAngle, fillEnd, capR, fillColor);
+            Stroke(StartAngle + delta, endAngle - delta, trackColor);
+            Cap(StartAngle, trackColor);
+            Cap(endAngle, trackColor);
+            return;
         }
+
+        var fillEnd = StartAngle + SweepAngle * MathF.Min(frac, 1f);
+
+        // Track: only the unfilled portion — drawn first (background)
+        Stroke(fillEnd + delta, endAngle - delta, trackColor);
+        Cap(endAngle, trackColor);
+
+        // Fill: drawn on top — separate segment, no overlap with track
+        Stroke(StartAngle + delta, fillEnd - delta, fillColor);
+        Cap(StartAngle, fillColor);
+        Cap(fillEnd, fillColor);
     }
 
     /// <summary>
