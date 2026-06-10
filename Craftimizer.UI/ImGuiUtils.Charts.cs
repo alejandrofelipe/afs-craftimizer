@@ -24,39 +24,43 @@ public static partial class ImGuiUtils
 
         var trackColor = ImGui.GetColorU32(color with { W = 0.20f });
         var fillColor  = ImGui.GetColorU32(color);
-        // Shorten each stroke by delta so cap circles sit tangent to (not overlapping) the stroke.
-        var delta = capR / radius;
-        var endAngle = StartAngle + SweepAngle;
+        var endAngle   = StartAngle + SweepAngle;
 
         Vector2 ArcPt(float a) => center + new Vector2(MathF.Cos(a) * radius, MathF.Sin(a) * radius);
-        void Cap(float a, uint col) => drawList.AddCircleFilled(ArcPt(a), capR, col);
+
         void Stroke(float a0, float a1, uint col)
         {
-            if (a1 > a0 + 0.001f)
-            {
-                drawList.PathArcTo(center, radius, a0, a1, 32);
-                drawList.PathStroke(col, ImDrawFlags.None, strokeW);
-            }
+            drawList.PathArcTo(center, radius, a0, a1, 0);
+            drawList.PathStroke(col, ImDrawFlags.None, strokeW);
+        }
+
+        // Filled semicircle whose flat edge aligns with the stroke's flat end at `angle`.
+        // backward=true  → faces away from arc start (used at the start of an arc segment).
+        // backward=false → faces away from arc end   (used at the end of an arc segment).
+        // The semicircle is adjacent to the stroke body with zero overlap → no alpha compositing.
+        void RoundCap(float angle, bool backward, uint col)
+        {
+            var a0 = backward ? angle + MathF.PI : angle;
+            drawList.PathArcTo(ArcPt(angle), capR, a0, a0 + MathF.PI, 0);
+            drawList.PathFillConvex(col);
         }
 
         if (frac <= 0.005f)
         {
-            Stroke(StartAngle + delta, endAngle - delta, trackColor);
-            Cap(StartAngle, trackColor);
-            Cap(endAngle, trackColor);
+            Stroke(StartAngle, endAngle, trackColor);
+            RoundCap(StartAngle, backward: true,  trackColor);
+            RoundCap(endAngle,   backward: false, trackColor);
             return;
         }
 
         var fillEnd = StartAngle + SweepAngle * MathF.Min(frac, 1f);
 
-        // Track: only the unfilled portion — drawn first (background)
-        Stroke(fillEnd + delta, endAngle - delta, trackColor);
-        Cap(endAngle, trackColor);
+        Stroke(StartAngle, endAngle, trackColor);
+        RoundCap(endAngle, backward: false, trackColor);
 
-        // Fill: drawn on top — separate segment, no overlap with track
-        Stroke(StartAngle + delta, fillEnd - delta, fillColor);
-        Cap(StartAngle, fillColor);
-        Cap(fillEnd, fillColor);
+        Stroke(StartAngle, fillEnd, fillColor);
+        RoundCap(StartAngle, backward: true,  fillColor);
+        RoundCap(fillEnd,    backward: false, fillColor);
     }
 
     /// <summary>
