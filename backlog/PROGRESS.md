@@ -46,3 +46,4 @@
 | 🔴 Bug: Lista de Coleta não atualiza ao adicionar receita | 🔴 Bug confirmado | Ver `backlog/bug-lista-coleta-nao-atualiza-apos-add.md` |
 | 🔴 Bug: Conteúdo transborda borda direita dos GroupPanels | 🔴 Bug confirmado | Ver `backlog/bug-lista-coleta-overflow-borda-groupPanel.md` |
 | Redesign das abas de Settings | 📝 Refinado | Ver `backlog/redesign-abas-settings.md` |
+| Consolidação de componentes UI (refactor) | 📝 Rascunho | Ver `backlog/consolidacao-componentes-ui.md` |
