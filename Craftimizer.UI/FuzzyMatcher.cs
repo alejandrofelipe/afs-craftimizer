@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Craftimizer.Utils;
 
-internal readonly struct FuzzyMatcher
+public readonly struct FuzzyMatcher
 {
     private const bool IsBorderMatching = true;
     private static readonly (int, int)[] EmptySegArray = [];
@@ -216,7 +216,7 @@ internal readonly struct FuzzyMatcher
     }
 }
 
-internal enum MatchMode
+public enum MatchMode
 {
     Simple,
     Fuzzy,

@@ -1,6 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.ManagedFontAtlas;
-using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -64,7 +61,7 @@ internal static partial class ImGuiUtils
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Filtering recipes failed");
+                    System.Diagnostics.Debug.WriteLine($"Filtering recipes failed: {e}");
                 }
             }, TaskContinuationOptions.OnlyOnFaulted);
         }

@@ -1,6 +1,3 @@
-using Craftimizer.Plugin;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +9,7 @@ namespace Craftimizer.Utils;
 /// Componente robusto e altamente customizável de barras de progresso.
 /// Suporta múltiplos modos: simples, agregado, multi-resultado, com tooltips ricos.
 /// </summary>
-public static class ProgressBarComponent
+public static partial class ProgressBarComponent
 {
     #region Enums e Records
 
@@ -70,10 +67,10 @@ public static class ProgressBarComponent
     {
         /// <summary>Fração de progresso entre 0.0 e 1.0, sempre clamped</summary>
         public float Fraction => MaxValue > 0 ? Math.Clamp((float)CurrentValue / MaxValue, 0f, 1f) : 0f;
-        
+
         /// <summary>Verdadeiro se o processo está no estado Completed</summary>
         public bool IsComplete => State == ProgressState.Completed;
-        
+
         /// <summary>Verdadeiro se o processo está no estado Indeterminate</summary>
         public bool IsIndeterminate => State == ProgressState.Indeterminate;
     }
@@ -93,7 +90,7 @@ public static class ProgressBarComponent
     /// <param name="ForegroundColor">Cor de preenchimento customizada (sobrescreve tema)</param>
     public record VisualConfig(
         DisplayMode Mode = DisplayMode.Horizontal,
-        Configuration.ProgressBarType ColorTheme = Configuration.ProgressBarType.Colorful,
+        ProgressBarType ColorTheme = ProgressBarType.Colorful,
         float? Width = null,
         float? Height = null,
         bool ShowPercentage = true,
@@ -474,64 +471,6 @@ public static class ProgressBarComponent
 
         // Cores baseadas em stage (solver)
         return Colors.GetSolverProgressColors(snapshot.Stage, config.ColorTheme);
-    }
-
-    #endregion
-
-    #region Helpers para Migração
-
-    /// <summary>
-    /// Converte um objeto Solver para ProgressSnapshot.
-    /// Helper de migração do sistema antigo DynamicBars para ProgressBarComponent.
-    /// </summary>
-    /// <param name="solver">Instância do solver em execução</param>
-    /// <param name="nameOverride">Nome customizado para exibição (default: "Solver")</param>
-    /// <returns>Snapshot imutável com estado atual do solver</returns>
-    /// <example>
-    /// <code>
-    /// var snapshot = ProgressBarComponent.FromSolver(solver, "MCTS Solver");
-    /// ProgressBarComponent.DrawSingle(snapshot);
-    /// </code>
-    /// </example>
-    public static ProgressSnapshot FromSolver(Solver.Solver solver, string? nameOverride = null)
-    {
-        var state = solver.IsIndeterminate
-            ? ProgressState.Indeterminate
-            : (solver.ProgressValue >= solver.ProgressMax ? ProgressState.Completed : ProgressState.InProgress);
-
-        return new ProgressSnapshot(
-            Name: nameOverride ?? "Solver",
-            CurrentValue: solver.ProgressValue,
-            MaxValue: solver.ProgressMax,
-            State: state,
-            Stage: solver.ProgressStage
-        );
-    }
-
-    /// <summary>
-    /// Wrapper de compatibilidade com DynamicBars.DrawProgressBar existente.
-    /// Mantido para transição gradual. Novo código deve usar DrawSingle ou DrawAggregated.
-    /// </summary>
-    /// <param name="solver">Instância do solver em execução</param>
-    /// <param name="progressType">Tipo de barra de progresso (Colorful/Simple/None)</param>
-    /// <param name="availSpace">Espaço disponível em pixels (null = usar espaço disponível)</param>
-    /// <remarks>
-    /// Este método existe para permitir que DynamicBars.DrawProgressBar obsoleto
-    /// delegue para a nova implementação sem quebrar código existente.
-    /// </remarks>
-    public static void DrawProgressBarCompat(
-        Solver.Solver solver,
-        Configuration.ProgressBarType progressType,
-        float? availSpace = null)
-    {
-        var snapshot = FromSolver(solver);
-        var config = new VisualConfig(
-            Mode: progressType == Configuration.ProgressBarType.None ? DisplayMode.Compact : DisplayMode.Horizontal,
-            ColorTheme: progressType,
-            Width: availSpace
-        );
-
-        DrawSingle(snapshot, config);
     }
 
     #endregion

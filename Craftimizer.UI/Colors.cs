@@ -1,6 +1,3 @@
-using Craftimizer.Plugin;
-using Dalamud.Interface.Colors;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -64,7 +61,7 @@ public static class Colors
     public static readonly Vector4 TextMuted = new(0.314f, 0.376f, 0.478f, 1f); // #50607A
 
     private static Vector4 SolverProgressBg => ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.TableBorderLight));
-    private static Vector4 SolverProgressFgBland => ImGuiColors.DalamudWhite2;
+    private static Vector4 SolverProgressFgBland => new(0.78f, 0.78f, 0.78f, 1f);
 
     private static readonly Vector4[] SolverProgressFgColorful =
     [
@@ -94,12 +91,12 @@ public static class Colors
         new(0.75f, 1f, 0.75f, 1f), // Green
     ];
 
-    public static (Vector4 Background, Vector4 Foreground) GetSolverProgressColors(int? stageValue, Configuration.ProgressBarType progressType)
+    public static (Vector4 Background, Vector4 Foreground) GetSolverProgressColors(int? stageValue, ProgressBarType progressType)
     {
         var fg = progressType switch
         {
-            Configuration.ProgressBarType.Colorful => SolverProgressFgColorful,
-            Configuration.ProgressBarType.Simple => SolverProgressFgMonochromatic,
+            ProgressBarType.Colorful => SolverProgressFgColorful,
+            ProgressBarType.Simple => SolverProgressFgMonochromatic,
             _ => throw new InvalidOperationException("No progress bar should be visible")
         };
 

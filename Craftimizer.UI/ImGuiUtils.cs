@@ -1,9 +1,4 @@
-using Dalamud.Interface;
-using Dalamud.Interface.ManagedFontAtlas;
 using System.Collections.Generic;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -54,8 +49,11 @@ internal static partial class ImGuiUtils
                 var textFrameHeight = ImGui.GetFrameHeight();
                 ImGui.AlignTextToFramePadding();
                 {
-                    using var labelColor = accentLabel ? ImRaii.PushColor(ImGuiCol.Text, Colors.ActionBuff) : null;
+                    if (accentLabel)
+                        ImGui.PushStyleColor(ImGuiCol.Text, Colors.ActionBuff);
                     ImGui.TextUnformatted(name);
+                    if (accentLabel)
+                        ImGui.PopStyleColor();
                 }
                 GroupPanelLabelStack.Push((ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), textFrameHeight / 2f)); // push rect to stack
                 ImGui.SameLine(0, 0);
@@ -205,7 +203,7 @@ internal static partial class ImGuiUtils
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-                Dalamud.Utility.Util.OpenLink(url);
+                UiServices.Current.OpenLink(url);
             var urlWithoutScheme = url;
             if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
                 urlWithoutScheme = uri.Host + (string.Equals(uri.PathAndQuery, "/", StringComparison.Ordinal) ? string.Empty : uri.PathAndQuery);
@@ -315,25 +313,5 @@ internal static partial class ImGuiUtils
             buttonWidth = ImGui.CalcTextSize(text).X + ImGui.GetStyle().FramePadding.X * 2;
         AlignCentered(buttonWidth);
         return ImGui.Button(text, buttonSize);
-    }
-
-    // ── IFontHandle extensions ────────────────────────────────────────────────
-
-    public static float GetFontSize(this IFontHandle font)
-    {
-        using (font.Push())
-            return ImGui.GetFontSize();
-    }
-
-    public static Vector2 CalcTextSize(this IFontHandle font, string text)
-    {
-        using (font.Push())
-            return ImGui.CalcTextSize(text);
-    }
-
-    public static void Text(this IFontHandle font, string text)
-    {
-        using (font.Push())
-            ImGui.TextUnformatted(text);
     }
 }

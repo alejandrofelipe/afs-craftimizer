@@ -1,5 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility;
 using System.Numerics;
 
 namespace Craftimizer.Utils;
