@@ -11,6 +11,14 @@ public static partial class ImGuiUtils
 
     public enum ResearchTypeState { Locked, Active, Complete, Maxed }
 
+    private static (Vector4 Label, Vector4 Num, Vector4 Marker) GetResearchTypeColors(ResearchTypeState state) => state switch
+    {
+        ResearchTypeState.Active   => (Colors.CosmicActive,   Colors.CosmicActive   with { W = 0.8f }, Colors.CosmicUpgrade),
+        ResearchTypeState.Complete => (Colors.CosmicComplete, Colors.CosmicComplete with { W = 0.8f }, Colors.CosmicComplete),
+        ResearchTypeState.Maxed    => (Colors.CosmicMaxed,    Colors.CosmicMaxed    with { W = 0.8f }, Colors.CosmicMaxed),
+        _                          => (Colors.CosmicLocked,   Colors.CosmicLocked   with { W = 0.5f }, Colors.CosmicUpgrade),
+    };
+
     /// <summary>
     /// Draws a full research-type row as seen in the CosmicTracker window:
     /// <code>
@@ -24,13 +32,7 @@ public static partial class ImGuiUtils
         ResearchTypeState state, float barWidth,
         int? delta = null)
     {
-        var (labelColor, numColor, upgradeColor) = state switch
-        {
-            ResearchTypeState.Active   => (Colors.CosmicActive,   Colors.CosmicActive   with { W = 0.8f }, Colors.CosmicUpgrade),
-            ResearchTypeState.Complete => (Colors.CosmicComplete,  Colors.CosmicComplete  with { W = 0.8f }, Colors.CosmicComplete),
-            ResearchTypeState.Maxed    => (Colors.CosmicMaxed,     Colors.CosmicMaxed     with { W = 0.8f }, Colors.CosmicMaxed),
-            _                          => (Colors.CosmicLocked,    Colors.CosmicLocked    with { W = 0.5f }, Colors.CosmicLocked),
-        };
+        var (labelColor, numColor, upgradeColor) = GetResearchTypeColors(state);
 
         using var id       = ImRaii.PushId(label);
         var drawList       = ImGui.GetWindowDrawList();
@@ -166,19 +168,7 @@ public static partial class ImGuiUtils
         var labelWidth   = 60f * UiServices.Current.GlobalScale;
         var barAreaWidth = barWidth - labelWidth - ImGui.GetStyle().ItemSpacing.X;
 
-        var labelColor = state switch
-        {
-            ResearchTypeState.Active   => Colors.CosmicActive,
-            ResearchTypeState.Complete => Colors.CosmicComplete,
-            ResearchTypeState.Maxed    => Colors.CosmicMaxed,
-            _                          => Colors.CosmicLocked,
-        };
-        var markerColor = state switch
-        {
-            ResearchTypeState.Complete => Colors.CosmicComplete,
-            ResearchTypeState.Maxed    => Colors.CosmicMaxed,
-            _                          => Colors.CosmicUpgrade,
-        };
+        var (labelColor, _, markerColor) = GetResearchTypeColors(state);
 
         using var id = ImRaii.PushId(label);
         using (ImRaii.Group())
