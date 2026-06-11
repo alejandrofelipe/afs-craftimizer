@@ -25,4 +25,5 @@ StudioApp.Run(
     new SettingsStory(),
     new CraftingListWindowStory(),
     new CraftingListAddWindowStory(),
+    new CraftingListDetailWindowStory(),
 ]);
