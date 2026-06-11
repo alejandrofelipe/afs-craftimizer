@@ -24,4 +24,5 @@ StudioApp.Run(
     new MacroListStory(),
     new SettingsStory(),
     new CraftingListWindowStory(),
+    new CraftingListAddWindowStory(),
 ]);
