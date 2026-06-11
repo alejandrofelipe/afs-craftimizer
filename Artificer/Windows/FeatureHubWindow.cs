@@ -11,11 +11,6 @@ using PluginClass = Artificer.Plugin.Plugin;
 
 namespace Artificer.Windows;
 
-/// <summary>
-/// A small always-visible floating launcher button that opens a popup menu
-/// giving quick access to the plugin's feature windows (Crafting Lists, settings).
-/// Registered unconditionally — independent of the EnableCraftingLists toggle.
-/// </summary>
 public sealed class FeatureHubWindow : Window, IDisposable
 {
     private readonly PluginClass _plugin;
@@ -48,29 +43,25 @@ public sealed class FeatureHubWindow : Window, IDisposable
 
     private void DrawContent()
     {
-        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Boxes))
-            ImGui.OpenPopup("##FeatureHubPopup");
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Ferramentas Artificer");
-
-        using var popup = ImRaii.Popup("##FeatureHubPopup");
-        if (!popup)
-            return;
-
         using (ImRaii.Disabled(!_plugin.Configuration.EnableCraftingLists))
         {
-            if (ImGui.MenuItem("Lista de Coleta"))
+            if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Boxes))
                 _plugin.CraftingListWindow.Toggle();
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && !_plugin.Configuration.EnableCraftingLists)
-            ImGuiUtils.Tooltip("Habilite em Configurações → General → Crafting Lists");
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted("   Planeje materiais de crafting");
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            if (_plugin.Configuration.EnableCraftingLists)
+                ImGuiUtils.Tooltip("Lista de Coleta");
+            else
+                ImGuiUtils.Tooltip("Lista de Coleta\n(Habilite em Configurações → General)");
+        }
 
-        ImGui.Separator();
+        ImGui.SameLine();
 
-        if (ImGui.MenuItem("Configurações"))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Cog))
             _plugin.OpenSettingsTab("General");
+        if (ImGui.IsItemHovered())
+            ImGuiUtils.Tooltip("Configurações");
     }
 
     public void Dispose()
