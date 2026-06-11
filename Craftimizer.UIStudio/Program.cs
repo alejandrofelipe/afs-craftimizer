@@ -12,4 +12,5 @@ StudioApp.Run(
     new TabbedWindowStory(),
     new ListWindowStory(),
     new StatDashboardStory(),
+    new FloatingOverlayStory(),
 ]);
