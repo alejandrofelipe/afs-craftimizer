@@ -14,6 +14,21 @@ public static class Theme
     private const int ColorCount = 17;
     private const int VarCount   = 3;
 
+    // Dalamud's patched cimgui shifted DisabledAlpha from index 1 to 24,
+    // so all other ImGuiStyleVar values are off by 1 vs ImGuiNET defaults.
+    // Call ConfigureForDalamud() from Plugin constructor to fix this.
+    private static ImGuiStyleVar _windowPadding = ImGuiStyleVar.WindowPadding; // ImGuiNET = 2
+    private static ImGuiStyleVar _frameRounding = ImGuiStyleVar.FrameRounding; // ImGuiNET = 12
+    private static ImGuiStyleVar _childRounding  = ImGuiStyleVar.ChildRounding;  // ImGuiNET = 7
+
+    public static void ConfigureForDalamud()
+    {
+        // Dalamud.Bindings.ImGui values: WindowPadding=1, FrameRounding=11, ChildRounding=6
+        _windowPadding = (ImGuiStyleVar)1;
+        _frameRounding = (ImGuiStyleVar)11;
+        _childRounding  = (ImGuiStyleVar)6;
+    }
+
     public static void Push()
     {
         ImGui.PushStyleColor(ImGuiCol.WindowBg,             BgSurface);
@@ -34,9 +49,9 @@ public static class Theme
         ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab,        BgOverlay);
         ImGui.PushStyleColor(ImGuiCol.ScrollbarGrabHovered, BgHover);
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,  new Vector2(12f, 8f) * UiServices.Current.GlobalScale);
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f * UiServices.Current.GlobalScale);
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding,  6f * UiServices.Current.GlobalScale);
+        ImGui.PushStyleVar(_windowPadding, new Vector2(12f, 8f) * UiServices.Current.GlobalScale);
+        ImGui.PushStyleVar(_frameRounding, 4f * UiServices.Current.GlobalScale);
+        ImGui.PushStyleVar(_childRounding,  6f * UiServices.Current.GlobalScale);
     }
 
     public static void Pop()
