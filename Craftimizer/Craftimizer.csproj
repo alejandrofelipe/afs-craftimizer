@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
     <Authors>alejandrofelipe (fork de Asriel Camora)</Authors>
-    <Version>2.20.2.0</Version>
+    <Version>2.20.3.0</Version>
     <PackageProjectUrl>https://github.com/WorkingRobot/Craftimizer.git</PackageProjectUrl>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -47,5 +47,13 @@
     <ProjectReference Include="..\Solver\Craftimizer.Solver.csproj" />
     <ProjectReference Include="..\Craftimizer.UI\Craftimizer.UI.csproj" />
   </ItemGroup>
+
+  <!-- Craftimizer.UI references ImGui.NET (standalone NuGet), which copies cimgui.dll
+       and ImGui.NET.dll to the plugin output. Dalamud provides both; shipping our own
+       causes a second cimgui.dll with GImGui==NULL, crashing Theme.Push(). -->
+  <Target Name="RemoveImGuiNativeDlls" AfterTargets="Build">
+    <Delete Files="$(OutDir)cimgui.dll"    Condition="Exists('$(OutDir)cimgui.dll')" />
+    <Delete Files="$(OutDir)ImGui.NET.dll" Condition="Exists('$(OutDir)ImGui.NET.dll')" />
+  </Target>
 
 </Project>

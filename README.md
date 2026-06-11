@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.20.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.20.3.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -51,6 +51,13 @@ dotnet run --project Craftimizer.UIStudio
 | Molecules | Empty State | 4 variantes: só título, com subtítulo, 1 botão, 2 botões |
 | Molecules | Progress Bar | Todos os estados, modos, temas de cor, agregado e slider interativo |
 | Molecules | Charts | `DrawStatArc`: tamanhos, frações, cores de stat, rings concêntricos e slider interativo |
+| Molecules | Bars | `DrawBarRow`: variações de valores, overflow, dados reais de crafting |
+| Templates | Tabbed Window | BeginTabBar + GroupPanel + DrawBarRow (ex: MacroEditor, Settings) |
+| Templates | List Window | Search input + lista scrollável + DrawEmptyState (ex: CraftingListWindow) |
+| Templates | Stat Dashboard | DrawBarRow arcos + ProgressBarComponent horizontal, slider interativo |
+| Templates | Floating Overlay | `DrawResearchTypeRow` em 4 estados × 2 modos (ex: CosmicTracker) |
+| Templates | Dialog | 3 variantes lado a lado: informativa, confirmação, destrutiva (danger button) |
+| Templates | Single Panel | GroupPanel sem footer e com footer + AlignRight (ex: RecipeNote, MacroClipboard) |
 
 ---
 
@@ -111,6 +118,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 0 build warnings
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log
 - CosmicTracker atualiza instantaneamente ao trocar de job
+- 🐛 Fix: crash `C0000005` em `Theme.Push()` — plugin não deve shipar `cimgui.dll`/`ImGui.NET.dll` pois o Dalamud os fornece; DLL duplicada causava `GImGui == NULL`
 - Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade
 - Novo solver **Next Action Forked**
 - Sync com upstream v2.11 (fix GC corruption, fix crash por RNG compartilhado, solver não gera ações supérfluas após progress completo)
