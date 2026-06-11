@@ -22,18 +22,14 @@ public sealed class FeatureHubWindow : Window, IDisposable
 
     public FeatureHubWindow(PluginClass plugin) : base("###Artificer-feature-hub",
         ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar |
-        ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoBackground |
-        ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav)
+        ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav)
     {
         _plugin = plugin;
         _plugin.WindowSystem.AddWindow(this);
         IsOpen = true;
     }
 
-    public override void PreDraw() => Theme.Push();
-    public override void PostDraw() { Theme.Pop(); base.PostDraw(); }
-
-    public override void Draw()
+    public override void PreDraw()
     {
         if (_firstFrame)
         {
@@ -42,7 +38,13 @@ public sealed class FeatureHubWindow : Window, IDisposable
             ImGui.SetNextWindowPos(new Vector2(displaySize.X - 60 * scale, displaySize.Y - 60 * scale));
             _firstFrame = false;
         }
+        Theme.Push();
+    }
 
+    public override void PostDraw() { Theme.Pop(); base.PostDraw(); }
+
+    public override void Draw()
+    {
         if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Boxes))
             ImGui.OpenPopup("##FeatureHubPopup");
         if (ImGui.IsItemHovered())
