@@ -1,3 +1,4 @@
+using Artificer.Plugin;
 using Artificer.Utils;
 using Artificer.Utils.UI;
 using Dalamud.Bindings.ImGui;
@@ -14,7 +15,6 @@ namespace Artificer.Windows;
 public sealed class FeatureHubWindow : Window, IDisposable
 {
     private readonly PluginClass _plugin;
-    private bool _firstFrame = true;
 
     public FeatureHubWindow(PluginClass plugin) : base("###Artificer-feature-hub",
         ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar |
@@ -22,18 +22,18 @@ public sealed class FeatureHubWindow : Window, IDisposable
     {
         _plugin = plugin;
         _plugin.WindowSystem.AddWindow(this);
-        IsOpen = true;
+    }
+
+    public override void Update()
+    {
+        IsOpen = Service.ClientState.IsLoggedIn;
     }
 
     public override void PreDraw()
     {
-        if (_firstFrame)
-        {
-            var displaySize = ImGui.GetIO().DisplaySize;
-            var scale = ImGuiHelpers.GlobalScale;
-            ImGui.SetNextWindowPos(new Vector2(displaySize.X - 60 * scale, displaySize.Y - 60 * scale));
-            _firstFrame = false;
-        }
+        var displaySize = ImGui.GetIO().DisplaySize;
+        var scale = ImGuiHelpers.GlobalScale;
+        ImGui.SetNextWindowPos(new Vector2(displaySize.X - 60 * scale, displaySize.Y - 60 * scale), ImGuiCond.FirstUseEver);
         Theme.Push();
     }
 

@@ -27,6 +27,7 @@ public static class Theme
         _windowPadding = (ImGuiStyleVar)1;
         _frameRounding = (ImGuiStyleVar)11;
         _childRounding  = (ImGuiStyleVar)6;
+        ImRaii.ConfigureForDalamud();
     }
 
     public static void Push()

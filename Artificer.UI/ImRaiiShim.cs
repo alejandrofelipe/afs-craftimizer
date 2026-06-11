@@ -8,6 +8,20 @@ namespace ImGuiNET;
 
 public static class ImRaii
 {
+    private static bool _dalamud;
+
+    // Called from Theme.ConfigureForDalamud() so all PushStyle calls remap to Dalamud's
+    // ImGuiStyleVar values (Dalamud moved DisabledAlpha from index 1 to 24, shifting all
+    // other indices down by 1).
+    public static void ConfigureForDalamud() { _dalamud = true; }
+
+    private static ImGuiStyleVar Remap(ImGuiStyleVar idx)
+    {
+        if (!_dalamud || (int)idx == 0) return idx;
+        if ((int)idx == 1) return (ImGuiStyleVar)24; // DisabledAlpha: ImGuiNET=1 → Dalamud=24
+        return (ImGuiStyleVar)((int)idx - 1);
+    }
+
     public struct FontDisposable : IDisposable
     {
         private bool _disposed;
@@ -71,13 +85,13 @@ public static class ImRaii
 
     public static StyleDisposable PushStyle(ImGuiStyleVar idx, float val)
     {
-        ImGui.PushStyleVar(idx, val);
+        ImGui.PushStyleVar(Remap(idx), val);
         return new StyleDisposable(1);
     }
 
     public static StyleDisposable PushStyle(ImGuiStyleVar idx, Vector2 val)
     {
-        ImGui.PushStyleVar(idx, val);
+        ImGui.PushStyleVar(Remap(idx), val);
         return new StyleDisposable(1);
     }
 
