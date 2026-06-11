@@ -26,4 +26,5 @@ StudioApp.Run(
     new CraftingListWindowStory(),
     new CraftingListAddWindowStory(),
     new CraftingListDetailWindowStory(),
+    new CraftingListMergeWindowStory(),
 ]);
