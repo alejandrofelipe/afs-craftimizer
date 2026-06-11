@@ -11,4 +11,5 @@ StudioApp.Run(
     new BarsStory(),
     new TabbedWindowStory(),
     new ListWindowStory(),
+    new StatDashboardStory(),
 ]);
