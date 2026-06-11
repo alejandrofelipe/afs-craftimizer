@@ -42,9 +42,11 @@ $allDirs | Select-Object -Skip 2 | ForEach-Object {
 ## Via Script (Recomendado)
 
 ```powershell
-.\scripts\build.ps1 -Deploy             # Build + Deploy
-.\scripts\build.ps1 -Configuration Release   # Só build
-.\scripts\build.ps1 -Deploy -NoBuild    # Só deploy (usa build existente)
+.\scripts\build.ps1 -Deploy                   # Build + Deploy
+.\scripts\build.ps1 -Deploy -NoBuild          # Só deploy (usa build existente)
+.\scripts\build.ps1 -Deploy -Bump             # Bump build number + Build + Deploy
+.\scripts\build.ps1 -Deploy -Bump -BumpType patch   # Bump patch + Build + Deploy
+.\scripts\build.ps1 -Package                  # Build Release + gerar zip em dist/
 ```
 
 ## Estrutura Deployada

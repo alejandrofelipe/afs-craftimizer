@@ -5,22 +5,32 @@ Scripts PowerShell para build, versionamento e empacotamento do plugin Craftimiz
 ## Scripts Disponíveis
 
 ### `build.ps1`
-Build e deploy do plugin.
+Build, deploy e empacotamento do plugin. Ponto central para todas as operações de build.
 
 **Uso:**
 ```powershell
-.\scripts\build.ps1                     # Build Debug
+.\scripts\build.ps1                          # Build Debug
 .\scripts\build.ps1 -Configuration Release
-.\scripts\build.ps1 -Deploy             # Build Release + deploy para XIVLauncher
-.\scripts\build.ps1 -Deploy -NoBuild    # Deploy sem rebuild
-.\scripts\build.ps1 -Studio             # Build plugin + Craftimizer.UIStudio
+.\scripts\build.ps1 -Deploy                  # Build Release + deploy para XIVLauncher
+.\scripts\build.ps1 -Deploy -NoBuild         # Deploy sem rebuild
+.\scripts\build.ps1 -Studio                  # Build plugin + Craftimizer.UIStudio
+.\scripts\build.ps1 -Bump                    # Bump build number + Build Debug
+.\scripts\build.ps1 -Bump -BumpType patch    # Bump patch + Build Debug
+.\scripts\build.ps1 -Deploy -Bump            # Bump build + Build Release + Deploy
+.\scripts\build.ps1 -Package                 # Build Release + gerar zip em dist/
+.\scripts\build.ps1 -Package -NoBuild        # Apenas empacota (sem rebuild)
+.\scripts\build.ps1 -Package -PackageOutputDir releases
 ```
 
 **Parâmetros:**
 - `-Configuration`: `Debug` ou `Release` (padrão: `Debug`)
-- `-Deploy`: Copia o build para `%APPDATA%\XIVLauncher\installedPlugins\Craftimizer\{version}`
-- `-NoBuild`: Pula o build e faz deploy do que já está em `bin\Release`
-- `-Studio`: Também builda `Craftimizer.UIStudio` (não é referenciado pelo plugin, precisa ser explícito)
+- `-Deploy`: Copia o build para `%APPDATA%\XIVLauncher\installedPlugins\Craftimizer\{version}`; mantém apenas as 2 versões mais recentes
+- `-NoBuild`: Pula o build e usa o que já está em `bin\Release`
+- `-Studio`: Também builda `Craftimizer.UIStudio` (não referenciado pelo plugin, precisa ser explícito)
+- `-Bump`: Bump de versão antes do build (padrão: build number)
+- `-BumpType`: Nível do bump — `major`, `minor`, `patch`, `build` (padrão: `build`); só usado com `-Bump`
+- `-Package`: Cria arquivo `.zip` em `dist/` (ou `-PackageOutputDir`)
+- `-PackageOutputDir`: Diretório de saída do zip (padrão: `dist`)
 
 ---
 
@@ -46,26 +56,6 @@ Incrementa a versão no `Craftimizer.csproj`.
 
 ---
 
-### `build-package.ps1`
-Gera arquivo `.zip` para distribuição Dalamud.
-
-**Uso:**
-```powershell
-.\scripts\build-package.ps1             # Build Release + cria zip em dist/
-.\scripts\build-package.ps1 -NoBuild    # Apenas empacota (sem rebuild)
-.\scripts\build-package.ps1 -OutputDir "releases"
-```
-
-**Parâmetros:**
-- `-NoBuild`: Pula o build e empacota o que já está em `bin\Release`
-- `-OutputDir`: Diretório de saída (padrão: `dist`)
-
-**Saída:**
-- Arquivo: `dist/Craftimizer-v{version}.zip`
-- Inclui: Todos os arquivos de `bin\Release` (DLLs, JSON, dependências, pasta `win-x64/`)
-
----
-
 ## Workflow Típico
 
 ### 1. Desenvolvimento
@@ -76,24 +66,21 @@ Gera arquivo `.zip` para distribuição Dalamud.
 
 ### 2. Preparar Release
 ```powershell
-# Bumpar versão patch (ex: 2.9.4.31 → 2.9.5.0)
-.\scripts\bump-version.ps1 -Type patch
-
-# Build e gerar zip para distribuição
-.\scripts\build-package.ps1
+# Bump patch + build Release + gerar zip
+.\scripts\build.ps1 -Package -Bump -BumpType patch
 ```
 
-### 3. Deploy Manual
+### 3. Deploy com bump automático
 ```powershell
-# Build Release + deploy local
-.\scripts\build.ps1 -Configuration Release -Deploy
+# Bump build number + deploy local
+.\scripts\build.ps1 -Deploy -Bump
 ```
 
 ---
 
 ## Requisitos
 
-- **PowerShell 5.1+** ou **PowerShell Core 7+**
+- **PowerShell 7+** (pwsh)
 - **.NET 10 SDK** (ou versão especificada em `Craftimizer.csproj`)
 - Scripts assumem que o SDK está em PATH ou no caminho Scoop: `C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe`
 
@@ -105,17 +92,17 @@ Gera arquivo `.zip` para distribuição Dalamud.
 Craftimizer/
 ├── dist/                          ← Pacotes .zip (gitignored)
 │   └── Craftimizer-v{version}.zip
-├── scripts/                       ← Scripts de build
-│   ├── build.ps1
-│   ├── bump-version.ps1
-│   └── build-package.ps1
+├── scripts/
+│   ├── build.ps1                  ← build, deploy, package, bump
+│   └── bump-version.ps1           ← bump de versão isolado
 ├── Craftimizer/
 │   └── bin/Release/               ← Output do plugin (deploy source)
 │       ├── Craftimizer.dll
-│       ├── Craftimizer.UI.dll     ← biblioteca de UI standalone
+│       ├── Craftimizer.UI.dll
+│       ├── ImGui.NET.dll
 │       ├── Craftimizer.Simulator.dll
 │       ├── Craftimizer.Solver.dll
-│       └── ...                    ← cimgui.dll e ImGui.NET.dll removidos pelo MSBuild
+│       └── ...                    ← cimgui.dll removida pelo MSBuild
 └── Craftimizer.UIStudio/
     └── bin/                       ← App desktop standalone (não deployado)
 ```
