@@ -28,6 +28,15 @@ New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
 Copy-Item "Craftimizer\bin\Release\*" $pluginDir -Force -Recurse
 
 Write-Host "Deploy completo: $pluginDir" -ForegroundColor Green
+
+# Manter apenas as 2 versões mais recentes
+$installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer"
+$allDirs = Get-ChildItem -Path $installBase -Directory |
+    Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+    Sort-Object { [version]$_.Name } -Descending
+$allDirs | Select-Object -Skip 2 | ForEach-Object {
+    Remove-Item $_.FullName -Recurse -Force
+}
 ```
 
 ## Via Script (Recomendado)

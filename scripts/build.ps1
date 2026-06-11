@@ -97,4 +97,15 @@ if ($Deploy) {
     Write-Host "Deploying to $pluginDir ..." -ForegroundColor Cyan
     Copy-Item "$binDir\*" $pluginDir -Force
     Write-Host "Deploy complete." -ForegroundColor Green
+
+    # Keep only the two most recent version folders (current + previous)
+    $installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer"
+    $allDirs = Get-ChildItem -Path $installBase -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+        Sort-Object { [version]$_.Name } -Descending
+    $toRemove = $allDirs | Select-Object -Skip 2
+    foreach ($dir in $toRemove) {
+        Write-Host "Removing old version: $($dir.Name)" -ForegroundColor DarkGray
+        Remove-Item $dir.FullName -Recurse -Force
+    }
 }
