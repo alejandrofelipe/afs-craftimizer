@@ -1,4 +1,5 @@
 using Artificer.Utils;
+using Artificer.Utils.UI;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -43,7 +44,9 @@ public sealed class FeatureHubWindow : Window, IDisposable
 
     public override void PostDraw() { Theme.Pop(); base.PostDraw(); }
 
-    public override void Draw()
+    public override void Draw() => DrawGuard.Try(DrawContent);
+
+    private void DrawContent()
     {
         if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Boxes))
             ImGui.OpenPopup("##FeatureHubPopup");
