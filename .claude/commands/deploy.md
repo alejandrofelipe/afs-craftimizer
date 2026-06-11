@@ -44,6 +44,7 @@ Write-Host "Deploy completo: $pluginDir" -ForegroundColor Green
 %APPDATA%\XIVLauncher\installedPlugins\Craftimizer\{version}\
 ├─ Craftimizer.dll
 ├─ Craftimizer.json
+├─ Craftimizer.UI.dll
 ├─ Craftimizer.Simulator.dll
 ├─ Craftimizer.Solver.dll
 ├─ Microsoft.Data.Sqlite.dll
@@ -51,6 +52,10 @@ Write-Host "Deploy completo: $pluginDir" -ForegroundColor Green
 ├─ Raphael.Net.dll
 └─ raphael.dll
 ```
+
+> `cimgui.dll` **não** está presente — o target MSBuild `RemoveCimguiDll` o remove pós-build.
+> Dalamud fornece o `cimgui.dll` nativo; shipar cópia duplicada causaria `GImGui == NULL`.
+> `ImGui.NET.dll` **está presente** — Dalamud SDK 15+ não distribui mais essa DLL; o plugin a shipa.
 
 ## Verificação Pós-Deploy
 

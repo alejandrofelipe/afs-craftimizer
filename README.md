@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.20.3.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.20.4.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -118,7 +118,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 0 build warnings
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log
 - CosmicTracker atualiza instantaneamente ao trocar de job
-- 🐛 Fix: crash `C0000005` em `Theme.Push()` — plugin não deve shipar `cimgui.dll`/`ImGui.NET.dll` pois o Dalamud os fornece; DLL duplicada causava `GImGui == NULL`
+- 🐛 Fix: crash `C0000005` em `Theme.Push()` — plugin não deve shipar `cimgui.dll` pois o Dalamud fornece o contexto nativo; DLL duplicada causava `GImGui == NULL`
+- 🐛 Fix: plugin não carregava com Dalamud SDK 15+ — `ImGui.NET.dll` foi removida do runtime do Dalamud; agora shipada com o plugin (wrapper gerenciado que P/Invoca no `cimgui.dll` nativo do Dalamud)
 - Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade
 - Novo solver **Next Action Forked**
 - Sync com upstream v2.11 (fix GC corruption, fix crash por RNG compartilhado, solver não gera ações supérfluas após progress completo)

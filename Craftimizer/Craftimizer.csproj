@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
     <Authors>alejandrofelipe (fork de Asriel Camora)</Authors>
-    <Version>2.20.3.0</Version>
+    <Version>2.20.4.0</Version>
     <PackageProjectUrl>https://github.com/WorkingRobot/Craftimizer.git</PackageProjectUrl>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -48,12 +48,12 @@
     <ProjectReference Include="..\Craftimizer.UI\Craftimizer.UI.csproj" />
   </ItemGroup>
 
-  <!-- Craftimizer.UI references ImGui.NET (standalone NuGet), which copies cimgui.dll
-       and ImGui.NET.dll to the plugin output. Dalamud provides both; shipping our own
-       causes a second cimgui.dll with GImGui==NULL, crashing Theme.Push(). -->
-  <Target Name="RemoveImGuiNativeDlls" AfterTargets="Build">
-    <Delete Files="$(OutDir)cimgui.dll"    Condition="Exists('$(OutDir)cimgui.dll')" />
-    <Delete Files="$(OutDir)ImGui.NET.dll" Condition="Exists('$(OutDir)ImGui.NET.dll')" />
+  <!-- Dalamud provides cimgui.dll natively; shipping our own causes a second GImGui context
+       (GImGui==NULL) that crashes Theme.Push(). ImGui.NET.dll is a managed-only wrapper
+       that P/Invokes into cimgui.dll, so shipping it is safe — we ship it, Dalamud owns
+       the native layer. Dalamud SDK 15+ no longer distributes ImGui.NET.dll at all. -->
+  <Target Name="RemoveCimguiDll" AfterTargets="Build">
+    <Delete Files="$(OutDir)cimgui.dll" Condition="Exists('$(OutDir)cimgui.dll')" />
   </Target>
 
 </Project>
