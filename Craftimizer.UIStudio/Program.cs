@@ -20,4 +20,5 @@ StudioApp.Run(
     new SynthHelperStory(),
     new RecipeNoteStory(),
     new CosmicTrackerStory(),
+    new MacroClipboardStory(),
 ]);
