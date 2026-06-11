@@ -21,4 +21,5 @@ StudioApp.Run(
     new RecipeNoteStory(),
     new CosmicTrackerStory(),
     new MacroClipboardStory(),
+    new MacroListStory(),
 ]);
