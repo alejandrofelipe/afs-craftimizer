@@ -1,9 +1,9 @@
 // Test/UIServicesTests.cs
-using Craftimizer.Utils;
+using Artificer.Utils;
 using ImGuiNET;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Craftimizer.Test;
+namespace Artificer.Test;
 
 [TestClass]
 public class UIServicesTests

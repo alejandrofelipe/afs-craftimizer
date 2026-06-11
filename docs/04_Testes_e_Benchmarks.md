@@ -1,6 +1,6 @@
 # Qualidade de Código (Testes & Benchmarks)
 
-A estabilidade do Craftimizer recai sobre seus dois projetos paralelos focados em QA estrutural. Testar localmente é mandatório antes de qualquer "Push".
+A estabilidade do Artificer recai sobre seus dois projetos paralelos focados em QA estrutural. Testar localmente é mandatório antes de qualquer "Push".
 
 ## 1. O Projeto `Test` (MSTest)
 Usamos MSTest V3 injetado via framework `Microsoft.Testing.Platform`.
@@ -18,7 +18,7 @@ Testes de tempo real de simulação, especialmente criados pra manter os limites
 
 Para rodar (Obrigatoriamente no modo `Release` para inibir JIT overhead):
 ```sh
-dotnet run -c Release --project Benchmark/Craftimizer.Benchmark.csproj
+dotnet run -c Release --project Benchmark/Artificer.Benchmark.csproj
 ```
 
 **Por que focar nisso?**

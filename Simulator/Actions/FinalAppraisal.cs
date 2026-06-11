@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class FinalAppraisal() : BaseBuffAction(
     ActionCategory.Other, 42, 19012,

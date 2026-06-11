@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class Reflect() : BaseAction(
     ActionCategory.FirstTurn, 69, 100387,

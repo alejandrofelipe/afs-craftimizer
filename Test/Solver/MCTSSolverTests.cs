@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Solver;
+namespace Artificer.Test.Solver;
 
 [TestClass]
 public class MCTSSolverTests
@@ -146,7 +146,7 @@ public class MCTSSolverTests
     public async Task Solver_Oneshot_Completes()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.Oneshot), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.Oneshot), state);
         solver.Start();
         var solution = await solver.GetSafeTask();
         Assert.IsNotNull(solution);
@@ -157,7 +157,7 @@ public class MCTSSolverTests
     public async Task Solver_OneshotForked_Completes()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.OneshotForked), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.OneshotForked), state);
         solver.Start();
         var solution = await solver.GetSafeTask();
         Assert.IsNotNull(solution);
@@ -167,7 +167,7 @@ public class MCTSSolverTests
     public async Task Solver_Stepwise_Completes()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
         solver.Start();
         var solution = await solver.GetSafeTask();
         Assert.IsNotNull(solution);
@@ -178,7 +178,7 @@ public class MCTSSolverTests
     public async Task Solver_StepwiseForked_Completes()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.StepwiseForked), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.StepwiseForked), state);
         solver.Start();
         var solution = await solver.GetSafeTask();
         Assert.IsNotNull(solution);
@@ -188,7 +188,7 @@ public class MCTSSolverTests
     public async Task Solver_StepwiseGenetic_Completes()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.StepwiseGenetic), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.StepwiseGenetic), state);
         solver.Start();
         var solution = await solver.GetSafeTask();
         Assert.IsNotNull(solution);
@@ -204,7 +204,7 @@ public class MCTSSolverTests
         state.ActionCount = 1;
 
         var config = FastConfig(SolverAlgorithm.Raphael);
-        using var solver = new Craftimizer.Solver.Solver(config, state);
+        using var solver = new Artificer.Solver.Solver(config, state);
 
         var warned = false;
         solver.OnWarn += _ => warned = true;
@@ -221,7 +221,7 @@ public class MCTSSolverTests
     public void Solver_StartTwice_Throws()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
         solver.Start();
         Assert.ThrowsException<InvalidOperationException>(() => solver.Start());
     }
@@ -230,7 +230,7 @@ public class MCTSSolverTests
     public async Task Solver_GetTaskBeforeStart_Throws()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
         await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => solver.GetTask());
     }
 
@@ -239,7 +239,7 @@ public class MCTSSolverTests
     {
         var state = new SimulationState(EasyInput());
         using var cts = new CancellationTokenSource();
-        using var solver = new Craftimizer.Solver.Solver(
+        using var solver = new Artificer.Solver.Solver(
             FastConfig(SolverAlgorithm.StepwiseGenetic) with { Iterations = 100_000, MaxIterations = 100_000, ForkCount = 32, FurcatedActionCount = 16 },
             state) { Token = cts.Token };
 
@@ -255,7 +255,7 @@ public class MCTSSolverTests
     public async Task Solver_OnLog_Fires()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
 
         var logged = false;
         solver.OnLog += _ => logged = true;
@@ -269,7 +269,7 @@ public class MCTSSolverTests
     public async Task Solver_OnNewAction_Fires()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
 
         var actions = new List<ActionType>();
         solver.OnNewAction += a => actions.Add(a);
@@ -285,7 +285,7 @@ public class MCTSSolverTests
     public void Solver_Oneshot_ProgressStage_IsNull()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.Oneshot), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.Oneshot), state);
         Assert.IsNull(solver.ProgressStage);
     }
 
@@ -293,7 +293,7 @@ public class MCTSSolverTests
     public void Solver_Stepwise_ProgressStage_IsNotNull()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
         Assert.IsNotNull(solver.ProgressStage);
         Assert.AreEqual(0, solver.ProgressStage);
     }
@@ -302,7 +302,7 @@ public class MCTSSolverTests
     public void Solver_IsIndeterminate_BeforeStart()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(SolverAlgorithm.Stepwise), state);
         Assert.IsTrue(solver.IsIndeterminate);
     }
 
@@ -310,7 +310,7 @@ public class MCTSSolverTests
     public void Solver_IsStarted_FalseBeforeStart()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
         Assert.IsFalse(solver.IsStarted);
     }
 
@@ -318,7 +318,7 @@ public class MCTSSolverTests
     public async Task Solver_IsCompletedSuccessfully_TrueAfterCompletion()
     {
         var state = new SimulationState(EasyInput());
-        using var solver = new Craftimizer.Solver.Solver(FastConfig(), state);
+        using var solver = new Artificer.Solver.Solver(FastConfig(), state);
         solver.Start();
         await solver.GetSafeTask();
         Assert.IsTrue(solver.IsCompletedSuccessfully);

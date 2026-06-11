@@ -1,6 +1,6 @@
 # /commit
 
-Prepara e executa o commit completo de uma mudança no Craftimizer:
+Prepara e executa o commit completo de uma mudança no Artificer:
 atualiza README, faz version bump, cria commit com mensagem estruturada, cria tag e faz push.
 
 **Uso:**
@@ -67,7 +67,7 @@ Executar o script:
 .\scripts\bump-version.ps1 -Type <nível>
 ```
 
-O script atualiza `Craftimizer/Craftimizer.csproj` e exibe `Version bumped: X.Y.Z.W → X.Y.Z.W`.
+O script atualiza `Artificer/Artificer.csproj` e exibe `Version bumped: X.Y.Z.W → X.Y.Z.W`.
 Ler a nova versão como `$VERSION`.
 
 Após o bump, atualizar também a linha de versão no README:
@@ -150,7 +150,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 # Staged o que foi modificado (código + README + .csproj + PROGRESS.md se atualizado)
 git add <arquivos alterados>
 git add README.md
-git add Craftimizer/Craftimizer.csproj
+git add Artificer/Artificer.csproj
 # Se o Passo 3.5 atualizou o PROGRESS.md:
 git add backlog/PROGRESS.md
 

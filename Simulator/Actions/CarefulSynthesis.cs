@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class CarefulSynthesis() : BaseAction(
     ActionCategory.Synthesis, 62, 100203,

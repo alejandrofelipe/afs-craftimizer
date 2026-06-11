@@ -1,7 +1,7 @@
-# Craftimizer — Design System
+# Artificer — Design System
 
 Documentação de referência do vocabulário visual do plugin. Usada pelo agente
-`craftimizer-specialist` para tomar decisões de UI consistentes sem precisar
+`Artificer-specialist` para tomar decisões de UI consistentes sem precisar
 re-derivar padrões do código a cada conversa.
 
 ## O que é este Design System
@@ -10,10 +10,10 @@ Um conjunto de **tokens, componentes e padrões** derivados diretamente do códi
 Não é uma especificação aspiracional — é uma descrição do que já existe.
 
 Fonte de verdade canônica (código):
-- `Craftimizer/Utils/UI/Colors.cs` — todos os tokens de cor
-- `Craftimizer/Utils/UI/Theme.cs` — backgrounds, borders, radii aplicados ao ImGui
-- `Craftimizer/Utils/UI/ImGuiUtils.cs` — componentes reutilizáveis
-- `Craftimizer/Utils/UI/ImGuiUtils.Cosmic.cs` — componentes do Cosmic Tracker
+- `Artificer/Utils/UI/Colors.cs` — todos os tokens de cor
+- `Artificer/Utils/UI/Theme.cs` — backgrounds, borders, radii aplicados ao ImGui
+- `Artificer/Utils/UI/ImGuiUtils.cs` — componentes reutilizáveis
+- `Artificer/Utils/UI/ImGuiUtils.Cosmic.cs` — componentes do Cosmic Tracker
 
 Preview visual interativo:
 - `mockup/design-system.html` — abre no browser, mostra todos os tokens e componentes

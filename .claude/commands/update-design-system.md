@@ -1,6 +1,6 @@
 # /update-design-system
 
-Cria ou atualiza o design system visual do plugin Craftimizer em `mockup/design-system.html`,
+Cria ou atualiza o design system visual do plugin Artificer em `mockup/design-system.html`,
 mantendo-o em sincronia com as fontes de verdade do código (`Colors.cs`, `Theme.cs`, `ImGuiUtils*.cs`).
 
 **Uso:** `/update-design-system`
@@ -27,20 +27,20 @@ Sem argumentos — a skill lê o estado atual do código e **reescreve o HTML co
 Ler os seguintes arquivos **antes de qualquer edição**:
 
 ```
-Craftimizer.UI/Colors.cs               ← todos os tokens de cor (Vector4)
-Craftimizer.UI/Theme.cs                ← backgrounds, borders, Push/Pop de estilo
-Craftimizer.UI/ImGuiUtils.cs           ← GroupPanel, Badge, helpers de layout
-Craftimizer.UI/ImGuiUtils.Cosmic.cs    ← componentes Cosmic (DrawResearchTypeRow, etc.)
-Craftimizer.UI/ImGuiUtils.Charts.cs    ← DrawStatArc, DrawBarRow
-Craftimizer.UI/ProgressBarComponent.cs ← modos Horizontal/Arc/Compact/Stacked
-Craftimizer/Windows/MacroEditor.cs     ← padrões de layout, Group Panels em uso
-Craftimizer/Windows/CosmicTracker.cs   ← componentes Cosmic Tracker em uso
-Craftimizer/Windows/SynthHelper.cs     ← padrões do overlay de síntese
+Artificer.UI/Colors.cs               ← todos os tokens de cor (Vector4)
+Artificer.UI/Theme.cs                ← backgrounds, borders, Push/Pop de estilo
+Artificer.UI/ImGuiUtils.cs           ← GroupPanel, Badge, helpers de layout
+Artificer.UI/ImGuiUtils.Cosmic.cs    ← componentes Cosmic (DrawResearchTypeRow, etc.)
+Artificer.UI/ImGuiUtils.Charts.cs    ← DrawStatArc, DrawBarRow
+Artificer.UI/ProgressBarComponent.cs ← modos Horizontal/Arc/Compact/Stacked
+Artificer/Windows/MacroEditor.cs     ← padrões de layout, Group Panels em uso
+Artificer/Windows/CosmicTracker.cs   ← componentes Cosmic Tracker em uso
+Artificer/Windows/SynthHelper.cs     ← padrões do overlay de síntese
 ```
 
-> Nota: `Craftimizer/Utils/UI/` contém partial classes e extensões plugin-específicas
+> Nota: `Artificer/Utils/UI/` contém partial classes e extensões plugin-específicas
 > (ex: `ProgressBarComponent.Solver.cs`, `DynamicBars.cs`, `IFontHandleExtensions.cs`).
-> A fonte de verdade dos tokens de design é `Craftimizer.UI/`, não `Craftimizer/Utils/UI/`.
+> A fonte de verdade dos tokens de design é `Artificer.UI/`, não `Artificer/Utils/UI/`.
 
 Extrair de `Colors.cs`:
 - Todos os campos `public static readonly Vector4` → nome + valores RGBA (0.0–1.0)
@@ -141,7 +141,7 @@ Design system já em sincronia com Colors.cs. Nenhuma alteração feita.
 
 ## Referências
 
-- Fontes de verdade: `Craftimizer.UI/Colors.cs`, `Craftimizer.UI/Theme.cs`, `Craftimizer.UI/ImGuiUtils*.cs`
+- Fontes de verdade: `Artificer.UI/Colors.cs`, `Artificer.UI/Theme.cs`, `Artificer.UI/ImGuiUtils*.cs`
 - Output: `mockup/design-system.html`
 - Documentação do DS: `docs/design-system/` (referência para agentes)
 - Mockups de telas: `mockup/` (não modificar em /update-design-system)

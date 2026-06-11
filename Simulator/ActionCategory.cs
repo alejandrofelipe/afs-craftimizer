@@ -1,7 +1,7 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using System.Collections.Frozen;
 
-namespace Craftimizer.Simulator;
+namespace Artificer.Simulator;
 
 public enum ActionCategory
 {

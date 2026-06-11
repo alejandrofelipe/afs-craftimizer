@@ -1,4 +1,4 @@
-# Estrutura do Projeto Craftimizer
+# Estrutura do Projeto Artificer
 
 Este documento detalha onde as coisas estão na pasta base do projeto e suas funções de desenvolvimento.
 
@@ -6,8 +6,8 @@ Este documento detalha onde as coisas estão na pasta base do projeto e suas fun
 * **`.vscode/`**: Definições comuns de ambiente para quem usa Visual Studio Code.
 * **`assets/`** e **`Images/`**: Ativos de imagem (pngs, svgs e ícones) usados primariamente na documentação (como o README) ou no gerenciador de pacotes do Dalamud.
 * **`backlog/`**: Documentação e acompanhamento solto de bugs conhecidos e *feature requests* (ex. "calcular-ping-wait-macro.md").
-* **`Benchmark/`**: Contém o CSPROJ `Craftimizer.Benchmark` para testar performance em micro-nível (BenchmarkDotNet).
-* **`Craftimizer/`**: C# Project do plugin de Interface do usuário.
+* **`Benchmark/`**: Contém o CSPROJ `Artificer.Benchmark` para testar performance em micro-nível (BenchmarkDotNet).
+* **`Artificer/`**: C# Project do plugin de Interface do usuário.
   * `Windows/`: Controllers das janelas do ImGui (`MacroEditor.cs`, `RecipeNote.cs`, `Settings.cs`).
   * `Utils/`: Integração de Hooks (como ActionUsed), leitura de memória in-game, e gerência de Ipc/Comunicações.
   * `Application/`: Regras de negócio restritas ao plugin (ex. Copy/Paste e conversões das Macros).
@@ -19,6 +19,6 @@ Este documento detalha onde as coisas estão na pasta base do projeto e suas fun
 * **`dist/`**: Gerado automaticamente após compilar. Onde o arquivo ZIP final pra importação no XIVLauncher reside.
 
 ### Configurações na Raiz:
-- **`Craftimizer.sln`**: Solução Visual Studio ligando tudo.
+- **`Artificer.sln`**: Solução Visual Studio ligando tudo.
 - **`.editorconfig`**: Mantém consistência de tabs, indentações, e lint rules (ex. regras Meziantou).
 - **`UPDATE-7.5.md`**: Log longo e histórico da compatibilidade recente.

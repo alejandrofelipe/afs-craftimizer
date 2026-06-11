@@ -1,7 +1,7 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using Action = Raphael.Action;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 internal static unsafe class RaphaelUtils
 {

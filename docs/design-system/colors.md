@@ -1,6 +1,6 @@
 # Cores — Design System
 
-Fonte de verdade: `Craftimizer/Utils/UI/Colors.cs`
+Fonte de verdade: `Artificer/Utils/UI/Colors.cs`
 
 Todos os tokens são `public static readonly Vector4` (RGBA, valores 0.0–1.0).
 Para converter para hex: `Math.Round(component * 255)` → hex de 2 dígitos.

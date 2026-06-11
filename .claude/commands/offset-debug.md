@@ -22,7 +22,7 @@ Diagnostica e corrige memory offsets quebrados em structs FFXIVClientStructs ap�
 ### Verificar Logs Dalamud
 
 ```powershell
-Get-Content "$env:APPDATA\XIVLauncher\dalamud.log" | Select-String "Craftimizer|Exception|offset"
+Get-Content "$env:APPDATA\XIVLauncher\dalamud.log" | Select-String "Artificer|Exception|offset"
 ```
 
 Procurar: `NullReferenceException`, `AccessViolationException`, valor `0x00000000`
@@ -78,7 +78,7 @@ Após aplicar novo offset:
 ## Fase 4: Documentar
 
 ```powershell
-git add Craftimizer/Utils/Infrastructure/CSRecipeNote.cs
+git add Artificer/Utils/Infrastructure/CSRecipeNote.cs
 git commit -m "fix(memory): corrigir offset ActiveCraftRecipeId após patch X.Y
 
 - Offset antigo: 0x118

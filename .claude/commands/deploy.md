@@ -1,36 +1,36 @@
 # /deploy
 
-Compila o plugin Craftimizer em Release e deploya para o XIVLauncher local, pronto para teste in-game.
+Compila o plugin Artificer em Release e deploya para o XIVLauncher local, pronto para teste in-game.
 
 ## Pré-requisitos
 
 - .NET SDK 10.0+ (`dotnet --version`)
 - Código compilável (0 erros)
 - XIVLauncher instalado em `%APPDATA%\XIVLauncher`
-- Versão definida em `Craftimizer/Craftimizer.csproj`
+- Versão definida em `Artificer/Artificer.csproj`
 
 ## Procedimento Padrão
 
 ```powershell
 # 1. Build Release
-dotnet build Craftimizer/Craftimizer.csproj -c Release --nologo
+dotnet build Artificer/Artificer.csproj -c Release --nologo
 if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 
 # 2. Ler versão
-$xml = [xml](Get-Content Craftimizer/Craftimizer.csproj)
+$xml = [xml](Get-Content Artificer/Artificer.csproj)
 $version = $xml.Project.PropertyGroup[0].Version
 
 # 3. Criar diretório de deploy
-$pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer\$version"
+$pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Artificer\$version"
 New-Item -ItemType Directory -Path $pluginDir -Force | Out-Null
 
 # 4. Copiar arquivos
-Copy-Item "Craftimizer\bin\Release\*" $pluginDir -Force -Recurse
+Copy-Item "Artificer\bin\Release\*" $pluginDir -Force -Recurse
 
 Write-Host "Deploy completo: $pluginDir" -ForegroundColor Green
 
 # Manter apenas as 2 versões mais recentes
-$installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer"
+$installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Artificer"
 $allDirs = Get-ChildItem -Path $installBase -Directory |
     Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
     Sort-Object { [version]$_.Name } -Descending
@@ -52,12 +52,12 @@ $allDirs | Select-Object -Skip 2 | ForEach-Object {
 ## Estrutura Deployada
 
 ```
-%APPDATA%\XIVLauncher\installedPlugins\Craftimizer\{version}\
-├─ Craftimizer.dll
-├─ Craftimizer.json
-├─ Craftimizer.UI.dll
-├─ Craftimizer.Simulator.dll
-├─ Craftimizer.Solver.dll
+%APPDATA%\XIVLauncher\installedPlugins\Artificer\{version}\
+├─ Artificer.dll
+├─ Artificer.json
+├─ Artificer.UI.dll
+├─ Artificer.Simulator.dll
+├─ Artificer.Solver.dll
 ├─ Microsoft.Data.Sqlite.dll
 ├─ Microsoft.Extensions.Caching.Memory.dll
 ├─ Raphael.Net.dll
@@ -71,14 +71,14 @@ $allDirs | Select-Object -Skip 2 | ForEach-Object {
 ## Verificação Pós-Deploy
 
 ```powershell
-$version = ([xml](Get-Content Craftimizer/Craftimizer.csproj)).Project.PropertyGroup[0].Version
-Test-Path "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer\$version\Craftimizer.dll"
+$version = ([xml](Get-Content Artificer/Artificer.csproj)).Project.PropertyGroup[0].Version
+Test-Path "$env:APPDATA\XIVLauncher\installedPlugins\Artificer\$version\Artificer.dll"
 ```
 
 ## Testes In-Game (Manual)
 
-1. **Plugin carregado**: `/xlplugins` → "Craftimizer" na lista
-2. **Comando**: `/craftimizer` abre janela principal
+1. **Plugin carregado**: `/xlplugins` → "Artificer" na lista
+2. **Comando**: `/Artificer` abre janela principal
 3. **Editor**: `/crafteditor` abre MacroEditor
 4. **Overlays**: Abrir crafting log → overlay aparece
 
@@ -86,12 +86,12 @@ Test-Path "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer\$version\Crafti
 
 **Build falhou:**
 ```powershell
-dotnet build Craftimizer/Craftimizer.csproj -c Release --verbosity detailed
+dotnet build Artificer/Artificer.csproj -c Release --verbosity detailed
 ```
 
 **Plugin não carrega in-game:**
 ```powershell
-Get-Content "$env:APPDATA\XIVLauncher\dalamud.log" | Select-String "Craftimizer"
+Get-Content "$env:APPDATA\XIVLauncher\dalamud.log" | Select-String "Artificer"
 ```
 
 **Access denied ao copiar (jogo rodando):**
@@ -106,7 +106,7 @@ $env:PATH = "C:\Users\aleja\scoop\apps\dotnet-sdk\current;$env:PATH"
 **Versão antiga in-game:**
 ```powershell
 dotnet clean
-dotnet build Craftimizer/Craftimizer.csproj -c Release
+dotnet build Artificer/Artificer.csproj -c Release
 .\scripts\build.ps1 -Deploy -NoBuild
 ```
 

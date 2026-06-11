@@ -1,8 +1,8 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 
-namespace Craftimizer.Simulator;
+namespace Artificer.Simulator;
 
 public class Simulator
 {

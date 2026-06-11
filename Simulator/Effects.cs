@@ -2,7 +2,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Craftimizer.Simulator;
+namespace Artificer.Simulator;
 
 [StructLayout(LayoutKind.Auto)]
 public record struct Effects

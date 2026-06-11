@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class GreatStrides() : BaseBuffAction(
     ActionCategory.Buffs, 21, 260,

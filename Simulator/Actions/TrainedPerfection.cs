@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class TrainedPerfection() : BaseBuffAction(
     ActionCategory.Durability, 100, 100475,

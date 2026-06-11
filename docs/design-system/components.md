@@ -2,7 +2,7 @@
 
 Catálogo de todos os componentes reutilizáveis, com assinatura C#, comportamento e exemplo de uso.
 
-Fonte de verdade: `Craftimizer/Utils/UI/ImGuiUtils.cs`, `ImGuiUtils.Progress.cs`, `ImGuiUtils.Cosmic.cs`
+Fonte de verdade: `Artificer/Utils/UI/ImGuiUtils.cs`, `ImGuiUtils.Progress.cs`, `ImGuiUtils.Cosmic.cs`
 
 ---
 
@@ -100,7 +100,7 @@ para simular a transição de cor in-game.
 ImGuiUtils.DrawConditionIndicator(Condition condition, float spacing);
 ```
 
-- `condition`: valor do enum `Craftimizer.Simulator.Condition`
+- `condition`: valor do enum `Artificer.Simulator.Condition`
 - `spacing`: gap em pixels entre o círculo e o texto (antes do scale)
 
 ### Comportamento visual

@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class PrudentTouch() : BaseAction(
     ActionCategory.Quality, 66, 100227,

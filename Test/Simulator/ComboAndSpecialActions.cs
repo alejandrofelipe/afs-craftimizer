@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Simulator;
+namespace Artificer.Test.Simulator;
 
 /// <summary>
 /// Tests for combo actions, TrainedEye, and CarefulObservation behaviour.

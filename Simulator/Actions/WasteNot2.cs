@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class WasteNot2() : BaseBuffAction(
     ActionCategory.Durability, 47, 4639,

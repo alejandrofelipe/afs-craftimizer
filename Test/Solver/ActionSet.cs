@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Solver;
+namespace Artificer.Test.Solver;
 
 [TestClass]
 public class ActionSetTests
@@ -90,7 +90,7 @@ public class ActionSetTests
     public void TestRandomIndex()
     {
 #if IS_DETERMINISTIC
-        Assert.Inconclusive("Craftimizer is currently built for determinism; all random actions are not actually random.");
+        Assert.Inconclusive("Artificer is currently built for determinism; all random actions are not actually random.");
 #endif
 
         var actions = new[]
@@ -124,7 +124,7 @@ public class ActionSetTests
     public void TestPopRandom()
     {
 #if IS_DETERMINISTIC
-        Assert.Inconclusive("Craftimizer is currently built for determinism; all random actions are not actually random.");
+        Assert.Inconclusive("Artificer is currently built for determinism; all random actions are not actually random.");
 #endif
 
         var actions = new[]

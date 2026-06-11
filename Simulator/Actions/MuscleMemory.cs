@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class MuscleMemory() : BaseAction(
     ActionCategory.FirstTurn, 54, 100379,

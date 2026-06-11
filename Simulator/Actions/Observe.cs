@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class Observe() : BaseAction(
     ActionCategory.Other, 13, 100010,

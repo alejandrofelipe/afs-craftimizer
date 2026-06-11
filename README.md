@@ -1,9 +1,9 @@
-# Craftimizer
+# Artificer
 
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.20.4.2 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.20.4.4 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -12,16 +12,16 @@ Plugin Dalamud para FFXIV que otimiza macros de crafting usando simulação e bu
 ## Estrutura do Projeto
 
 ```
-Craftimizer/            ← Plugin Dalamud (entry point, janelas, hooks, serviços)
-Craftimizer.UI/         ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NET direto)
-Craftimizer.UIStudio/   ← App desktop standalone para testar UI sem o FFXIV rodando
+Artificer/            ← Plugin Dalamud (entry point, janelas, hooks, serviços)
+Artificer.UI/         ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NET direto)
+Artificer.UIStudio/   ← App desktop standalone para testar UI sem o FFXIV rodando
 Simulator/              ← Lógica de simulação de crafting (puro C#, sem dependências externas)
 Solver/                 ← Algoritmos MCTS, genético e Raphael
 Test/                   ← 194 testes cobrindo Simulator e Solver
 Benchmark/              ← Benchmarks de performance do solver
 ```
 
-### Craftimizer.UI
+### Artificer.UI
 
 Biblioteca standalone (sem Dalamud) com todos os componentes ImGui reutilizáveis:
 
@@ -33,13 +33,13 @@ Biblioteca standalone (sem Dalamud) com todos os componentes ImGui reutilizávei
 
 Pode ser referenciada por qualquer projeto .NET sem precisar de Dalamud instalado.
 
-### Craftimizer.UIStudio
+### Artificer.UIStudio
 
 App desktop standalone (Silk.NET + OpenGL + GLFW) estilo Storybook para desenvolver e inspecionar componentes visuais sem precisar abrir o FFXIV.
 
 **Como executar:**
 ```powershell
-dotnet run --project Craftimizer.UIStudio
+dotnet run --project Artificer.UIStudio
 ```
 
 **Stories disponíveis:**
@@ -109,8 +109,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 ## Diferenças deste Fork
 
 - Compatibilidade verificada com FFXIV 7.51+
-- **`Craftimizer.UI`** — biblioteca de UI extraída para projeto standalone sem Dalamud; permite testes de componentes fora do jogo
-- **`Craftimizer.UIStudio`** — app Storybook standalone (Silk.NET/OpenGL) para desenvolver e inspecionar componentes visuais sem o FFXIV rodando
+- **`Artificer.UI`** — biblioteca de UI extraída para projeto standalone sem Dalamud; permite testes de componentes fora do jogo
+- **`Artificer.UIStudio`** — app Storybook standalone (Silk.NET/OpenGL) para desenvolver e inspecionar componentes visuais sem o FFXIV rodando
 - Barras de progresso redesenhadas (`ProgressBarComponent` com modos Horizontal/Arc/Compact/Stacked e progresso agregado)
 - Cache de ícones migrado para `IMemoryCache` com eviction configurável
 - Reorganização estrutural do projeto para layout .NET padrão
@@ -141,7 +141,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
    https://raw.githubusercontent.com/alejandrofelipe/afs-craftimizer/main/repo.json
    ```
 3. Clique **Save and Close**
-4. No **Plugin Installer**, procure por "Craftimizer" e instale
+4. No **Plugin Installer**, procure por "Artificer" e instale
 
 ### Versão oficial
 
@@ -153,12 +153,12 @@ Para a versão estável sem customizações, instale o [Craftimizer original](ht
 
 Plugin:
 ```powershell
-dotnet build Craftimizer/Craftimizer.csproj -c Release
+dotnet build Artificer/Artificer.csproj -c Release
 ```
 
 UI Studio:
 ```powershell
-dotnet run --project Craftimizer.UIStudio
+dotnet run --project Artificer.UIStudio
 ```
 
 Testes (194 testes cobrindo Simulator e Solver):

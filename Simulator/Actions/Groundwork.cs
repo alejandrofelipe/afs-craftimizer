@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class Groundwork() : BaseAction(
     ActionCategory.Synthesis, 72, 100403,

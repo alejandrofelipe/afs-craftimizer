@@ -1,6 +1,6 @@
 # /version-bump
 
-Incrementa a versão do plugin Craftimizer seguindo convenções semânticas MAJOR.MINOR.PATCH.BUILD.
+Incrementa a versão do plugin Artificer seguindo convenções semânticas MAJOR.MINOR.PATCH.BUILD.
 
 ## Formato: MAJOR.MINOR.PATCH.BUILD
 

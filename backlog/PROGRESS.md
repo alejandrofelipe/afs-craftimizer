@@ -1,4 +1,4 @@
-# Progresso de Implementação — Craftimizer
+# Progresso de Implementação — Artificer
 
 Última revisão: 2026-06-10 (sessão 9)
 
@@ -16,7 +16,7 @@
 | 🐛 Fix: ObjectDisposedException RecipeNote | v2.10.5.9 |
 | Reorganização estrutural do projeto | v2.11.0.0 |
 | Otimizações técnicas: load rápido, reuso, DI | v2.11.0.0 |
-| Remover prefixo "Craftimizer" dos títulos de janela | v2.11.0.2 |
+| Remover prefixo "Artificer" dos títulos de janela | v2.11.0.2 |
 | Componente reutilizável de Empty State | v2.11.0.2 |
 | 🐛 Fix: Solver progress bar plana no MacroEditor | v2.11.0.2 |
 | 🐛 Fix: CosmicTracker XP desatualizado ao trocar job | v2.11.0.3 |
@@ -31,7 +31,7 @@
 | Settings: aba Experimental (Listas de Coleta + Gear Wear Tracking) | v2.17.0.0 |
 | Settings: reorganizar conteúdo das abas — opções movidas para abas corretas | v2.18.0.0 |
 | 🐛 Fix: Ações destrutivas sem confirmação (remover receita + limpar gear wear) | v2.18.1.0 |
-| Migração de componentes visuais para Craftimizer.UI | v2.20.0.0 |
+| Migração de componentes visuais para Artificer.UI | v2.20.0.0 |
 
 ---
 

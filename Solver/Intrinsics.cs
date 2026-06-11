@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 [SkipLocalsInit]
 [Pure]

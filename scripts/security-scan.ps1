@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Roda os 3 scanners de segurança no projeto Craftimizer sem precisar de Docker.
+    Roda os 3 scanners de segurança no projeto Artificer sem precisar de Docker.
 
 .DESCRIPTION
     1. dotnet list package --vulnerable  — CVEs nas dependências NuGet
@@ -32,8 +32,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $root   = Split-Path $PSScriptRoot -Parent
-$csproj = "$root\Craftimizer\Craftimizer.csproj"
-$sln    = "$root\Craftimizer.sln"
+$csproj = "$root\Artificer\Artificer.csproj"
+$sln    = "$root\Artificer.sln"
 
 $scoopDotnet = "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"
 $dotnet = if (Test-Path $scoopDotnet) { $scoopDotnet } else { "dotnet" }
@@ -58,7 +58,7 @@ function Write-Section([string]$title) {
 # ---------------------------------------------------------------
 Write-Section "1/3 — NuGet Vulnerability Audit (dotnet list package --vulnerable)"
 
-# Usar a solution para cobrir todos os projetos (Craftimizer, Craftimizer.UI, etc.)
+# Usar a solution para cobrir todos os projetos (Artificer, Artificer.UI, etc.)
 # --source restringe ao nuget.org, evitando erro NU1301 do feed Dalamud (404)
 $auditOutput = & $dotnet list $sln package --vulnerable --include-transitive `
     --source https://api.nuget.org/v3/index.json 2>&1

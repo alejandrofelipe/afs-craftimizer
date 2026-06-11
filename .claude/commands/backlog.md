@@ -1,6 +1,6 @@
 # /backlog
 
-Cria um novo item de backlog para o Craftimizer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md`.
+Cria um novo item de backlog para o Artificer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md`.
 
 **Uso:** `/backlog <título ou descrição do item>`
 
@@ -83,7 +83,7 @@ Incluir os links encontrados na seção **Referências** do template. Se não ho
 
 ## Arquivos Afetados
 
-- `Craftimizer/[Arquivo].cs`
+- `Artificer/[Arquivo].cs`
 
 ## Status
 
@@ -181,7 +181,7 @@ Incluir os links encontrados na seção **Referências** do template. Se não ho
 ### Novos Arquivos
 
 ```
-Craftimizer/
+Artificer/
   [Listar arquivos novos com breve descrição]
 ```
 

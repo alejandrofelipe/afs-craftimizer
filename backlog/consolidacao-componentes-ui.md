@@ -4,13 +4,13 @@
 **Status:** 📝 Rascunho
 **Tipo:** Refactor / Qualidade de Código
 **Estimativa total:** 2–3h
-**Escopo:** `Craftimizer.UI/` — sem alterações de comportamento ou API pública
+**Escopo:** `Artificer.UI/` — sem alterações de comportamento ou API pública
 
 ---
 
 ## Resumo Executivo
 
-Auditoria identificou 6 padrões de código similar ou duplicado em `Craftimizer.UI/`. Nenhum representa bug — são oportunidades de DRY que reduzem LOC, melhoram legibilidade e facilitam futuras manutenções. Todas as mudanças são internas (não afetam callers externos).
+Auditoria identificou 6 padrões de código similar ou duplicado em `Artificer.UI/`. Nenhum representa bug — são oportunidades de DRY que reduzem LOC, melhoram legibilidade e facilitam futuras manutenções. Todas as mudanças são internas (não afetam callers externos).
 
 ---
 
@@ -18,7 +18,7 @@ Auditoria identificou 6 padrões de código similar ou duplicado em `Craftimizer
 
 ### F1 — `DrawResearchTypeRow` e `DrawResearchTypeRowMinimized` fazem a mesma coisa com variantes leves
 
-**Arquivos:** `Craftimizer.UI/ImGuiUtils.Cosmic.cs`
+**Arquivos:** `Artificer.UI/ImGuiUtils.Cosmic.cs`
 
 As duas funções (linhas ~22–156 e ~162–207) calculam `fillFraction` e `upgradeFraction` com código idêntico. A diferença real é o layout (full vs compacto com tooltip). O switch de cor `ResearchTypeState → Colors.Cosmic*` é duplicado manualmente nas duas.
 
@@ -33,7 +33,7 @@ As duas funções (linhas ~22–156 e ~162–207) calculam `fillFraction` e `upg
 
 ### F2 — Switch `ResearchTypeState → cor` copiado 2× no mesmo arquivo
 
-**Arquivo:** `Craftimizer.UI/ImGuiUtils.Cosmic.cs` (linhas ~27–33 e ~169–181)
+**Arquivo:** `Artificer.UI/ImGuiUtils.Cosmic.cs` (linhas ~27–33 e ~169–181)
 
 O mesmo switch `state switch { Active => CosmicActive, Complete => ..., Maxed => ..., _ => ... }` aparece duas vezes no mesmo arquivo, com leve variação nos campos retornados (single color vs tuple).
 
@@ -54,7 +54,7 @@ private static (Vector4 Label, Vector4 Num, Vector4 Upgrade) GetResearchTypeColo
 
 ### F3 — `AlignRight()` existe mas não é usada em `ImGuiUtils.Cosmic.cs`
 
-**Arquivos:** `Craftimizer.UI/ImGuiUtils.cs` (linha ~271), `Craftimizer.UI/ImGuiUtils.Cosmic.cs` (linhas ~67, 86, 116, 125, 140)
+**Arquivos:** `Artificer.UI/ImGuiUtils.cs` (linha ~271), `Artificer.UI/ImGuiUtils.Cosmic.cs` (linhas ~67, 86, 116, 125, 140)
 
 `ImGuiUtils.AlignRight(width, containerWidth)` já existe como helper público. O arquivo Cosmic repete `ImGui.SameLine(barWidth - textWidth)` manualmente 5× em vez de chamar o helper.
 
@@ -67,7 +67,7 @@ Substituir as 5 ocorrências por `AlignRight(textWidth, barWidth)`.
 
 ### F4 — `Tooltip()` e `TooltipWrapped()` diferem apenas por um parâmetro de wrap
 
-**Arquivo:** `Craftimizer.UI/ImGuiUtils.cs` (linhas ~217–230)
+**Arquivo:** `Artificer.UI/ImGuiUtils.cs` (linhas ~217–230)
 
 ```csharp
 // atual: dois métodos separados
@@ -94,7 +94,7 @@ Manter `TooltipWrapped` como alias com `[Obsolete]` por uma versão antes de del
 
 ### F5 — Arc caps em `DrawStatArc` repetem a mesma matemática 2×
 
-**Arquivo:** `Craftimizer.UI/ImGuiUtils.Charts.cs` (linhas ~30–31 e ~38–39)
+**Arquivo:** `Artificer.UI/ImGuiUtils.Charts.cs` (linhas ~30–31 e ~38–39)
 
 Track caps (cor de fundo) e fill caps (cor preenchida) usam o mesmo cálculo trigonométrico:
 ```csharp
@@ -121,7 +121,7 @@ private static void DrawArcCaps(ImDrawListPtr drawList, Vector2 center, float ra
 
 ### F6 — `IFontHandleExtensions`: `CalcTextSize` e `Text` sem callers
 
-**Arquivo:** `Craftimizer/Utils/UI/IFontHandleExtensions.cs`
+**Arquivo:** `Artificer/Utils/UI/IFontHandleExtensions.cs`
 
 `GetFontSize()` — 1 caller em `Settings.About.cs`.
 `CalcTextSize()` — 0 callers.
@@ -152,7 +152,7 @@ Deletar `CalcTextSize` e `Text`. Avaliar se `GetFontSize` pode ser inlined no ú
 - [ ] 0 warnings de compilação após cada mudança
 - [ ] Nenhuma alteração de comportamento visual (UIStudio deve renderizar igual antes/depois)
 - [ ] Callers externos não são quebrados (nenhuma mudança de assinatura pública sem overload de compatibilidade)
-- [ ] Build `dotnet build Craftimizer/Craftimizer.csproj -c Release` passa limpo
+- [ ] Build `dotnet build Artificer/Artificer.csproj -c Release` passa limpo
 
 ---
 

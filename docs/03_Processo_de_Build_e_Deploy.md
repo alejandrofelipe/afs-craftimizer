@@ -10,8 +10,8 @@ O processo diário baseia-se no script:
 ```powershell
 ./scripts/build.ps1
 ```
-Esse script faz um restore (`dotnet restore`) e gera `.dll` e `.json` locais no caminho de output (ex: `Craftimizer/bin/Debug/`). 
-**Dica Dalamud**: Dentro do menu de configurações experimentais do FFXIV Dalamud, adicione o caminho do projeto local (ex: `C:\Users\...\Craftimizer\Craftimizer\bin\Debug`) para testar instantaneamente via "DevPlugins" hot-reload.
+Esse script faz um restore (`dotnet restore`) e gera `.dll` e `.json` locais no caminho de output (ex: `Artificer/bin/Debug/`). 
+**Dica Dalamud**: Dentro do menu de configurações experimentais do FFXIV Dalamud, adicione o caminho do projeto local (ex: `C:\Users\...\Artificer\Artificer\bin\Debug`) para testar instantaneamente via "DevPlugins" hot-reload.
 
 ## 2. Empacotamento (Release ZIP)
 Ao finalizar os testes de QA ou Features:
@@ -19,7 +19,7 @@ Ao finalizar os testes de QA ou Features:
 ./scripts/build-package.ps1
 ```
 Isto dispara o compilador para o mode `Release` e executa um script pós-build que empacota os binários otimizados de todos os projetos, arquivos de Assets, e `.json` do manifest do dalamud. 
-O arquivo final (ex: `Craftimizer-v2.10.1.1.zip`) cai na pasta secreta `dist/`.
+O arquivo final (ex: `Artificer-v2.10.1.1.zip`) cai na pasta secreta `dist/`.
 
 ## 3. Gerência de Versão Semântica (Bump Versioning)
 Não altere a versão do `.csproj` manualmente! Utilize o script dedicado:

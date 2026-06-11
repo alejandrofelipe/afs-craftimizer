@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class DaringTouch() : BaseAction(
     ActionCategory.Quality, 96, 100451,

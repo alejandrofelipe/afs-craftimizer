@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 [StructLayout(LayoutKind.Auto)]
 public sealed class RootScores

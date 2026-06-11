@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class TrainedEye() : BaseAction(
     ActionCategory.FirstTurn, 80, 100283,

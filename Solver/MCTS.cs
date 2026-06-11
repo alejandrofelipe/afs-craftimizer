@@ -1,11 +1,11 @@
-using Craftimizer.Simulator.Actions;
-using Craftimizer.Simulator;
+using Artificer.Simulator.Actions;
+using Artificer.Simulator;
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
-using Node = Craftimizer.Solver.ArenaNode<Craftimizer.Solver.SimulationNode>;
+using Node = Artificer.Solver.ArenaNode<Artificer.Solver.SimulationNode>;
 using System.Runtime.Intrinsics;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 // https://github.com/alostsock/crafty/blob/cffbd0cad8bab3cef9f52a3e3d5da4f5e3781842/crafty/src/simulator.rs
 public sealed class MCTS

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal abstract class BaseBuffAction(
         ActionCategory category, int level, uint actionId,

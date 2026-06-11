@@ -1,10 +1,10 @@
-using Craftimizer.Simulator;
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator;
+using Artificer.Simulator.Actions;
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 [StructLayout(LayoutKind.Auto)]
 public struct SimulationNode(in SimulationState state, ActionType? action, CompletionState completionState, ActionSet actions)

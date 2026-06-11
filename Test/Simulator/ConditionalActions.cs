@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Simulator;
+namespace Artificer.Test.Simulator;
 
 /// <summary>
 /// Tests for actions that require special conditions (Good/Excellent/HeartAndSoul)

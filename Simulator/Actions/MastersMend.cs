@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class MastersMend() : BaseAction(
     ActionCategory.Durability, 7, 100003,

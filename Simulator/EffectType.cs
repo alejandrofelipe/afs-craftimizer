@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator;
+namespace Artificer.Simulator;
 
 public enum EffectType
 {

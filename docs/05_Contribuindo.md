@@ -13,6 +13,6 @@ Buscamos garantir que o plugin fique polido, seguro para uso geral sem bans pela
 4. **Mandatório:**
    - Execute o `.editorconfig` lint / formatador da IDE para padronização.
    - Execute o Test suite e confirme 0 testes quebrados.
-   - Adicione novos testes (em `Craftimizer.Test`) caso mude um script nas sub-pastas `/Actions/`.
+   - Adicione novos testes (em `Artificer.Test`) caso mude um script nas sub-pastas `/Actions/`.
 5. Faça seus Commits.
 6. Submeta o PR. Aprovamos ou indicamos otimizações baseadas no *hotpath* de memórias alocadas.

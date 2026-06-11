@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Simulator;
+namespace Artificer.Test.Simulator;
 
 [TestClass]
 public class SimulatorTests

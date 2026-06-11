@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class RefinedTouch() : BaseAction(
     ActionCategory.Quality, 92, 100443,

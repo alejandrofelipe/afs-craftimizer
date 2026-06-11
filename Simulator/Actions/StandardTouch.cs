@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class StandardTouch() : BaseAction(
     ActionCategory.Quality, 18, 100004,

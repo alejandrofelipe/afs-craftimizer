@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class RapidSynthesis() : BaseAction(
     ActionCategory.Synthesis, 9, 100363,

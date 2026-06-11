@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class ImmaculateMend() : BaseAction(
     ActionCategory.Durability, 98, 100467,

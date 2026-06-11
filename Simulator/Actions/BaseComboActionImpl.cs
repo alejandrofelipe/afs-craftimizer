@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal abstract class BaseComboAction<A, B>(
     ActionType actionTypeA, ActionType actionTypeB,

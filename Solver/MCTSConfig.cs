@@ -1,7 +1,7 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using System.Runtime.InteropServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 [StructLayout(LayoutKind.Auto)]
 public readonly record struct MCTSConfig

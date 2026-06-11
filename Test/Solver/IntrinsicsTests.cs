@@ -1,6 +1,6 @@
 using System.Runtime.Intrinsics;
 
-namespace Craftimizer.Test.Solver;
+namespace Artificer.Test.Solver;
 
 [TestClass]
 public class IntrinsicsTests

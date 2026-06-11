@@ -1,0 +1,277 @@
+using Artificer.Simulator;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using Lumina.Excel.Sheets;
+using System;
+using System.Linq;
+using Artificer.Plugin;
+
+namespace Artificer.Utils;
+
+public static unsafe class Gearsets
+{
+    public record struct GearsetStats(int CP, int Craftsmanship, int Control);
+    public record struct GearsetMateria(ushort Type, ushort Grade);
+    
+    /// <summary>
+    /// Represents a single gear item in a gearset.
+    /// </summary>
+    /// <param name="ItemId">Item ID from Lumina sheets</param>
+    /// <param name="IsHq">Whether the item is high quality</param>
+    /// <param name="Materia">Materia socketed in the item</param>
+    /// <param name="Condition">Item condition/durability (0-30000). Max condition is 30000 (100%).</param>
+    public record struct GearsetItem(uint ItemId, bool IsHq, GearsetMateria[] Materia, ushort Condition);
+
+    private static readonly GearsetStats BaseStats = new(180, 0, 0);
+
+    public const int ParamCP = 11;
+    public const int ParamCraftsmanship = 70;
+    public const int ParamControl = 71;
+
+    public static GearsetItem[] GetGearsetItems(InventoryContainer* container)
+    {
+        var items = new GearsetItem[(int)container->Size];
+        for (var i = 0; i < container->Size; ++i)
+        {
+            var item = container->Items[i];
+            
+            // Read condition from InventoryItem (0-30000 range)
+            // If item has no durability (e.g., soul crystal), Condition will be 0
+            var condition = item.Condition;
+            
+            items[i] = new(
+                item.ItemId, 
+                item.Flags.HasFlag(InventoryItem.ItemFlags.HighQuality), 
+                GetMaterias(item.Materia, item.MateriaGrades),
+                condition
+            );
+        }
+        return items;
+    }
+
+    public static GearsetItem[] GetGearsetItems(RaptureGearsetModule.GearsetEntry* entry)
+    {
+        var gearsetItems = entry->Items;
+        var items = new GearsetItem[14];
+        for (var i = 0; i < 14; ++i)
+        {
+            var item = gearsetItems[i];
+            // Saved gearsets don't store condition, default to max (30000)
+            items[i] = new(item.ItemId % 1000000, item.ItemId > 1000000, GetMaterias(item.Materia, item.MateriaGrades), 30000);
+        }
+        return items;
+    }
+
+    public static GearsetStats CalculateGearsetItemStats(GearsetItem gearsetItem)
+    {
+        var item = LuminaSheets.ItemSheet.GetRow(gearsetItem.ItemId)!;
+
+        int cp = 0, craftsmanship = 0, control = 0;
+
+        void IncreaseStat(uint baseParam, int amount)
+        {
+            if (baseParam == ParamCP)
+                cp += amount;
+            else if (baseParam == ParamCraftsmanship)
+                craftsmanship += amount;
+            else if (baseParam == ParamControl)
+                control += amount;
+        }
+
+        foreach (var statIncrease in item.BaseParam.Zip(item.BaseParamValue))
+            IncreaseStat(statIncrease.First.RowId, statIncrease.Second);
+        if (gearsetItem.IsHq)
+            foreach (var statIncrease in item.BaseParamSpecial.Zip(item.BaseParamValueSpecial))
+                IncreaseStat(statIncrease.First.RowId, statIncrease.Second);
+
+        foreach (var gearsetMateria in gearsetItem.Materia)
+        {
+            if (gearsetMateria.Type == 0)
+                continue;
+
+            var materia = LuminaSheets.MateriaSheet.GetRow(gearsetMateria.Type)!;
+            IncreaseStat(materia.BaseParam.RowId, materia.Value[gearsetMateria.Grade]);
+        }
+
+        cp = Math.Min(cp, CalculateParamCap(item, ParamCP));
+        craftsmanship = Math.Min(craftsmanship, CalculateParamCap(item, ParamCraftsmanship));
+        control = Math.Min(control, CalculateParamCap(item, ParamControl));
+
+        return new(cp, craftsmanship, control);
+    }
+
+    public static GearsetStats CalculateGearsetStats(GearsetItem[] gearsetItems) =>
+        gearsetItems.Select(CalculateGearsetItemStats).Aggregate(BaseStats, (a, b) => new(a.CP + b.CP, a.Craftsmanship + b.Craftsmanship, a.Control + b.Control));
+
+    public static GearsetStats CalculateGearsetCurrentStats()
+    {
+        var attributes = UIState.Instance()->PlayerState.Attributes;
+
+        return new()
+        {
+            CP = attributes[ParamCP],
+            Craftsmanship = attributes[ParamCraftsmanship],
+            Control = attributes[ParamControl],
+        };
+    }
+
+    public static (CharacterStats Stats, GearsetItem[] Items)? TryComputeCurrentStats(int characterLevel, bool canUseManipulation)
+    {
+        var gearStats = CalculateGearsetCurrentStats();
+        var container = InventoryManager.Instance()->GetInventoryContainer(InventoryType.EquippedItems);
+        if (container == null)
+            return null;
+        var gearItems = GetGearsetItems(container);
+        return (CalculateCharacterStats(gearStats, gearItems, characterLevel, canUseManipulation), gearItems);
+    }
+
+    public static CharacterStats CalculateCharacterStats(GearsetItem[] gearsetItems, int characterLevel, bool canUseManipulation) =>
+        CalculateCharacterStats(CalculateGearsetStats(gearsetItems), gearsetItems, characterLevel, canUseManipulation);
+
+    public static CharacterStats CalculateCharacterStats(GearsetStats gearsetStats, GearsetItem[] gearsetItems, int characterLevel, bool canUseManipulation) =>
+        new()
+        {
+            CP = gearsetStats.CP,
+            Craftsmanship = gearsetStats.Craftsmanship,
+            Control = gearsetStats.Control,
+            Level = characterLevel,
+            CanUseManipulation = canUseManipulation,
+            HasSplendorousBuff = gearsetItems.Any(IsSplendorousTool),
+            IsSpecialist = gearsetItems.Any(IsSpecialistSoulCrystal),
+        };
+
+    public static bool HasDelineations() =>
+        InventoryManager.Instance()->GetInventoryItemCount(28724) > 0;
+
+    public static bool IsItem(GearsetItem item, uint itemId) =>
+        item.ItemId == itemId;
+
+    public static bool IsSpecialistSoulCrystal(GearsetItem item)
+    {
+        if (item.ItemId == 0)
+            return false;
+
+        var luminaItem = LuminaSheets.ItemSheet.GetRow(item.ItemId)!;
+        //     Soul Crystal ItemUICategory                                           DoH Category
+        return luminaItem.ItemUICategory.RowId == 62 && luminaItem.ClassJobUse.Value.ClassJobCategory.RowId == 33;
+    }
+
+    public static bool IsSplendorousTool(GearsetItem item) =>
+        LuminaSheets.ItemSheetEnglish.GetRow(item.ItemId).Description.ToString().Contains("Increases to quality are 1.75 times higher than normal when material condition is Good.", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Gets the minimum gear condition percentage among all equipped items.
+    /// </summary>
+    /// <returns>Percentage (0-100), or null if no items are equipped or data unavailable.</returns>
+    public static float? GetMinimumGearCondition()
+    {
+        var container = InventoryManager.Instance()->GetInventoryContainer(InventoryType.EquippedItems);
+        if (container == null)
+            return null;
+
+        var gearItems = GetGearsetItems(container);
+        
+        // Filter out empty slots and items without durability (e.g., soul crystals)
+        var itemsWithDurability = gearItems
+            .Where(item => item.ItemId != 0 && item.Condition > 0)
+            .ToArray();
+
+        if (itemsWithDurability.Length == 0)
+            return null;
+
+        // Calculate percentage: 100 * Condition / 30000
+        var minCondition = itemsWithDurability.Min(item => item.Condition);
+        return 100f * minCondition / 30000f;
+    }
+
+    /// <summary>
+    /// Summary of gear condition for all equipped items.
+    /// </summary>
+    /// <param name="Min">Minimum condition percentage across all items (0-100)</param>
+    /// <param name="Max">Maximum condition percentage across all items (0-100)</param>
+    /// <param name="Average">Average condition percentage across all items (0-100)</param>
+    public record struct GearConditionSummary(float Min, float Max, float Average);
+
+    /// <summary>
+    /// Gets a summary of gear condition for all equipped items.
+    /// </summary>
+    /// <returns>Summary with min/max/average percentages, or null if no items equipped.</returns>
+    public static GearConditionSummary? GetGearConditionSummary()
+    {
+        var container = InventoryManager.Instance()->GetInventoryContainer(InventoryType.EquippedItems);
+        if (container == null)
+            return null;
+
+        var gearItems = GetGearsetItems(container);
+        
+        // Filter out empty slots and items without durability
+        var conditions = gearItems
+            .Where(item => item.ItemId != 0 && item.Condition > 0)
+            .Select(item => 100f * item.Condition / 30000f)
+            .ToArray();
+
+        if (conditions.Length == 0)
+            return null;
+
+        return new GearConditionSummary(
+            Min: conditions.Min(),
+            Max: conditions.Max(),
+            Average: conditions.Average()
+        );
+    }
+
+    // https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/24d0db2d9676f264edf53651b21005305267c84c/apps/client/src/app/modules/gearsets/materia.service.ts#L265
+    private static int CalculateParamCap(Item item, uint paramId)
+    {
+        var ilvl = item.LevelItem.Value;
+        var param = LuminaSheets.BaseParamSheet.GetRow(paramId)!;
+
+        var baseValue = paramId switch
+        {
+            ParamCP => ilvl.CP,
+            ParamCraftsmanship => ilvl.Craftsmanship,
+            ParamControl => ilvl.Control,
+            _ => 0
+        };
+        // https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/24d0db2d9676f264edf53651b21005305267c84c/apps/data-extraction/src/extractors/items.extractor.ts#L6
+        var slotMod = item.EquipSlotCategory.RowId switch
+        {
+            1 => param.OneHandWeaponPercent, // column 4
+            2 => param.OffHandPercent,       // column 5
+            3 => param.HeadPercent,          // ...
+            4 => param.ChestPercent,
+            5 => param.HandsPercent,
+            6 => param.WaistPercent,
+            7 => param.LegsPercent,
+            8 => param.FeetPercent,
+            9 => param.EarringPercent,
+            10 => param.NecklacePercent,
+            11 => param.BraceletPercent,
+            12 => param.RingPercent,
+            13 => param.TwoHandWeaponPercent,
+            14 => param.OneHandWeaponPercent,
+            15 => param.ChestHeadPercent,
+            16 => param.ChestHeadLegsFeetPercent,
+            17 => 0,
+            18 => param.LegsFeetPercent,
+            19 => param.HeadChestHandsLegsFeetPercent,
+            20 => param.ChestLegsGlovesPercent,
+            21 => param.ChestLegsFeetPercent,
+            _ => 0
+        };
+        var roleMod = param.MeldParam[item.BaseParamModifier];
+
+        // https://github.com/Caraxi/SimpleTweaksPlugin/pull/595
+        var cap = (int)Math.Round((float)baseValue * slotMod / (roleMod * 10f), MidpointRounding.AwayFromZero);
+        return cap == 0 ? int.MaxValue : cap;
+    }
+
+    private static GearsetMateria[] GetMaterias(ReadOnlySpan<ushort> types, ReadOnlySpan<byte> grades)
+    {
+        var materia = new GearsetMateria[5];
+        for (var i = 0; i < 5; ++i)
+            materia[i] = new(types[i], grades[i]);
+        return materia;
+    }
+}

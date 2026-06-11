@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class ByregotsBlessing() : BaseAction(
     ActionCategory.Quality, 50, 100339,

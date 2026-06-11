@@ -11,7 +11,7 @@ Chamado automaticamente pelo `/commit`. Pode ser chamado isolado quando necessá
 ### 1. Ler versão atual
 
 ```powershell
-$xml = [xml](Get-Content Craftimizer/Craftimizer.csproj)
+$xml = [xml](Get-Content Artificer/Artificer.csproj)
 $version = $xml.Project.PropertyGroup[0].Version
 # ex: "2.10.2.0"
 ```

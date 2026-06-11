@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class Innovation() : BaseBuffAction(
     ActionCategory.Buffs, 26, 19004,

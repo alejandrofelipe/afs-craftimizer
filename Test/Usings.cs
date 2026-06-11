@@ -1,4 +1,4 @@
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
-global using Craftimizer.Solver;
-global using Craftimizer.Simulator;
-global using Craftimizer.Simulator.Actions;
+global using Artificer.Solver;
+global using Artificer.Simulator;
+global using Artificer.Simulator.Actions;

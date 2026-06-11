@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 public sealed class ArenaNode<T>(in T state, ArenaNode<T>? parent = null) where T : struct
 {

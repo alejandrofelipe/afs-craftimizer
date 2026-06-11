@@ -1,4 +1,4 @@
-# Craftimizer — Plano de Atualização para FFXIV 7.5
+# Artificer — Plano de Atualização para FFXIV 7.5
 
 > **Gerado em:** 12/05/2026  
 > **Versão atual do plugin:** 2.9.1.1  
@@ -26,10 +26,10 @@
 
 | Arquivo | Mudança |
 |---|---|
-| `Craftimizer/Craftimizer.csproj` | Bumpar SDK, `<Version>` |
-| `Solver/Craftimizer.Solver.csproj` | Verificar `DotNext`, `Raphael.Net` |
-| `Benchmark/Craftimizer.Benchmark.csproj` | Verificar `BenchmarkDotNet` |
-| `Test/Craftimizer.Test.csproj` | Verificar `MSTest` |
+| `Artificer/Artificer.csproj` | Bumpar SDK, `<Version>` |
+| `Solver/Artificer.Solver.csproj` | Verificar `DotNext`, `Raphael.Net` |
+| `Benchmark/Artificer.Benchmark.csproj` | Verificar `BenchmarkDotNet` |
+| `Test/Artificer.Test.csproj` | Verificar `MSTest` |
 
 ---
 
@@ -130,15 +130,15 @@ Os projetos `Simulator/` e `Solver/` são **pure C#** sem dependências do jogo.
 
 ### Fase 2: Atualização do SDK
 
-- [ ] **Bumpar `Dalamud.NET.Sdk`** em `Craftimizer/Craftimizer.csproj`:
+- [ ] **Bumpar `Dalamud.NET.Sdk`** em `Artificer/Artificer.csproj`:
   ```xml
   <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   ```
 
 - [ ] **Executar build inicial** para obter lista completa de erros:
   ```powershell
-  cd C:\Users\aleja\DEV\Craftimizer
-  dotnet build Craftimizer/Craftimizer.csproj 2>&1 | Tee-Object -FilePath build-errors.txt
+  cd C:\Users\aleja\DEV\Artificer
+  dotnet build Artificer/Artificer.csproj 2>&1 | Tee-Object -FilePath build-errors.txt
   ```
 
 ### Fase 3: Resolver Breaking Changes (por prioridade)
@@ -170,12 +170,12 @@ Para cada erro de interface/método do Dalamud:
 
 - [ ] **Build release limpa**:
   ```powershell
-  dotnet build Craftimizer.sln -c Release
+  dotnet build Artificer.sln -c Release
   ```
 
 - [ ] **Executar testes**:
   ```powershell
-  dotnet test Test/Craftimizer.Test.csproj -v normal
+  dotnet test Test/Artificer.Test.csproj -v normal
   ```
 
 - [ ] **Verificar IDs hardcoded** com uma sessão ativa do jogo após o patch
@@ -189,12 +189,12 @@ Para cada erro de interface/método do Dalamud:
 
 ### Fase 6: Release
 
-- [ ] **Bumpar versão** em `Craftimizer/Craftimizer.csproj`:
+- [ ] **Bumpar versão** em `Artificer/Artificer.csproj`:
   ```xml
   <Version>2.9.2.0</Version>
   ```
 
-- [ ] **Atualizar `Craftimizer.json`** se ApplicableVersion precisar ser ajustada
+- [ ] **Atualizar `Artificer.json`** se ApplicableVersion precisar ser ajustada
 
 - [ ] **Commit e push**:
   ```powershell
@@ -244,7 +244,7 @@ O solver externo `Raphael.Net` (versão 4.1.0) é uma biblioteca Rust compilada 
 Esta sheet Lumina é específica do sistema WKS (Wondrous Kiteworks) introduzido no Dawntrail. O nome contém um possível typo ("Evalution" em vez de "Evaluation"). Verificar no patch 7.5 se a sheet foi renomeada corretamente pela SE.
 
 ### Sobre o `packages.lock.json`
-O arquivo `Craftimizer/packages.lock.json` precisa ser atualizado após o bump do SDK:
+O arquivo `Artificer/packages.lock.json` precisa ser atualizado após o bump do SDK:
 ```powershell
-dotnet restore Craftimizer/Craftimizer.csproj --force-evaluate
+dotnet restore Artificer/Artificer.csproj --force-evaluate
 ```

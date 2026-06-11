@@ -1,9 +1,9 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using System.Diagnostics.Contracts;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 public struct ActionSet
 {

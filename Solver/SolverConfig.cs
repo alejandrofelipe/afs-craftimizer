@@ -1,11 +1,11 @@
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator.Actions;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 public enum SolverAlgorithm
 {

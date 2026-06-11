@@ -1,4 +1,4 @@
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 internal sealed class AdvancedTouch() : BaseAction(
     ActionCategory.Quality, level: 68, actionId: 100411,

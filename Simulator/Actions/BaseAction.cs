@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Craftimizer.Simulator.Actions;
+namespace Artificer.Simulator.Actions;
 
 public abstract class BaseAction(
     ActionCategory category, int level, uint actionId,

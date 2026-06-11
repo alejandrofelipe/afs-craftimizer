@@ -1,9 +1,9 @@
 {
   "Author": "alejandrofelipe",
-  "Name": "Craftimizer (AFS Fork)",
-  "InternalName": "Craftimizer",
-  "AssemblyVersion": "2.20.4.2",
-  "Description": "Fork pessoal do Craftimizer. Gera macros e simula crafts com MCTS/Raphael. Inclui melhorias de UI, tracking de Cosmic Tool em tempo real e monitoramento de durabilidade de gear.",
+  "Name": "Artificer",
+  "InternalName": "Artificer",
+  "AssemblyVersion": "2.20.4.4",
+  "Description": "Fork pessoal do Craftimizer com melhorias de UI, tracking de Cosmic Tool em tempo real e monitoramento de durabilidade de gear. Gera macros e simula crafts com MCTS/Raphael.",
   "Punchline": "Gerador de macros e simulador de crafting com solver MCTS e Raphael.",
   "RepoUrl": "https://github.com/alejandrofelipe/afs-craftimizer",
   "ApplicableVersion": "any",

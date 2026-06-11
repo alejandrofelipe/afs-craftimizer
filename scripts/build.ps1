@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Build, deploy, and package Craftimizer.
+    Build, deploy, and package Artificer.
 
 .PARAMETER Configuration
     Build configuration. Default: Debug. When -Deploy or -Package is set, also builds Release.
@@ -14,7 +14,7 @@
     Skip build and just deploy/package whatever is already in the Release bin folder.
 
 .PARAMETER Studio
-    Also build Craftimizer.UIStudio after the main plugin build.
+    Also build Artificer.UIStudio after the main plugin build.
     UIStudio is not referenced by the plugin, so it must be built explicitly.
 
 .PARAMETER Bump
@@ -64,8 +64,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $root         = Split-Path $PSScriptRoot -Parent
-$csproj       = "$root\Craftimizer\Craftimizer.csproj"
-$studioCsproj = "$root\Craftimizer.UIStudio\Craftimizer.UIStudio.csproj"
+$csproj       = "$root\Artificer\Artificer.csproj"
+$studioCsproj = "$root\Artificer.UIStudio\Artificer.UIStudio.csproj"
 
 # Prefer Scoop-installed SDK; fall back to PATH
 $scoopDotnet = "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"
@@ -82,13 +82,13 @@ $version = $xml.Project.PropertyGroup[0].Version
 
 # --- build ---
 if (-not $NoBuild) {
-    Write-Host "Building Craftimizer $version ($Configuration)..." -ForegroundColor Cyan
+    Write-Host "Building Artificer $version ($Configuration)..." -ForegroundColor Cyan
     & $dotnet build $csproj -c $Configuration --nologo /p:NodeReuse=false
     if ($LASTEXITCODE -ne 0) { throw "Build failed ($Configuration)." }
 
     # When deploying or packaging, also ensure Release is up to date
     if (($Deploy -or $Package) -and $Configuration -ne "Release") {
-        Write-Host "Building Craftimizer $version (Release)..." -ForegroundColor Cyan
+        Write-Host "Building Artificer $version (Release)..." -ForegroundColor Cyan
         & $dotnet build $csproj -c Release --nologo /p:NodeReuse=false
         if ($LASTEXITCODE -ne 0) { throw "Build failed (Release)." }
     }
@@ -98,7 +98,7 @@ if (-not $NoBuild) {
 
 # --- UIStudio (optional) ---
 if ($Studio -and -not $NoBuild) {
-    Write-Host "Building Craftimizer.UIStudio ($Configuration)..." -ForegroundColor Cyan
+    Write-Host "Building Artificer.UIStudio ($Configuration)..." -ForegroundColor Cyan
     & $dotnet build $studioCsproj -c $Configuration --nologo /p:NodeReuse=false
     if ($LASTEXITCODE -ne 0) { throw "UIStudio build failed." }
     Write-Host "UIStudio build succeeded." -ForegroundColor Green
@@ -106,8 +106,8 @@ if ($Studio -and -not $NoBuild) {
 
 # --- deploy (always from Release) ---
 if ($Deploy) {
-    $binDir    = "$root\Craftimizer\bin\Release"
-    $pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer\$version"
+    $binDir    = "$root\Artificer\bin\Release"
+    $pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Artificer\$version"
     if (-not (Test-Path $pluginDir)) {
         Write-Host "Creating plugin directory: $pluginDir" -ForegroundColor Yellow
         New-Item -ItemType Directory -Path $pluginDir | Out-Null
@@ -117,7 +117,7 @@ if ($Deploy) {
     Write-Host "Deploy complete." -ForegroundColor Green
 
     # Keep only the two most recent version folders (current + previous)
-    $installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer"
+    $installBase = "$env:APPDATA\XIVLauncher\installedPlugins\Artificer"
     $allDirs = Get-ChildItem -Path $installBase -Directory -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
         Sort-Object { [version]$_.Name } -Descending
@@ -130,7 +130,7 @@ if ($Deploy) {
 
 # --- package (creates a .zip in dist/) ---
 if ($Package) {
-    $binDir    = "$root\Craftimizer\bin\Release"
+    $binDir    = "$root\Artificer\bin\Release"
     $outputDir = "$root\$PackageOutputDir"
 
     if (-not (Test-Path $binDir)) {
@@ -141,7 +141,7 @@ if ($Package) {
         New-Item -ItemType Directory -Path $outputDir | Out-Null
     }
 
-    $zipName = "Craftimizer-v$version.zip"
+    $zipName = "Artificer-v$version.zip"
     $zipPath = "$outputDir\$zipName"
 
     Write-Host "Packaging $zipName ..." -ForegroundColor Cyan

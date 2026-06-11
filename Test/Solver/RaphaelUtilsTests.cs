@@ -1,6 +1,6 @@
 using RaphaelAction = Raphael.Action;
 
-namespace Craftimizer.Test.Solver;
+namespace Artificer.Test.Solver;
 
 [TestClass]
 public class RaphaelUtilsTests

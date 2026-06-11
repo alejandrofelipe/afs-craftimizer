@@ -1,7 +1,7 @@
-using Craftimizer.Simulator;
-using Craftimizer.Simulator.Actions;
+using Artificer.Simulator;
+using Artificer.Simulator.Actions;
 
-namespace Craftimizer.Solver;
+namespace Artificer.Solver;
 
 public readonly record struct SolverSolution {
     private readonly List<ActionType> actions = null!;

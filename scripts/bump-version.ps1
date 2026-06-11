@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Bump the Craftimizer version in Craftimizer.csproj.
+    Bump the Artificer version in Artificer.csproj.
 
 .PARAMETER Type
     Which part of the version to increment.
@@ -30,7 +30,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $root   = Split-Path $PSScriptRoot -Parent
-$csproj = "$root\Craftimizer\Craftimizer.csproj"
+$csproj = "$root\Artificer\Artificer.csproj"
 $content = Get-Content $csproj -Raw
 
 # --- parse current version ---

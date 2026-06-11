@@ -1,4 +1,4 @@
-namespace Craftimizer.Test.Solver;
+namespace Artificer.Test.Solver;
 
 /// <summary>
 /// Tests for SimulationNode, MCTSConfig, SolverSolution and RootScores.
@@ -7,7 +7,7 @@ namespace Craftimizer.Test.Solver;
 public class SolverNodeTests
 {
     private static SimulationInput MakeInput(int maxProgress = 3500, int maxQuality = 7200) =>
-        new(new Craftimizer.Simulator.CharacterStats
+        new(new Artificer.Simulator.CharacterStats
         {
             Craftsmanship = 3304,
             Control = 3374,
@@ -15,7 +15,7 @@ public class SolverNodeTests
             Level = 90,
             CanUseManipulation = true,
         },
-        new Craftimizer.Simulator.RecipeInfo
+        new Artificer.Simulator.RecipeInfo
         {
             ClassJobLevel = 90,
             MaxDurability = 80,

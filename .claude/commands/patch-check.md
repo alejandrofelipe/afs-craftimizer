@@ -1,6 +1,6 @@
 # /patch-check
 
-Analisa a compatibilidade do plugin Craftimizer com uma nova versão do FFXIV. Produz documentação técnica e matriz de risco.
+Analisa a compatibilidade do plugin Artificer com uma nova versão do FFXIV. Produz documentação técnica e matriz de risco.
 
 ## Quando Usar
 
@@ -12,10 +12,10 @@ Analisa a compatibilidade do plugin Craftimizer com uma nova versão do FFXIV. P
 
 ```powershell
 # SDK atual
-Get-Content Craftimizer/Craftimizer.csproj | Select-String "Dalamud.NET.Sdk"
+Get-Content Artificer/Artificer.csproj | Select-String "Dalamud.NET.Sdk"
 
 # Todas as dependências
-Get-Content Craftimizer/Craftimizer.csproj | Select-String "PackageReference"
+Get-Content Artificer/Artificer.csproj | Select-String "PackageReference"
 ```
 
 Verificar compatibilidade do SDK em: https://github.com/goatcorp/Dalamud.NET.Sdk/releases
@@ -29,20 +29,20 @@ Dependências críticas:
 ## Fase 2: Mapeamento de Componentes de Risco
 
 ### Alto Risco (8-10%)
-- `Craftimizer/Utils/Infrastructure/CSRecipeNote.cs`
+- `Artificer/Utils/Infrastructure/CSRecipeNote.cs`
   - `[FieldOffset(0x118)] public ushort ActiveCraftRecipeId`
   - Teste: Abrir crafting log, selecionar receita
 
 ### Médio Risco (5-7%)
-- `Craftimizer/Windows/SynthHelper.cs`
+- `Artificer/Windows/SynthHelper.cs`
   - Lê 26 AtkValue indices do `AddonSynthesis`
   - Teste: Iniciar craft, verificar suggestions
 
 ### Baixo Risco (1-3%)
-- `Craftimizer/Utils/SimulatorUtils.cs`
+- `Artificer/Utils/SimulatorUtils.cs`
   - Status IDs: 48 (Well Fed), 49 (Medicated), 356, 357 (FC buffs)
   - Teste: Comer comida, verificar detection
-- `Craftimizer/Utils/RecipeData.cs`
+- `Artificer/Utils/RecipeData.cs`
   - Lumina sheets auto-updated pelo Dalamud
 
 ## Fase 3: Documentação de Análise
@@ -74,7 +74,7 @@ Criar em `backlog/`:
 
 ## Fase 5: Testes In-Game
 
-1. **Smoke test**: `/xlplugins` → Craftimizer está loaded
+1. **Smoke test**: `/xlplugins` → Artificer está loaded
 2. **RecipeNote test**: `/craftlog` → selecionar receita → overlay aparece
 3. **SynthHelper test**: Iniciar craft → suggestions aparecem
 4. **New content test**: Testar receitas/NPCs novos do patch
@@ -84,7 +84,7 @@ Criar em `backlog/`:
 
 ```powershell
 $oldVersion = "2.X.X.X"
-$pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Craftimizer"
+$pluginDir = "$env:APPDATA\XIVLauncher\installedPlugins\Artificer"
 Remove-Item "$pluginDir\*" -Recurse -Force
 Copy-Item "backup\$oldVersion\*" $pluginDir -Recurse -Force
 ```
