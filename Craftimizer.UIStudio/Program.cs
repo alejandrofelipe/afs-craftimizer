@@ -13,4 +13,5 @@ StudioApp.Run(
     new ListWindowStory(),
     new StatDashboardStory(),
     new FloatingOverlayStory(),
+    new DialogStory(),
 ]);
