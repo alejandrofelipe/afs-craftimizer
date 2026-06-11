@@ -22,4 +22,5 @@ StudioApp.Run(
     new CosmicTrackerStory(),
     new MacroClipboardStory(),
     new MacroListStory(),
+    new SettingsStory(),
 ]);
