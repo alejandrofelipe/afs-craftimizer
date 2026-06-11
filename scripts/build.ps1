@@ -12,6 +12,10 @@
 .PARAMETER NoBuild
     Skip build and just deploy whatever is already in the Release bin folder.
 
+.PARAMETER Studio
+    Also build Craftimizer.UIStudio after the main plugin build.
+    UIStudio is not referenced by the plugin, so it must be built explicitly.
+
 .PARAMETER Bump
     Bump the version before building. Accepted values: major, minor, patch, build (default).
     Calls bump-version.ps1 with the given type.
@@ -20,6 +24,7 @@
     .\build.ps1
     .\build.ps1 -Configuration Release
     .\build.ps1 -Deploy
+    .\build.ps1 -Studio                 # build plugin + UIStudio
     .\build.ps1 -Deploy -Bump build     # bump build number + build + deploy
     .\build.ps1 -Deploy -Bump patch     # bump patch + build + deploy
     .\build.ps1 -Deploy -NoBuild
@@ -30,6 +35,7 @@ param(
 
     [switch]$Deploy,
     [switch]$NoBuild,
+    [switch]$Studio,
 
     [ValidateSet("major", "minor", "patch", "build")]
     [string]$Bump
@@ -38,8 +44,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$root     = Split-Path $PSScriptRoot -Parent
-$csproj   = "$root\Craftimizer\Craftimizer.csproj"
+$root          = Split-Path $PSScriptRoot -Parent
+$csproj        = "$root\Craftimizer\Craftimizer.csproj"
+$studioCsproj  = "$root\Craftimizer.UIStudio\Craftimizer.UIStudio.csproj"
 
 # Prefer Scoop-installed SDK; fall back to PATH
 $scoopDotnet = "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"
@@ -69,6 +76,14 @@ if (-not $NoBuild) {
     }
 
     Write-Host "Build succeeded." -ForegroundColor Green
+}
+
+# --- UIStudio (optional) ---
+if ($Studio -and -not $NoBuild) {
+    Write-Host "Building Craftimizer.UIStudio ($Configuration)..." -ForegroundColor Cyan
+    & $dotnet build $studioCsproj -c $Configuration --nologo /p:NodeReuse=false
+    if ($LASTEXITCODE -ne 0) { throw "UIStudio build failed." }
+    Write-Host "UIStudio build succeeded." -ForegroundColor Green
 }
 
 # --- deploy (always from Release) ---

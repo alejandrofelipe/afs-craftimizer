@@ -27,14 +27,20 @@ Sem argumentos — a skill lê o estado atual do código e **reescreve o HTML co
 Ler os seguintes arquivos **antes de qualquer edição**:
 
 ```
-Craftimizer/Utils/UI/Colors.cs          ← todos os tokens de cor (Vector4)
-Craftimizer/Utils/UI/Theme.cs           ← se existir: backgrounds, borders, radii
-Craftimizer/Utils/UI/ImGuiUtils.cs      ← GroupPanel, Badge, helpers de layout
-Craftimizer/Utils/UI/ImGuiUtils.Cosmic.cs  ← se existir: componentes Cosmic
-Craftimizer/Windows/MacroEditor.cs      ← padrões de layout, Group Panels em uso
+Craftimizer.UI/Colors.cs               ← todos os tokens de cor (Vector4)
+Craftimizer.UI/Theme.cs                ← backgrounds, borders, Push/Pop de estilo
+Craftimizer.UI/ImGuiUtils.cs           ← GroupPanel, Badge, helpers de layout
+Craftimizer.UI/ImGuiUtils.Cosmic.cs    ← componentes Cosmic (DrawResearchTypeRow, etc.)
+Craftimizer.UI/ImGuiUtils.Charts.cs    ← DrawStatArc, DrawBarRow
+Craftimizer.UI/ProgressBarComponent.cs ← modos Horizontal/Arc/Compact/Stacked
+Craftimizer/Windows/MacroEditor.cs     ← padrões de layout, Group Panels em uso
 Craftimizer/Windows/CosmicTracker.cs   ← componentes Cosmic Tracker em uso
 Craftimizer/Windows/SynthHelper.cs     ← padrões do overlay de síntese
 ```
+
+> Nota: `Craftimizer/Utils/UI/` contém partial classes e extensões plugin-específicas
+> (ex: `ProgressBarComponent.Solver.cs`, `DynamicBars.cs`, `IFontHandleExtensions.cs`).
+> A fonte de verdade dos tokens de design é `Craftimizer.UI/`, não `Craftimizer/Utils/UI/`.
 
 Extrair de `Colors.cs`:
 - Todos os campos `public static readonly Vector4` → nome + valores RGBA (0.0–1.0)
@@ -135,7 +141,7 @@ Design system já em sincronia com Colors.cs. Nenhuma alteração feita.
 
 ## Referências
 
-- Fontes de verdade: `Craftimizer/Utils/UI/Colors.cs`, `Theme.cs`, `ImGuiUtils*.cs`
+- Fontes de verdade: `Craftimizer.UI/Colors.cs`, `Craftimizer.UI/Theme.cs`, `Craftimizer.UI/ImGuiUtils*.cs`
 - Output: `mockup/design-system.html`
 - Documentação do DS: `docs/design-system/` (referência para agentes)
 - Mockups de telas: `mockup/` (não modificar em /update-design-system)

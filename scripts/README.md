@@ -13,12 +13,14 @@ Build e deploy do plugin.
 .\scripts\build.ps1 -Configuration Release
 .\scripts\build.ps1 -Deploy             # Build Release + deploy para XIVLauncher
 .\scripts\build.ps1 -Deploy -NoBuild    # Deploy sem rebuild
+.\scripts\build.ps1 -Studio             # Build plugin + Craftimizer.UIStudio
 ```
 
 **Parâmetros:**
 - `-Configuration`: `Debug` ou `Release` (padrão: `Debug`)
 - `-Deploy`: Copia o build para `%APPDATA%\XIVLauncher\installedPlugins\Craftimizer\{version}`
 - `-NoBuild`: Pula o build e faz deploy do que já está em `bin\Release`
+- `-Studio`: Também builda `Craftimizer.UIStudio` (não é referenciado pelo plugin, precisa ser explícito)
 
 ---
 
@@ -102,15 +104,20 @@ Gera arquivo `.zip` para distribuição Dalamud.
 ```
 Craftimizer/
 ├── dist/                          ← Pacotes .zip (gitignored)
-│   └── Craftimizer-v2.9.4.31.zip
+│   └── Craftimizer-v{version}.zip
 ├── scripts/                       ← Scripts de build
 │   ├── build.ps1
 │   ├── bump-version.ps1
 │   └── build-package.ps1
-└── Craftimizer/
-    └── bin/
-        ├── Debug/                 ← Build local
-        └── Release/               ← Build para distribuição
+├── Craftimizer/
+│   └── bin/Release/               ← Output do plugin (deploy source)
+│       ├── Craftimizer.dll
+│       ├── Craftimizer.UI.dll     ← biblioteca de UI standalone
+│       ├── Craftimizer.Simulator.dll
+│       ├── Craftimizer.Solver.dll
+│       └── ...                    ← cimgui.dll e ImGui.NET.dll removidos pelo MSBuild
+└── Craftimizer.UIStudio/
+    └── bin/                       ← App desktop standalone (não deployado)
 ```
 
 ---

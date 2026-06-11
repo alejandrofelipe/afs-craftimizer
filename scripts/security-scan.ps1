@@ -33,6 +33,7 @@ $ErrorActionPreference = "Stop"
 
 $root   = Split-Path $PSScriptRoot -Parent
 $csproj = "$root\Craftimizer\Craftimizer.csproj"
+$sln    = "$root\Craftimizer.sln"
 
 $scoopDotnet = "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"
 $dotnet = if (Test-Path $scoopDotnet) { $scoopDotnet } else { "dotnet" }
@@ -57,8 +58,9 @@ function Write-Section([string]$title) {
 # ---------------------------------------------------------------
 Write-Section "1/3 — NuGet Vulnerability Audit (dotnet list package --vulnerable)"
 
+# Usar a solution para cobrir todos os projetos (Craftimizer, Craftimizer.UI, etc.)
 # --source restringe ao nuget.org, evitando erro NU1301 do feed Dalamud (404)
-$auditOutput = & $dotnet list $csproj package --vulnerable --include-transitive `
+$auditOutput = & $dotnet list $sln package --vulnerable --include-transitive `
     --source https://api.nuget.org/v3/index.json 2>&1
 $auditOutput | ForEach-Object { Write-Host $_ }
 

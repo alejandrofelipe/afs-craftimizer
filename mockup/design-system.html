@@ -11,70 +11,81 @@
   <style>
     /* ─── Tokens ─────────────────────────────────────────────────────────────── */
     :root {
-      /* Backgrounds / Surfaces */
-      --bg-base:     #060810;
-      --bg-surface:  #0D1120;
-      --bg-elevated: #141928;
-      --bg-overlay:  #1B2235;
-      --bg-hover:    #212A40;
+      /* Backgrounds / Surfaces — Theme.cs */
+      --bg-base:     #060810;   /* BgBase     (0.024,0.031,0.063) */
+      --bg-surface:  #0D1120;   /* BgSurface  (0.051,0.067,0.125) */
+      --bg-elevated: #141928;   /* BgElevated (0.078,0.098,0.157) */
+      --bg-overlay:  #1B2235;   /* BgOverlay  (0.106,0.133,0.208) */
+      --bg-hover:    #212A40;   /* BgHover    (0.129,0.165,0.251) */
 
-      /* Border */
-      --border:      rgba(100, 140, 200, 0.30);
+      /* Border — Theme.cs */
+      --border:        rgba(100, 140, 200, 0.30);  /* (0.392,0.549,0.784,0.30) */
       --border-strong: rgba(100, 140, 200, 0.50);
 
-      /* Stat Colors */
-      --progress:    #52E5A0;
-      --quality:     #B07BFF;
-      --durability:  #FFB84A;
-      --cp:          #FF6C8A;
-      --collectability: #42C4E8;
-      --hq:          #97DC60;
+      /* Stat Colors — Colors.cs */
+      --progress:       #52E5A0;  /* (0.322,0.898,0.627,1) */
+      --quality:        #B07BFF;  /* (0.690,0.482,1.000,1) */
+      --durability:     #FFB84A;  /* (1.000,0.722,0.290,1) */
+      --cp:             #FF6C8A;  /* (1.000,0.424,0.541,1) */
+      --collectability: #41C4E8;  /* (0.255,0.769,0.910,1) */
+      --hq:             #97DC60;  /* (0.592,0.863,0.376,1) */
 
-      /* Action Category */
-      --action-synth:   #52E5A0;
-      --action-touch:   #B07BFF;
-      --action-buff:    #4AB8FF;
-      --action-special: #FFB84A;
+      /* Action Category — Colors.cs */
+      --action-synth:   #52E5A0;  /* = Progress */
+      --action-touch:   #B07BFF;  /* = Quality  */
+      --action-buff:    #4AB8FF;  /* (0.290,0.722,1.000,1) */
+      --action-special: #FFB84A;  /* = Durability */
 
-      /* Conditions */
-      --cond-normal:    #C7C7C7;
-      --cond-good:      #FFB84A;
-      --cond-excellent: #FF6C8A;
-      --cond-poor:      #8A99BB;
-      --cond-pliant:    #4AB8FF;
-      --cond-malleable: #B07BFF;
-      --cond-sturdy:    #52E5A0;
-      --cond-primed:    #FF8C40;
+      /* Conditions — Colors.cs */
+      --cond-normal:    #C7C7C7;  /* (0.78,0.78,0.78,1)  */
+      --cond-good:      #FFB84A;  /* (1.00,0.72,0.29,1)  */
+      --cond-excellent: #FF6B8A;  /* (1.00,0.42,0.54,1)  G=107=0x6B */
+      --cond-poor:      #8A99BA;  /* (0.54,0.60,0.73,1)  B=186=0xBA */
+      --cond-pliant:    #4AB8FF;  /* (0.29,0.72,1.00,1)  */
+      --cond-malleable: #B07AFF;  /* (0.69,0.48,1.00,1)  G=122=0x7A */
+      --cond-sturdy:    #52E6A1;  /* (0.32,0.90,0.63,1)  G=230=0xE6 B=161=0xA1 */
+      --cond-primed:    #FF8C40;  /* (1.00,0.55,0.25,1)  */
 
-      /* Cosmic Exploration */
-      --cosmic-active:   #B07AFF;
-      --cosmic-complete: #55B855;
-      --cosmic-locked:   #383847;
-      --cosmic-mission:  #F0B830;
-      --cosmic-upgrade:  #9973E6;
-      --cosmic-maxed:    #FFD966;
-      --cosmic-changed:  rgba(240, 184, 48, 0.12);
+      /* Badge tints — Colors.cs */
+      --specialist-gold: #FCF79E; /* (0.99,0.97,0.62,1) R=252 G=247 B=158 */
 
-      /* Semantic States */
-      --good:       #52E5A0;
-      --bad:        #FF5C6E;
-      --link:       #4AB8FF;
-      --disabled:   rgba(128, 128, 128, 0.75);
-      --text-muted: #50607A;
+      /* Cosmic Exploration — Colors.cs */
+      --cosmic-active:   #B07AFF;              /* (0.69,0.48,1.00,1)   G=122=0x7A */
+      --cosmic-complete: #54B854;              /* (0.33,0.72,0.33,1)   R=B=84=0x54 */
+      --cosmic-locked:   #383847;              /* (0.22,0.22,0.28,1)   */
+      --cosmic-mission:  #F0B830;              /* (0.94,0.72,0.19,1)   */
+      --cosmic-upgrade:  #9973E6;              /* (0.60,0.45,0.90,1)   */
+      --cosmic-maxed:    #FFD966;              /* (1.00,0.85,0.40,1)   */
+      --cosmic-changed:  rgba(240,184,48,0.12);/* (0.94,0.72,0.19,0.12)*/
 
-      /* Solver Progress — Colorful */
-      --solver-1: #DE313D;
-      --solver-2: #F59E1E;
-      --solver-3: #F7D600;
-      --solver-4: #5EB05A;
-      --solver-5: #364DFA;
-      --solver-6: #429EF0;
-      --solver-7: #B37CE0;
+      /* Semantic States — Colors.cs */
+      --good:       #52E5A0;              /* = Progress */
+      --bad:        #FF5C6E;              /* (1.000,0.361,0.431,1) G=92=0x5C B=110=0x6E */
+      --link:       #4AB8FF;              /* = ActionBuff */
+      --disabled:   rgba(128,128,128,0.75);/* (0.5,0.5,0.5,0.75) */
+      --text-muted: #50607A;              /* (0.314,0.376,0.478,1) */
 
-      /* Collectability Thresholds */
-      --collect-t1: #78C7EE;
-      --collect-t2: #FDCA00;
-      --collect-t3: #BFFFBF;
+      /* Solver Progress — Colorful — Colors.cs SolverProgressFgColorful */
+      --solver-1: #DE304D;  /* (0.87,0.19,0.30) G=48=0x30 B=77=0x4D */
+      --solver-2: #F59E1F;  /* (0.96,0.62,0.12) B=31=0x1F */
+      --solver-3: #F7D600;  /* (0.97,0.84,0.00) */
+      --solver-4: #5EB059;  /* (0.37,0.69,0.35) B=89=0x59 */
+      --solver-5: #364DFA;  /* (0.21,0.30,0.98) */
+      --solver-6: #429EF0;  /* (0.26,0.62,0.94) */
+      --solver-7: #B37DE0;  /* (0.70,0.49,0.88) G=125=0x7D */
+
+      /* Solver Progress — Monochromatic — Colors.cs SolverProgressFgMonochromatic */
+      --mono-1: #545454;  /* (0.33,0.33,0.33) */
+      --mono-2: #707070;  /* (0.44,0.44,0.44) */
+      --mono-3: #8F8F8F;  /* (0.56,0.56,0.56) */
+      --mono-4: #ADADAD;  /* (0.68,0.68,0.68) */
+      --mono-5: #CFCFCF;  /* (0.81,0.81,0.81) 207=0xCF */
+      --mono-6: #EDEDED;  /* (0.93,0.93,0.93) */
+
+      /* Collectability Thresholds — Colors.cs CollectabilityThreshold */
+      --collect-t1: #78C7ED;  /* (0.47,0.78,0.93) B=237=0xED */
+      --collect-t2: #FCC900;  /* (0.99,0.79,0.00) R=252=0xFC G=201=0xC9 */
+      --collect-t3: #BFFFBF;  /* (0.75,1.00,0.75) */
 
       /* Typography */
       --font-body: "Inter", "Segoe UI", sans-serif;
@@ -84,9 +95,9 @@
       --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
       --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
 
-      /* Radii */
-      --r-sm: 4px;
-      --r-md: 6px;
+      /* Radii — Theme.cs PushStyleVar */
+      --r-sm: 4px;   /* FrameRounding */
+      --r-md: 6px;   /* ChildRounding  */
       --r-lg: 8px;
       --r-pill: 9999px;
     }
@@ -203,9 +214,7 @@
       padding: var(--sp-5);
       margin-bottom: var(--sp-3);
     }
-    .card-dark {
-      background: var(--bg-elevated);
-    }
+    .card-dark { background: var(--bg-elevated); }
 
     /* ─── COLOR SWATCHES ─────────────────────────────────────────────────────── */
     .swatch-grid {
@@ -218,27 +227,15 @@
       overflow: hidden;
       border: 1px solid var(--border);
     }
-    .swatch-color {
-      height: 56px;
-    }
+    .swatch-color { height: 56px; }
     .swatch-info {
       background: var(--bg-overlay);
       padding: var(--sp-2) var(--sp-2);
     }
-    .swatch-name {
-      font-size: 11px; font-weight: 600; color: #D0D8E8;
-      margin-bottom: 2px;
-    }
-    .swatch-hex {
-      font-family: var(--font-mono);
-      font-size: 10px; color: var(--text-muted);
-    }
-    .swatch-token {
-      font-size: 9px; color: var(--text-muted); opacity: 0.7;
-      margin-top: 1px;
-    }
+    .swatch-name  { font-size: 11px; font-weight: 600; color: #D0D8E8; margin-bottom: 2px; }
+    .swatch-hex   { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+    .swatch-token { font-size: 9px; color: var(--text-muted); opacity: 0.7; margin-top: 1px; }
 
-    /* background swatches stack two per row and show label */
     .swatch-bg .swatch-color {
       height: 40px;
       display: flex; align-items: center; justify-content: center;
@@ -258,21 +255,10 @@
     .type-spec  { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); opacity: 0.7; }
 
     /* ─── SPACING SCALE ──────────────────────────────────────────────────────── */
-    .spacing-row {
-      display: flex; align-items: center; gap: var(--sp-4);
-      padding: var(--sp-2) 0;
-    }
-    .spacing-bar {
-      height: 8px; background: var(--link);
-      border-radius: var(--r-pill); opacity: 0.7;
-    }
-    .spacing-label {
-      font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
-      width: 60px; flex-shrink: 0;
-    }
-    .spacing-val {
-      font-size: 11px; color: var(--text-muted);
-    }
+    .spacing-row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-2) 0; }
+    .spacing-bar { height: 8px; background: var(--link); border-radius: var(--r-pill); opacity: 0.7; }
+    .spacing-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 60px; flex-shrink: 0; }
+    .spacing-val { font-size: 11px; color: var(--text-muted); }
 
     /* ─── COMPONENT: Plugin Window ───────────────────────────────────────────── */
     .plugin-window {
@@ -292,9 +278,7 @@
       user-select: none;
     }
     .plugin-titlebar-icon { color: var(--quality); font-size: 12px; }
-    .plugin-titlebar-label {
-      flex: 1; font-size: 12px; font-weight: 600; color: #C8B8FF;
-    }
+    .plugin-titlebar-label { flex: 1; font-size: 12px; font-weight: 600; color: #C8B8FF; }
     .plugin-titlebar-btn {
       width: 20px; height: 20px; border-radius: var(--r-sm);
       border: 1px solid var(--border);
@@ -307,7 +291,7 @@
     .plugin-titlebar-btn.active { color: var(--link); border-color: rgba(74,184,255,0.4); }
     .plugin-body { padding: var(--sp-3); }
 
-    /* ─── COMPONENT: Group Panel ─────────────────────────────────────────────── */
+    /* ─── COMPONENT: Group Panel (BeginGroupPanel / EndGroupPanel) ───────────── */
     .group-panel {
       border: 1px solid var(--border);
       border-radius: var(--r-md);
@@ -323,7 +307,7 @@
       color: var(--link);
     }
 
-    /* ─── COMPONENT: Progress Bar ────────────────────────────────────────────── */
+    /* ─── COMPONENT: Progress Bar (ProgressBar / ProgressBar stat) ───────────── */
     .prog-wrap {
       background: var(--bg-base);
       border-radius: var(--r-sm);
@@ -346,7 +330,7 @@
       display: flex; justify-content: space-between;
     }
 
-    /* ─── COMPONENT: Badges / Pills ──────────────────────────────────────────── */
+    /* ─── COMPONENT: Badges / Pills (DrawBadgePill / DrawBadge) ─────────────── */
     .badge {
       display: inline-flex; align-items: center; gap: 5px;
       padding: 2px 7px;
@@ -354,11 +338,9 @@
       font-size: 11px; font-weight: 600;
       border: 1px solid;
     }
-    .badge-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-    /* ─── COMPONENT: State Chips ─────────────────────────────────────────────── */
+    /* ─── COMPONENT: State Chips (DrawStateChip) ─────────────────────────────── */
     .chip {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 3px 8px;
@@ -373,21 +355,16 @@
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.75); }
+      50%       { opacity: 0.5; transform: scale(0.75); }
     }
     .chip-dot.static { animation: none; }
 
-    /* ─── COMPONENT: Condition Indicator ─────────────────────────────────────── */
-    .cond-indicator {
-      display: inline-flex; align-items: center; gap: var(--sp-2);
-    }
-    .cond-dot {
-      width: 12px; height: 12px; border-radius: 50%;
-      box-shadow: 0 0 8px currentColor;
-    }
+    /* ─── COMPONENT: Condition Indicator (DrawConditionIndicator) ────────────── */
+    .cond-indicator { display: inline-flex; align-items: center; gap: var(--sp-2); }
+    .cond-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
     .cond-label { font-size: 12px; font-weight: 500; }
 
-    /* ─── COMPONENT: Icon Buttons ────────────────────────────────────────────── */
+    /* ─── COMPONENT: Icon Buttons (IconButtonSquare) ─────────────────────────── */
     .icon-btn {
       width: 28px; height: 28px;
       border-radius: var(--r-sm);
@@ -403,12 +380,32 @@
     .icon-btn.danger  { color: var(--bad);  border-color: rgba(255,92,110,0.35); }
     .icon-btn.success { color: var(--good); border-color: rgba(82,229,160,0.35); }
 
-    /* ─── COMPONENT: Link text ───────────────────────────────────────────────── */
-    .link-text {
-      color: var(--link); text-decoration: underline; cursor: pointer;
-      font-size: 13px;
-    }
+    /* ─── COMPONENT: Link text (Hyperlink) ──────────────────────────────────── */
+    .link-text { color: var(--link); text-decoration: underline; cursor: pointer; font-size: 13px; }
     .link-text:hover { opacity: 0.8; }
+
+    /* ─── COMPONENT: Empty State (DrawEmptyState) ────────────────────────────── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: var(--sp-2);
+      padding: var(--sp-10) var(--sp-6);
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .empty-state-icon { font-size: 36px; opacity: 0.4; margin-bottom: var(--sp-1); }
+    .empty-state-title { font-size: 14px; font-weight: 600; color: #C0C8DC; }
+    .empty-state-sub   { font-size: 12px; color: var(--text-muted); }
+    .empty-state-btn {
+      margin-top: var(--sp-2);
+      padding: 5px 16px;
+      border-radius: var(--r-sm);
+      border: none;
+      background: rgba(74,184,255,0.85);
+      color: #fff;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .empty-state-btn:hover { background: var(--link); }
 
     /* ─── COMPONENT: Cosmic Research Bar ─────────────────────────────────────── */
     .cosmic-bar-wrap {
@@ -418,11 +415,7 @@
       position: relative;
       overflow: visible;
     }
-    .cosmic-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      position: relative;
-    }
+    .cosmic-bar-fill { height: 100%; border-radius: 3px; position: relative; }
     .cosmic-bar-marker {
       position: absolute; top: -3px;
       width: 2px; height: 12px;
@@ -435,24 +428,13 @@
       border-radius: var(--r-sm);
     }
     .cosmic-row.changed { background: var(--cosmic-changed); }
-    .cosmic-name {
-      width: 80px; flex-shrink: 0;
-      font-size: 11px; font-weight: 600; color: #C0C8DC;
-    }
+    .cosmic-name { width: 80px; flex-shrink: 0; font-size: 11px; font-weight: 600; color: #C0C8DC; }
     .cosmic-bar-col { flex: 1; }
-    .cosmic-values {
-      font-family: var(--font-mono); font-size: 10px;
-      color: var(--text-muted); text-align: right;
-      width: 60px; flex-shrink: 0;
-    }
+    .cosmic-values { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); text-align: right; width: 60px; flex-shrink: 0; }
 
     /* ─── COMPONENT: Solver Progress Bars ───────────────────────────────────── */
-    .solver-bars {
-      display: flex; gap: 2px; height: 8px;
-    }
-    .solver-bar-seg {
-      flex: 1; border-radius: 2px;
-    }
+    .solver-bars { display: flex; gap: 2px; height: 8px; }
+    .solver-bar-seg { flex: 1; border-radius: 2px; }
 
     /* ─── COMPONENT: Stat Row ────────────────────────────────────────────────── */
     .stat-row {
@@ -461,14 +443,11 @@
       border-bottom: 1px solid rgba(100,140,200,0.08);
     }
     .stat-row:last-child { border-bottom: none; }
-    .stat-icon { width: 20px; font-size: 11px; }
-    .stat-name { flex: 1; font-size: 12px; color: #A0AABF; }
+    .stat-icon  { width: 20px; font-size: 11px; }
+    .stat-name  { flex: 1; font-size: 12px; color: #A0AABF; }
     .stat-value { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
     .stat-bar-col { width: 80px; margin-left: var(--sp-2); }
-    .stat-bar {
-      height: 4px; border-radius: var(--r-pill);
-      background: var(--bg-base); overflow: hidden;
-    }
+    .stat-bar { height: 4px; border-radius: var(--r-pill); background: var(--bg-base); overflow: hidden; }
     .stat-bar-fill { height: 100%; border-radius: var(--r-pill); }
 
     /* ─── COMPONENT: Table ───────────────────────────────────────────────────── */
@@ -481,7 +460,7 @@
     .param-table td:first-child { color: #8898B8; }
     .param-table td:last-child  { color: #D0D8E8; font-weight: 500; text-align: right; }
 
-    /* ─── COMPONENT: Tooltip ─────────────────────────────────────────────────── */
+    /* ─── COMPONENT: Tooltip (Tooltip / TooltipWrapped) ─────────────────────── */
     .tooltip-preview {
       background: var(--bg-overlay);
       border: 1px solid var(--border-strong);
@@ -503,10 +482,7 @@
     }
 
     /* ─── DEMO GRID ──────────────────────────────────────────────────────────── */
-    .demo-row {
-      display: flex; flex-wrap: wrap; gap: var(--sp-3);
-      align-items: flex-start;
-    }
+    .demo-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: flex-start; }
 
     /* ─── MISC ───────────────────────────────────────────────────────────────── */
     hr.ds { border: none; border-top: 1px solid var(--border); margin: var(--sp-6) 0; }
@@ -557,6 +533,7 @@
       <a class="ds-nav-link" href="#chips">State Chips</a>
       <a class="ds-nav-link" href="#conditions">Condições</a>
       <a class="ds-nav-link" href="#buttons">Botões</a>
+      <a class="ds-nav-link" href="#empty-state">Empty State</a>
       <a class="ds-nav-link" href="#stats">Stat Rows</a>
       <a class="ds-nav-link" href="#tables">Tabelas</a>
       <a class="ds-nav-link" href="#tooltips">Tooltips</a>
@@ -572,7 +549,6 @@
   <!-- ── MAIN ────────────────────────────────────────────────────────────── -->
   <main class="ds-main">
 
-    <!-- ── PAGE HEADER ─────────────────────────────────────────────────── -->
     <div style="margin-bottom: var(--sp-10);">
       <h1 style="font-size: 32px; font-weight: 700; color: #E8EEF8; margin-bottom: var(--sp-2);">
         Design System
@@ -580,6 +556,7 @@
       <p style="color: var(--text-muted); font-size: 14px; max-width: 560px;">
         Vocabulário visual completo do plugin Craftimizer para FFXIV — cores, tipografia,
         espaçamento e todos os componentes reutilizáveis usados nas telas do plugin.
+        Derivado de <span class="token">Colors.cs</span>, <span class="token">Theme.cs</span> e <span class="token">ImGuiUtils*.cs</span>.
       </p>
     </div>
 
@@ -590,7 +567,7 @@
       <h2 class="ds-section-title">Cores</h2>
       <p class="ds-section-desc">
         Paleta semântica derivada de <code>Colors.cs</code>. Cada cor carrega significado de jogo —
-        tipo de stat, categoria de ação ou estado de UI.
+        tipo de stat, categoria de ação ou estado de UI. Valores hex calculados de <code>Vector4(R,G,B,A)</code> × 255.
       </p>
 
       <!-- Stat Colors -->
@@ -630,10 +607,10 @@
             </div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#42C4E8;"></div>
+            <div class="swatch-color" style="background:#41C4E8;"></div>
             <div class="swatch-info">
               <div class="swatch-name">Collectability</div>
-              <div class="swatch-hex">#42C4E8</div>
+              <div class="swatch-hex">#41C4E8</div>
               <div class="swatch-token">--collectability</div>
             </div>
           </div>
@@ -655,7 +632,7 @@
           <div class="swatch">
             <div class="swatch-color" style="background:#52E5A0;"></div>
             <div class="swatch-info">
-              <div class="swatch-name">Synthesis</div>
+              <div class="swatch-name">ActionSynth</div>
               <div class="swatch-hex">#52E5A0</div>
               <div class="swatch-token">--action-synth</div>
             </div>
@@ -663,7 +640,7 @@
           <div class="swatch">
             <div class="swatch-color" style="background:#B07BFF;"></div>
             <div class="swatch-info">
-              <div class="swatch-name">Touch</div>
+              <div class="swatch-name">ActionTouch</div>
               <div class="swatch-hex">#B07BFF</div>
               <div class="swatch-token">--action-touch</div>
             </div>
@@ -671,7 +648,7 @@
           <div class="swatch">
             <div class="swatch-color" style="background:#4AB8FF;"></div>
             <div class="swatch-info">
-              <div class="swatch-name">Buff</div>
+              <div class="swatch-name">ActionBuff</div>
               <div class="swatch-hex">#4AB8FF</div>
               <div class="swatch-token">--action-buff</div>
             </div>
@@ -679,7 +656,7 @@
           <div class="swatch">
             <div class="swatch-color" style="background:#FFB84A;"></div>
             <div class="swatch-info">
-              <div class="swatch-name">Special</div>
+              <div class="swatch-name">ActionSpecial</div>
               <div class="swatch-hex">#FFB84A</div>
               <div class="swatch-token">--action-special</div>
             </div>
@@ -700,28 +677,43 @@
             <div class="swatch-info"><div class="swatch-name">Good</div><div class="swatch-hex">#FFB84A</div><div class="swatch-token">--cond-good</div></div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#FF6C8A;"></div>
-            <div class="swatch-info"><div class="swatch-name">Excellent</div><div class="swatch-hex">#FF6C8A</div><div class="swatch-token">--cond-excellent</div></div>
+            <div class="swatch-color" style="background:#FF6B8A;"></div>
+            <div class="swatch-info"><div class="swatch-name">Excellent</div><div class="swatch-hex">#FF6B8A</div><div class="swatch-token">--cond-excellent</div></div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#8A99BB;"></div>
-            <div class="swatch-info"><div class="swatch-name">Poor</div><div class="swatch-hex">#8A99BB</div><div class="swatch-token">--cond-poor</div></div>
+            <div class="swatch-color" style="background:#8A99BA;"></div>
+            <div class="swatch-info"><div class="swatch-name">Poor</div><div class="swatch-hex">#8A99BA</div><div class="swatch-token">--cond-poor</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#4AB8FF;"></div>
             <div class="swatch-info"><div class="swatch-name">Pliant</div><div class="swatch-hex">#4AB8FF</div><div class="swatch-token">--cond-pliant</div></div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#B07BFF;"></div>
-            <div class="swatch-info"><div class="swatch-name">Malleable</div><div class="swatch-hex">#B07BFF</div><div class="swatch-token">--cond-malleable</div></div>
+            <div class="swatch-color" style="background:#B07AFF;"></div>
+            <div class="swatch-info"><div class="swatch-name">Malleable</div><div class="swatch-hex">#B07AFF</div><div class="swatch-token">--cond-malleable</div></div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#52E5A0;"></div>
-            <div class="swatch-info"><div class="swatch-name">Sturdy</div><div class="swatch-hex">#52E5A0</div><div class="swatch-token">--cond-sturdy</div></div>
+            <div class="swatch-color" style="background:#52E6A1;"></div>
+            <div class="swatch-info"><div class="swatch-name">Sturdy</div><div class="swatch-hex">#52E6A1</div><div class="swatch-token">--cond-sturdy</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#FF8C40;"></div>
             <div class="swatch-info"><div class="swatch-name">Primed</div><div class="swatch-hex">#FF8C40</div><div class="swatch-token">--cond-primed</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge tints -->
+      <div class="ds-subsection">
+        <div class="ds-subsection-title">Badge Tints</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#FCF79E;"></div>
+            <div class="swatch-info">
+              <div class="swatch-name">SpecialistGold</div>
+              <div class="swatch-hex">#FCF79E</div>
+              <div class="swatch-token">--specialist-gold</div>
+            </div>
           </div>
         </div>
       </div>
@@ -732,27 +724,27 @@
         <div class="swatch-grid">
           <div class="swatch">
             <div class="swatch-color" style="background:#B07AFF;"></div>
-            <div class="swatch-info"><div class="swatch-name">Active</div><div class="swatch-hex">#B07AFF</div><div class="swatch-token">--cosmic-active</div></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicActive</div><div class="swatch-hex">#B07AFF</div><div class="swatch-token">--cosmic-active</div></div>
           </div>
           <div class="swatch">
-            <div class="swatch-color" style="background:#55B855;"></div>
-            <div class="swatch-info"><div class="swatch-name">Complete</div><div class="swatch-hex">#55B855</div><div class="swatch-token">--cosmic-complete</div></div>
+            <div class="swatch-color" style="background:#54B854;"></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicComplete</div><div class="swatch-hex">#54B854</div><div class="swatch-token">--cosmic-complete</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#383847;"></div>
-            <div class="swatch-info"><div class="swatch-name">Locked</div><div class="swatch-hex">#383847</div><div class="swatch-token">--cosmic-locked</div></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicLocked</div><div class="swatch-hex">#383847</div><div class="swatch-token">--cosmic-locked</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#F0B830;"></div>
-            <div class="swatch-info"><div class="swatch-name">Mission</div><div class="swatch-hex">#F0B830</div><div class="swatch-token">--cosmic-mission</div></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicMission</div><div class="swatch-hex">#F0B830</div><div class="swatch-token">--cosmic-mission</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#9973E6;"></div>
-            <div class="swatch-info"><div class="swatch-name">Upgrade</div><div class="swatch-hex">#9973E6</div><div class="swatch-token">--cosmic-upgrade</div></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicUpgrade</div><div class="swatch-hex">#9973E6</div><div class="swatch-token">--cosmic-upgrade</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#FFD966;"></div>
-            <div class="swatch-info"><div class="swatch-name">Maxed</div><div class="swatch-hex">#FFD966</div><div class="swatch-token">--cosmic-maxed</div></div>
+            <div class="swatch-info"><div class="swatch-name">CosmicMaxed</div><div class="swatch-hex">#FFD966</div><div class="swatch-token">--cosmic-maxed</div></div>
           </div>
         </div>
       </div>
@@ -771,11 +763,11 @@
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#4AB8FF;"></div>
-            <div class="swatch-info"><div class="swatch-name">Link / Info</div><div class="swatch-hex">#4AB8FF</div><div class="swatch-token">--link</div></div>
+            <div class="swatch-info"><div class="swatch-name">Link</div><div class="swatch-hex">#4AB8FF</div><div class="swatch-token">--link</div></div>
           </div>
           <div class="swatch">
             <div class="swatch-color" style="background:#50607A;"></div>
-            <div class="swatch-info"><div class="swatch-name">Text Muted</div><div class="swatch-hex">#50607A</div><div class="swatch-token">--text-muted</div></div>
+            <div class="swatch-info"><div class="swatch-name">TextMuted</div><div class="swatch-hex">#50607A</div><div class="swatch-token">--text-muted</div></div>
           </div>
         </div>
       </div>
@@ -784,13 +776,13 @@
       <div class="ds-subsection">
         <div class="ds-subsection-title">Solver — Progresso Colorful</div>
         <div class="swatch-grid">
-          <div class="swatch"><div class="swatch-color" style="background:#DE313D;"></div><div class="swatch-info"><div class="swatch-name">Stage 1</div><div class="swatch-hex">#DE313D</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#F59E1E;"></div><div class="swatch-info"><div class="swatch-name">Stage 2</div><div class="swatch-hex">#F59E1E</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#F7D600;"></div><div class="swatch-info"><div class="swatch-name">Stage 3</div><div class="swatch-hex">#F7D600</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#5EB05A;"></div><div class="swatch-info"><div class="swatch-name">Stage 4</div><div class="swatch-hex">#5EB05A</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#364DFA;"></div><div class="swatch-info"><div class="swatch-name">Stage 5</div><div class="swatch-hex">#364DFA</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#429EF0;"></div><div class="swatch-info"><div class="swatch-name">Stage 6</div><div class="swatch-hex">#429EF0</div></div></div>
-          <div class="swatch"><div class="swatch-color" style="background:#B37CE0;"></div><div class="swatch-info"><div class="swatch-name">Stage 7</div><div class="swatch-hex">#B37CE0</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#DE304D;"></div><div class="swatch-info"><div class="swatch-name">Stage 1</div><div class="swatch-hex">#DE304D</div><div class="swatch-token">--solver-1</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#F59E1F;"></div><div class="swatch-info"><div class="swatch-name">Stage 2</div><div class="swatch-hex">#F59E1F</div><div class="swatch-token">--solver-2</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#F7D600;"></div><div class="swatch-info"><div class="swatch-name">Stage 3</div><div class="swatch-hex">#F7D600</div><div class="swatch-token">--solver-3</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#5EB059;"></div><div class="swatch-info"><div class="swatch-name">Stage 4</div><div class="swatch-hex">#5EB059</div><div class="swatch-token">--solver-4</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#364DFA;"></div><div class="swatch-info"><div class="swatch-name">Stage 5</div><div class="swatch-hex">#364DFA</div><div class="swatch-token">--solver-5</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#429EF0;"></div><div class="swatch-info"><div class="swatch-name">Stage 6</div><div class="swatch-hex">#429EF0</div><div class="swatch-token">--solver-6</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#B37DE0;"></div><div class="swatch-info"><div class="swatch-name">Stage 7</div><div class="swatch-hex">#B37DE0</div><div class="swatch-token">--solver-7</div></div></div>
         </div>
       </div>
     </section>
@@ -807,52 +799,31 @@
 
       <div class="card">
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">HeaderFont (2×)</div>
-            <div class="type-spec">28px / 700</div>
-          </div>
+          <div class="type-meta"><div class="type-label">HeaderFont (2×)</div><div class="type-spec">28px / 700</div></div>
           <div style="font-size: 28px; font-weight: 700; color: #E8EEF8;">Macro Editor</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">SubheaderFont (1.5×)</div>
-            <div class="type-spec">21px / 600</div>
-          </div>
+          <div class="type-meta"><div class="type-label">SubheaderFont (1.5×)</div><div class="type-spec">21px / 600</div></div>
           <div style="font-size: 21px; font-weight: 600; color: #C8D0E0;">Character Stats</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">Body / Default</div>
-            <div class="type-spec">14px / 400</div>
-          </div>
+          <div class="type-meta"><div class="type-label">Body / Default</div><div class="type-spec">14px / 400</div></div>
           <div style="font-size: 14px; color: #D0D8E8;">Configure your crafting macro parameters here.</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">Small / Label</div>
-            <div class="type-spec">12px / 500</div>
-          </div>
+          <div class="type-meta"><div class="type-label">Small / Label</div><div class="type-spec">12px / 500</div></div>
           <div style="font-size: 12px; font-weight: 500; color: #A0AABF;">Recipe Level • Difficulty • Durability</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">Caption / Muted</div>
-            <div class="type-spec">11px / 400</div>
-          </div>
+          <div class="type-meta"><div class="type-label">Caption / Muted</div><div class="type-spec">11px / 400</div></div>
           <div style="font-size: 11px; color: var(--text-muted);">Progress: 3200 / 3500 (91%)</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">Mono / Value</div>
-            <div class="type-spec">12px mono / 600</div>
-          </div>
+          <div class="type-meta"><div class="type-label">Mono / Value</div><div class="type-spec">12px mono / 600</div></div>
           <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: #D0D8E8;">3482 / 560 CP</div>
         </div>
         <div class="type-row">
-          <div class="type-meta">
-            <div class="type-label">Overline / Section</div>
-            <div class="type-spec">10px / 600 uppercase</div>
-          </div>
+          <div class="type-meta"><div class="type-label">Overline / Section</div><div class="type-spec">10px / 600 uppercase</div></div>
           <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);">Craft Parameters</div>
         </div>
       </div>
@@ -865,6 +836,7 @@
       <h2 class="ds-section-title">Espaçamento</h2>
       <p class="ds-section-desc">
         Base de 4px. Todos os valores escalam com <span class="token">ImGuiHelpers.GlobalScale</span> no plugin real.
+        <code>WindowPadding = (12, 8)</code> × scale via <span class="token">Theme.Push()</span>.
       </p>
 
       <div class="card">
@@ -880,27 +852,27 @@
       </div>
 
       <div class="ds-subsection" style="margin-top: var(--sp-6);">
-        <div class="ds-subsection-title">Border Radius</div>
+        <div class="ds-subsection-title">Border Radius — Theme.cs PushStyleVar</div>
         <div class="demo-row">
           <div style="text-align:center;">
             <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-sm);margin:0 auto var(--sp-1);"></div>
             <div class="swatch-hex">r-sm / 4px</div>
-            <div class="swatch-token">frames, botões</div>
+            <div class="swatch-token">FrameRounding — frames, botões</div>
           </div>
           <div style="text-align:center;">
             <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-md);margin:0 auto var(--sp-1);"></div>
             <div class="swatch-hex">r-md / 6px</div>
-            <div class="swatch-token">janelas, group panels</div>
+            <div class="swatch-token">ChildRounding — janelas, panels</div>
           </div>
           <div style="text-align:center;">
             <div style="width:48px;height:48px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-lg);margin:0 auto var(--sp-1);"></div>
             <div class="swatch-hex">r-lg / 8px</div>
-            <div class="swatch-token">cards maiores</div>
+            <div class="swatch-token">cards maiores (DS only)</div>
           </div>
           <div style="text-align:center;">
             <div style="width:48px;height:24px;background:var(--bg-overlay);border:1px solid var(--border);border-radius:var(--r-pill);margin:12px auto var(--sp-1);"></div>
             <div class="swatch-hex">r-pill / 9999px</div>
-            <div class="swatch-token">badges, pills</div>
+            <div class="swatch-token">DrawBadgePill</div>
           </div>
         </div>
       </div>
@@ -912,56 +884,37 @@
     <section class="ds-section" id="surfaces">
       <h2 class="ds-section-title">Superfícies</h2>
       <p class="ds-section-desc">
-        Hierarquia de fundos em dark mode. Cada camada é ligeiramente mais clara — usada para
-        criar profundidade visual sem cores de destaque.
+        Hierarquia de fundos em dark mode de <code>Theme.cs</code>. Cada camada é ligeiramente mais clara —
+        cria profundidade visual sem cores de destaque.
       </p>
 
       <div style="display:flex; gap: var(--sp-3); flex-wrap: wrap;">
         <div class="swatch swatch-bg" style="width:160px;">
           <div class="swatch-color" style="background:#060810;">bg-base</div>
-          <div class="swatch-info">
-            <div class="swatch-name">BgBase</div>
-            <div class="swatch-hex">#060810</div>
-            <div class="swatch-token">scrollbar track</div>
-          </div>
+          <div class="swatch-info"><div class="swatch-name">BgBase</div><div class="swatch-hex">#060810</div><div class="swatch-token">ScrollbarBg</div></div>
         </div>
         <div class="swatch swatch-bg" style="width:160px;">
           <div class="swatch-color" style="background:#0D1120;">bg-surface</div>
-          <div class="swatch-info">
-            <div class="swatch-name">BgSurface</div>
-            <div class="swatch-hex">#0D1120</div>
-            <div class="swatch-token">WindowBg</div>
-          </div>
+          <div class="swatch-info"><div class="swatch-name">BgSurface</div><div class="swatch-hex">#0D1120</div><div class="swatch-token">WindowBg, TitleBg</div></div>
         </div>
         <div class="swatch swatch-bg" style="width:160px;">
           <div class="swatch-color" style="background:#141928;">bg-elevated</div>
-          <div class="swatch-info">
-            <div class="swatch-name">BgElevated</div>
-            <div class="swatch-hex">#141928</div>
-            <div class="swatch-token">ChildBg, title bar</div>
-          </div>
+          <div class="swatch-info"><div class="swatch-name">BgElevated</div><div class="swatch-hex">#141928</div><div class="swatch-token">ChildBg, TitleBgActive</div></div>
         </div>
         <div class="swatch swatch-bg" style="width:160px;">
           <div class="swatch-color" style="background:#1B2235;">bg-overlay</div>
-          <div class="swatch-info">
-            <div class="swatch-name">BgOverlay</div>
-            <div class="swatch-hex">#1B2235</div>
-            <div class="swatch-token">FrameBg, inputs</div>
-          </div>
+          <div class="swatch-info"><div class="swatch-name">BgOverlay</div><div class="swatch-hex">#1B2235</div><div class="swatch-token">FrameBg, Button</div></div>
         </div>
         <div class="swatch swatch-bg" style="width:160px;">
           <div class="swatch-color" style="background:#212A40;">bg-hover</div>
-          <div class="swatch-info">
-            <div class="swatch-name">BgHover</div>
-            <div class="swatch-hex">#212A40</div>
-            <div class="swatch-token">FrameBgHovered</div>
-          </div>
+          <div class="swatch-info"><div class="swatch-name">BgHover</div><div class="swatch-hex">#212A40</div><div class="swatch-token">FrameBgHovered, ButtonHovered</div></div>
         </div>
       </div>
 
       <div style="margin-top: var(--sp-4);">
         <div class="swatch-token" style="font-size: 12px;">
-          Border: <span style="color: rgba(100,140,200,0.8);">rgba(100, 140, 200, 0.30)</span> — borda padrão azul translúcida
+          Border: <span style="color: rgba(100,140,200,0.8);">rgba(100, 140, 200, 0.30)</span>
+          — <code>(0.392, 0.549, 0.784, 0.30)</code> aplicado via <span class="token">ImGuiCol.Border</span>
         </div>
       </div>
     </section>
@@ -973,10 +926,10 @@
       <h2 class="ds-section-title">Janela do Plugin</h2>
       <p class="ds-section-desc">
         Shell base usado por todas as janelas. Title bar com ícone, label e botões de ação.
+        Cores aplicadas via <span class="token">Theme.Push()</span> / <span class="token">Theme.Pop()</span>.
       </p>
 
       <div class="demo-row">
-        <!-- Macro Editor window skeleton -->
         <div class="plugin-window" style="width: 320px;">
           <div class="plugin-titlebar">
             <span class="plugin-titlebar-icon"><i class="fa-solid fa-hammer"></i></span>
@@ -986,27 +939,22 @@
             <span class="plugin-titlebar-btn active"><i class="fa-solid fa-eye"></i></span>
             <span class="plugin-titlebar-btn"><i class="fa-solid fa-minus"></i></span>
           </div>
-          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">
-            Conteúdo da janela…
-          </div>
+          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">Conteúdo da janela…</div>
         </div>
 
-        <!-- Synth Helper window skeleton -->
         <div class="plugin-window" style="width: 220px;">
           <div class="plugin-titlebar">
             <span class="plugin-titlebar-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
             <span class="plugin-titlebar-label">Synth Helper</span>
             <span class="plugin-titlebar-btn"><i class="fa-solid fa-xmark"></i></span>
           </div>
-          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">
-            Conteúdo…
-          </div>
+          <div class="plugin-body" style="font-size: 12px; color: var(--text-muted);">Conteúdo…</div>
         </div>
       </div>
 
       <div style="margin-top: var(--sp-4); font-size: 12px; color: var(--text-muted);">
         <strong style="color:#8898B8;">Anatomia:</strong>
-        BgElevated title bar → 1px border-bottom → BgSurface body → padding 10px×12px.
+        BgElevated title bar → 1px border-bottom → BgSurface body → WindowPadding (12,8)px.
         Label: <span class="token">#C8B8FF</span> (violet claro). Botão ativo: <span class="token">--link</span>.
       </div>
     </section>
@@ -1017,7 +965,9 @@
     <section class="ds-section" id="group-panel">
       <h2 class="ds-section-title">Group Panel</h2>
       <p class="ds-section-desc">
-        Container com borda e label flutuante na borda superior. Label colorida em <span class="token">--link</span>.
+        Container com borda e label flutuante via <span class="token">BeginGroupPanel(name, width)</span> /
+        <span class="token">EndGroupPanel()</span>. Label colorida em <span class="token">Colors.ActionBuff</span>
+        quando <code>accentLabel = true</code> (padrão).
       </p>
 
       <div class="card">
@@ -1048,59 +998,46 @@
     <section class="ds-section" id="progress">
       <h2 class="ds-section-title">Progress Bars</h2>
       <p class="ds-section-desc">
-        Barras de progresso para stats de crafting. Altura 14px com rounding suave.
+        <span class="token">ProgressBar(float value, Vector2 size, string? overlay)</span> —
+        valor negativo = modo indeterminado animado. Cor de fill = <span class="token">ImGuiCol.PlotHistogram</span>
+        (ajustável via PushStyleColor).
       </p>
 
       <div class="card">
-        <!-- Progress -->
         <div style="margin-bottom: var(--sp-3);">
           <div class="prog-label">
             <span style="color: var(--progress); font-weight: 600;">Progress</span>
             <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">3200 / 3500</span>
           </div>
-          <div class="prog-wrap">
-            <div class="prog-fill" style="width:91%; background: var(--progress);">91%</div>
-          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:91%; background: var(--progress);">91%</div></div>
         </div>
-        <!-- Quality -->
         <div style="margin-bottom: var(--sp-3);">
           <div class="prog-label">
             <span style="color: var(--quality); font-weight: 600;">Quality</span>
             <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">8420 / 14040</span>
           </div>
-          <div class="prog-wrap">
-            <div class="prog-fill" style="width:60%; background: var(--quality);">60%</div>
-          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:60%; background: var(--quality);">60%</div></div>
         </div>
-        <!-- Durability -->
         <div style="margin-bottom: var(--sp-3);">
           <div class="prog-label">
             <span style="color: var(--durability); font-weight: 600;">Durability</span>
             <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">35 / 70</span>
           </div>
-          <div class="prog-wrap">
-            <div class="prog-fill" style="width:50%; background: var(--durability);">50%</div>
-          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:50%; background: var(--durability);">50%</div></div>
         </div>
-        <!-- CP -->
         <div style="margin-bottom: var(--sp-3);">
           <div class="prog-label">
             <span style="color: var(--cp); font-weight: 600;">CP</span>
             <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">124 / 596</span>
           </div>
-          <div class="prog-wrap">
-            <div class="prog-fill" style="width:21%; background: var(--cp);">21%</div>
-          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:21%; background: var(--cp);">21%</div></div>
         </div>
-        <!-- Collectability -->
         <div>
           <div class="prog-label">
             <span style="color: var(--collectability); font-weight: 600;">Collectability</span>
             <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">450 / 900</span>
           </div>
-          <div class="prog-wrap">
-            <div class="prog-fill" style="width:50%; background: var(--collectability);">50%</div>
-          </div>
+          <div class="prog-wrap"><div class="prog-fill" style="width:50%; background: var(--collectability);">50%</div></div>
         </div>
       </div>
     </section>
@@ -1111,8 +1048,9 @@
     <section class="ds-section" id="badges">
       <h2 class="ds-section-title">Badges &amp; Pills</h2>
       <p class="ds-section-desc">
-        Pills com border radius total. Fill: 14% opacidade. Border: 30% opacidade.
-        Padding: 2px vertical × 7px horizontal.
+        <span class="token">DrawBadgePill(string text, Vector4 foreColor)</span> — fill 14% opacidade, border 30%.
+        Padding <code>(7, 2)</code> × GlobalScale. Rounding = height / 2 (pill completo).<br/>
+        <span class="token">DrawBadge(ImTextureID, Vector2 size, string tooltip, Vector4? tint)</span> — imagem com tooltip.
       </p>
 
       <div class="card">
@@ -1134,18 +1072,11 @@
         <hr class="ds" style="margin: var(--sp-3) 0;" />
 
         <div class="demo-row">
-          <span class="badge" style="color: var(--good); background: rgba(82,229,160,0.14); border-color: rgba(82,229,160,0.30);">
-            ✓ HQ
-          </span>
-          <span class="badge" style="color: var(--bad); background: rgba(255,92,110,0.14); border-color: rgba(255,92,110,0.30);">
-            ✗ Failed
-          </span>
-          <span class="badge" style="color: var(--cosmic-maxed); background: rgba(255,217,102,0.14); border-color: rgba(255,217,102,0.30);">
-            ★ Specialist
-          </span>
-          <span class="badge" style="color: var(--link); background: rgba(74,184,255,0.14); border-color: rgba(74,184,255,0.30);">
-            Stage 3
-          </span>
+          <span class="badge" style="color: var(--good); background: rgba(82,229,160,0.14); border-color: rgba(82,229,160,0.30);">✓ HQ</span>
+          <span class="badge" style="color: var(--bad); background: rgba(255,92,110,0.14); border-color: rgba(255,92,110,0.30);">✗ Failed</span>
+          <span class="badge" style="color: var(--specialist-gold); background: rgba(252,247,158,0.14); border-color: rgba(252,247,158,0.30);">★ Specialist</span>
+          <span class="badge" style="color: var(--link); background: rgba(74,184,255,0.14); border-color: rgba(74,184,255,0.30);">Stage 3</span>
+          <span class="badge" style="color: var(--cosmic-maxed); background: rgba(255,217,102,0.14); border-color: rgba(255,217,102,0.30);">★ Maxed</span>
         </div>
       </div>
     </section>
@@ -1156,26 +1087,18 @@
     <section class="ds-section" id="chips">
       <h2 class="ds-section-title">State Chips</h2>
       <p class="ds-section-desc">
-        Indicadores de estado do solver com dot animado. Background escuro com borda sutil.
+        <span class="token">DrawStateChip(SolverState state, string? label)</span> —
+        dot animado (sin pulse) quando <code>Solving</code>, estático nos demais.
+        Estados: <code>Solving · Complete · Suboptimal · Failed</code>.
       </p>
 
       <div class="card">
         <div class="demo-row">
-          <span class="chip">
-            <span class="chip-dot" style="background: var(--link);"></span>Solving…
-          </span>
-          <span class="chip">
-            <span class="chip-dot static" style="background: var(--good);"></span>Complete
-          </span>
-          <span class="chip">
-            <span class="chip-dot static" style="background: var(--durability);"></span>Suboptimal
-          </span>
-          <span class="chip">
-            <span class="chip-dot static" style="background: var(--bad);"></span>Failed
-          </span>
-          <span class="chip">
-            <span class="chip-dot static" style="background: var(--text-muted);"></span>Idle
-          </span>
+          <span class="chip"><span class="chip-dot" style="background: var(--link);"></span>Solving…</span>
+          <span class="chip"><span class="chip-dot static" style="background: var(--good);"></span>Complete</span>
+          <span class="chip"><span class="chip-dot static" style="background: var(--durability);"></span>Suboptimal</span>
+          <span class="chip"><span class="chip-dot static" style="background: var(--bad);"></span>Failed</span>
+          <span class="chip"><span class="chip-dot static" style="background: var(--text-muted);"></span>Idle</span>
         </div>
       </div>
     </section>
@@ -1186,44 +1109,21 @@
     <section class="ds-section" id="conditions">
       <h2 class="ds-section-title">Condition Indicator</h2>
       <p class="ds-section-desc">
-        Dot colorido com glow via box-shadow. Usado no SynthHelper para mostrar a condição
-        atual do crafting step.
+        <span class="token">DrawConditionIndicator(Condition condition, float spacing)</span> —
+        círculo animado (cor via <code>condition.GetColor(TimeOfDay)</code>) + nome da condição.
+        Usado no SynthHelper para mostrar o estado atual do crafting step.
       </p>
 
       <div class="card">
         <div class="demo-row" style="flex-wrap: wrap; gap: var(--sp-4);">
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-normal); color: var(--cond-normal);"></div>
-            <span class="cond-label" style="color: var(--cond-normal);">Normal</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-good); color: var(--cond-good);"></div>
-            <span class="cond-label" style="color: var(--cond-good);">Good</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-excellent); color: var(--cond-excellent);"></div>
-            <span class="cond-label" style="color: var(--cond-excellent);">Excellent</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-poor); color: var(--cond-poor);"></div>
-            <span class="cond-label" style="color: var(--cond-poor);">Poor</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-pliant); color: var(--cond-pliant);"></div>
-            <span class="cond-label" style="color: var(--cond-pliant);">Pliant</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-malleable); color: var(--cond-malleable);"></div>
-            <span class="cond-label" style="color: var(--cond-malleable);">Malleable</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-sturdy); color: var(--cond-sturdy);"></div>
-            <span class="cond-label" style="color: var(--cond-sturdy);">Sturdy</span>
-          </div>
-          <div class="cond-indicator">
-            <div class="cond-dot" style="background: var(--cond-primed); color: var(--cond-primed);"></div>
-            <span class="cond-label" style="color: var(--cond-primed);">Primed</span>
-          </div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-normal); color: var(--cond-normal);"></div><span class="cond-label" style="color: var(--cond-normal);">Normal</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-good); color: var(--cond-good);"></div><span class="cond-label" style="color: var(--cond-good);">Good</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-excellent); color: var(--cond-excellent);"></div><span class="cond-label" style="color: var(--cond-excellent);">Excellent</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-poor); color: var(--cond-poor);"></div><span class="cond-label" style="color: var(--cond-poor);">Poor</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-pliant); color: var(--cond-pliant);"></div><span class="cond-label" style="color: var(--cond-pliant);">Pliant</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-malleable); color: var(--cond-malleable);"></div><span class="cond-label" style="color: var(--cond-malleable);">Malleable</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-sturdy); color: var(--cond-sturdy);"></div><span class="cond-label" style="color: var(--cond-sturdy);">Sturdy</span></div>
+          <div class="cond-indicator"><div class="cond-dot" style="background: var(--cond-primed); color: var(--cond-primed);"></div><span class="cond-label" style="color: var(--cond-primed);">Primed</span></div>
         </div>
       </div>
     </section>
@@ -1234,11 +1134,14 @@
     <section class="ds-section" id="buttons">
       <h2 class="ds-section-title">Botões</h2>
       <p class="ds-section-desc">
-        Icon buttons 28×28px com variantes semânticas. Usados na title bar e nas hotbar de ações.
+        <span class="token">IconButtonSquare(FontAwesomeIcon icon, float size = -1)</span> —
+        botão quadrado com ícone centralizado via drawlist. Tamanho padrão = FrameHeight.<br/>
+        <span class="token">Theme.PushPrimaryButton()</span> / <span class="token">Theme.PushDangerButton()</span> —
+        sobreescrevem Button/ButtonHovered/ButtonActive com cores semânticas.
       </p>
 
       <div class="card">
-        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Icon Buttons</div>
+        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Icon Buttons — IconButtonSquare</div>
         <div class="demo-row">
           <span class="icon-btn"><i class="fa-solid fa-gear"></i></span>
           <span class="icon-btn"><i class="fa-solid fa-rotate-right"></i></span>
@@ -1251,11 +1154,75 @@
 
         <hr class="ds" style="margin: var(--sp-4) 0;" />
 
-        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Link Text</div>
+        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Botões Semânticos — Theme.Push*Button</div>
+        <div class="demo-row" style="align-items: center;">
+          <button style="padding: 5px 14px; border-radius: var(--r-sm); border: none; background: rgba(74,184,255,0.85); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;">
+            PrimaryButton
+          </button>
+          <button style="padding: 5px 14px; border-radius: var(--r-sm); border: none; background: rgba(255,92,110,0.70); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer;">
+            DangerButton
+          </button>
+        </div>
+
+        <hr class="ds" style="margin: var(--sp-4) 0;" />
+
+        <div class="ds-subsection-title" style="margin-bottom: var(--sp-3);">Link Text — Hyperlink</div>
         <div class="demo-row">
           <span class="link-text">Support the project ↗</span>
           <span class="link-text">View on GitHub ↗</span>
         </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         EMPTY STATE
+    ═══════════════════════════════════════════════════════════════════ -->
+    <section class="ds-section" id="empty-state">
+      <h2 class="ds-section-title">Empty State</h2>
+      <p class="ds-section-desc">
+        <span class="token">DrawEmptyState(FontAwesomeIcon icon, string title, string? subtitle, (string Label, Action Clicked)? primaryButton, (string Label, Action Clicked)? secondaryButton, float buttonWidth = 200f)</span> —
+        centra verticalmente o conteúdo na área disponível. Ícone em <span class="token">Colors.TextMuted</span>.
+        Com dois botões: secondary normal, primary usa <span class="token">Theme.PushPrimaryButton()</span>.
+      </p>
+
+      <div class="demo-row" style="align-items: flex-start; gap: var(--sp-6);">
+
+        <!-- Estado vazio sem botão -->
+        <div class="plugin-window" style="width: 260px; height: 200px;">
+          <div class="plugin-titlebar">
+            <span class="plugin-titlebar-icon"><i class="fa-solid fa-list"></i></span>
+            <span class="plugin-titlebar-label">Crafting Lists</span>
+          </div>
+          <div class="plugin-body" style="height: 100%;">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fa-solid fa-list"></i></div>
+              <div class="empty-state-title">Nenhuma lista criada</div>
+              <div class="empty-state-sub">Abra uma receita e clique "Adicionar à Lista"</div>
+              <button class="empty-state-btn">+ Criar primeira lista</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado vazio de busca -->
+        <div class="plugin-window" style="width: 260px; height: 200px;">
+          <div class="plugin-titlebar">
+            <span class="plugin-titlebar-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <span class="plugin-titlebar-label">Buscar Receita</span>
+          </div>
+          <div class="plugin-body" style="height: 100%;">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+              <div class="empty-state-title">Nenhuma receita encontrada</div>
+              <div class="empty-state-sub">Tente outro nome de item</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top: var(--sp-4); font-size: 12px; color: var(--text-muted);">
+        Assinatura: <span class="token">ImGuiUtils.DrawEmptyState(icon, title, subtitle?, primaryButton?, secondaryButton?, buttonWidth)</span> —
+        layout calculado com <code>CalcTextSize</code> + <code>GetFrameHeight</code> para centralização vertical perfeita.
       </div>
     </section>
 
@@ -1274,33 +1241,25 @@
           <div class="stat-icon" style="color: var(--progress);">●</div>
           <div class="stat-name">Progress</div>
           <div class="stat-value" style="color: var(--progress);">3200</div>
-          <div class="stat-bar-col">
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:91%; background: var(--progress);"></div></div>
-          </div>
+          <div class="stat-bar-col"><div class="stat-bar"><div class="stat-bar-fill" style="width:91%; background: var(--progress);"></div></div></div>
         </div>
         <div class="stat-row">
           <div class="stat-icon" style="color: var(--quality);">●</div>
           <div class="stat-name">Quality</div>
           <div class="stat-value" style="color: var(--quality);">8420</div>
-          <div class="stat-bar-col">
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:60%; background: var(--quality);"></div></div>
-          </div>
+          <div class="stat-bar-col"><div class="stat-bar"><div class="stat-bar-fill" style="width:60%; background: var(--quality);"></div></div></div>
         </div>
         <div class="stat-row">
           <div class="stat-icon" style="color: var(--durability);">●</div>
           <div class="stat-name">Durability</div>
           <div class="stat-value" style="color: var(--durability);">35</div>
-          <div class="stat-bar-col">
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:50%; background: var(--durability);"></div></div>
-          </div>
+          <div class="stat-bar-col"><div class="stat-bar"><div class="stat-bar-fill" style="width:50%; background: var(--durability);"></div></div></div>
         </div>
         <div class="stat-row">
           <div class="stat-icon" style="color: var(--cp);">●</div>
           <div class="stat-name">CP</div>
           <div class="stat-value" style="color: var(--bad);">124</div>
-          <div class="stat-bar-col">
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:21%; background: var(--bad);"></div></div>
-          </div>
+          <div class="stat-bar-col"><div class="stat-bar"><div class="stat-bar-fill" style="width:21%; background: var(--bad);"></div></div></div>
         </div>
       </div>
     </section>
@@ -1334,7 +1293,9 @@
     <section class="ds-section" id="tooltips">
       <h2 class="ds-section-title">Tooltips</h2>
       <p class="ds-section-desc">
-        Background BgOverlay com borda strong. Max-width 220px (ImGui wraps text).
+        <span class="token">Tooltip(string text)</span> — texto simples, DefaultFont.<br/>
+        <span class="token">TooltipWrapped(string text, float width = 300)</span> — com <code>TextWrapPos</code>, max 300pt × scale.
+        Background BgOverlay com borda strong.
       </p>
 
       <div class="card">
@@ -1362,13 +1323,16 @@
     <section class="ds-section" id="cosmic">
       <h2 class="ds-section-title">Cosmic Tracker — Research Bars</h2>
       <p class="ds-section-desc">
-        Barras de pesquisa de 6px de altura com marcador de threshold de upgrade.
-        Estados: locked, active, complete, maxed. Highlight amber ao ser atualizado (10s).
+        <span class="token">DrawResearchTypeRow(label, current, needed, max, state, barWidth, delta?)</span> —
+        header + barra 6px + sub-limits. Delta amber quando atualizado.<br/>
+        <span class="token">DrawResearchTypeRowMinimized(label, current, needed, max, state, barWidth)</span> —
+        label 60pt + barra larga. Tooltip com valores.<br/>
+        <span class="token">DrawResearchTypeBar(fill, upgrade, markerColor, state, size)</span> — só a barra + marker line.<br/>
+        <span class="token">DrawCosmicStageBadge(stage, complete, maxStage?)</span> — pill de stage com suffix ✓ ou →.
       </p>
 
       <div class="demo-row" style="align-items: flex-start; gap: var(--sp-6);">
 
-        <!-- Normal state window -->
         <div class="plugin-window" style="width: 280px;">
           <div class="plugin-titlebar">
             <span class="plugin-titlebar-icon"><i class="fa-solid fa-star"></i></span>
@@ -1376,18 +1340,12 @@
             <span class="plugin-titlebar-btn"><i class="fa-solid fa-minus"></i></span>
           </div>
           <div class="plugin-body">
-            <!-- Job header -->
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--sp-2);">
               <span style="font-size:13px; font-weight:600; color:#E0E0F0;">Culinarian</span>
-              <span class="badge" style="color: var(--cosmic-mission); background: rgba(240,184,48,0.14); border-color: rgba(240,184,48,0.30); font-size: 9px;">
-                ★ Stellar Mission
-              </span>
+              <span class="badge" style="color: var(--cosmic-mission); background: rgba(240,184,48,0.14); border-color: rgba(240,184,48,0.30); font-size: 9px;">★ Stellar Mission</span>
             </div>
 
-            <!-- Research bars -->
             <div style="display:flex; flex-direction:column; gap: var(--sp-2);">
-
-              <!-- Active -->
               <div class="cosmic-row changed">
                 <div class="cosmic-name">Techniques</div>
                 <div class="cosmic-bar-col">
@@ -1399,7 +1357,6 @@
                 <div class="cosmic-values">340 / 500</div>
               </div>
 
-              <!-- Complete -->
               <div class="cosmic-row">
                 <div class="cosmic-name">Ingredients</div>
                 <div class="cosmic-bar-col">
@@ -1411,7 +1368,6 @@
                 <div class="cosmic-values" style="color: var(--cosmic-complete);">500 / 500</div>
               </div>
 
-              <!-- Maxed -->
               <div class="cosmic-row">
                 <div class="cosmic-name">Traditions</div>
                 <div class="cosmic-bar-col">
@@ -1422,22 +1378,27 @@
                 <div class="cosmic-values" style="color: var(--cosmic-maxed);">MAX</div>
               </div>
 
-              <!-- Locked -->
               <div class="cosmic-row">
                 <div class="cosmic-name" style="color: var(--text-muted);">Secrets</div>
                 <div class="cosmic-bar-col">
-                  <div class="cosmic-bar-wrap">
-                    <div class="cosmic-bar-fill" style="width:0%; background: var(--cosmic-locked);"></div>
-                  </div>
+                  <div class="cosmic-bar-wrap"><div class="cosmic-bar-fill" style="width:0%; background: var(--cosmic-locked);"></div></div>
                 </div>
                 <div class="cosmic-values" style="color: var(--text-muted);">—</div>
               </div>
+            </div>
 
+            <hr class="ds" style="margin: var(--sp-3) 0;" />
+
+            <!-- DrawCosmicStageBadge examples -->
+            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: var(--sp-1); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">DrawCosmicStageBadge</div>
+            <div class="demo-row">
+              <span class="badge" style="color: var(--cosmic-active); background: rgba(176,122,255,0.14); border-color: rgba(176,122,255,0.30);">Stage 2 → 3</span>
+              <span class="badge" style="color: var(--cosmic-complete); background: rgba(84,184,84,0.14); border-color: rgba(84,184,84,0.30);">Stage 3/4 ✓</span>
+              <span class="badge" style="color: var(--cosmic-active); background: rgba(176,122,255,0.14); border-color: rgba(176,122,255,0.30);">Stage 2/4</span>
             </div>
           </div>
         </div>
 
-        <!-- Legend -->
         <div style="padding-top: var(--sp-2);">
           <div class="ds-subsection-title">Estados</div>
           <div style="display:flex; flex-direction:column; gap: var(--sp-2);">
@@ -1482,7 +1443,8 @@
     <section class="ds-section" id="solver-bars">
       <h2 class="ds-section-title">Solver Progress Bars</h2>
       <p class="ds-section-desc">
-        Barras segmentadas do solver MCTS/Raphael. Modo Colorful (7 cores) e Simple (6 tons de cinza).
+        Barras segmentadas do solver MCTS/Raphael via <span class="token">Colors.GetSolverProgressColors(stage, type)</span>.
+        Modo <code>Colorful</code> (7 cores) e <code>Simple</code> (6 tons de cinza).
         Altura 8px, gap 2px entre segmentos.
       </p>
 
@@ -1499,16 +1461,14 @@
         </div>
 
         <div class="ds-subsection-title">Simple / Monochromatic</div>
-        <div class="solver-bars">
-          <div class="solver-bar-seg" style="background: #545454;"></div>
-          <div class="solver-bar-seg" style="background: #707070;"></div>
-          <div class="solver-bar-seg" style="background: #8F8F8F;"></div>
-          <div class="solver-bar-seg" style="background: #ADADAD;"></div>
-          <div class="solver-bar-seg" style="background: #CECECE;"></div>
-          <div class="solver-bar-seg" style="background: #EDEDED;"></div>
+        <div class="solver-bars" style="margin-bottom: var(--sp-4);">
+          <div class="solver-bar-seg" style="background: var(--mono-1);"></div>
+          <div class="solver-bar-seg" style="background: var(--mono-2);"></div>
+          <div class="solver-bar-seg" style="background: var(--mono-3);"></div>
+          <div class="solver-bar-seg" style="background: var(--mono-4);"></div>
+          <div class="solver-bar-seg" style="background: var(--mono-5);"></div>
+          <div class="solver-bar-seg" style="background: var(--mono-6);"></div>
         </div>
-
-        <hr class="ds" style="margin: var(--sp-4) 0;" />
 
         <div class="ds-subsection-title">In-progress (4 of 7)</div>
         <div class="solver-bars">
@@ -1522,14 +1482,13 @@
         </div>
       </div>
 
-      <!-- Collectability thresholds -->
       <div class="ds-subsection" style="margin-top: var(--sp-6);">
         <div class="ds-subsection-title">Collectability Thresholds</div>
         <div class="card">
-          <div style="display:flex; gap: var(--sp-3);">
-            <span class="badge" style="color: var(--collect-t1); background: rgba(120,199,238,0.14); border-color: rgba(120,199,238,0.30);">Threshold 1</span>
-            <span class="badge" style="color: var(--collect-t2); background: rgba(253,202,0,0.14); border-color: rgba(253,202,0,0.30);">Threshold 2</span>
-            <span class="badge" style="color: var(--collect-t3); background: rgba(191,255,191,0.14); border-color: rgba(191,255,191,0.30);">Threshold 3</span>
+          <div style="display:flex; gap: var(--sp-3); flex-wrap: wrap;">
+            <span class="badge" style="color: var(--collect-t1); background: rgba(120,199,237,0.14); border-color: rgba(120,199,237,0.30);">Threshold 1 — #78C7ED</span>
+            <span class="badge" style="color: var(--collect-t2); background: rgba(252,201,0,0.14); border-color: rgba(252,201,0,0.30);">Threshold 2 — #FCC900</span>
+            <span class="badge" style="color: var(--collect-t3); background: rgba(191,255,191,0.14); border-color: rgba(191,255,191,0.30);">Threshold 3 — #BFFFBF</span>
           </div>
         </div>
       </div>
@@ -1537,23 +1496,23 @@
 
     <!-- Footer -->
     <div style="margin-top: var(--sp-12); padding-top: var(--sp-6); border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px;">
-      Craftimizer Design System — derivado de <span class="token">Colors.cs</span>, <span class="token">Theme.cs</span> e <span class="token">ImGuiUtils.cs</span>.
-      Todas as medidas usam base 4px e escalam com <span class="token">ImGuiHelpers.GlobalScale</span> no plugin real.
+      Craftimizer Design System — derivado de <span class="token">Colors.cs</span>, <span class="token">Theme.cs</span>,
+      <span class="token">ImGuiUtils.cs</span>, <span class="token">ImGuiUtils.Progress.cs</span>,
+      <span class="token">ImGuiUtils.Cosmic.cs</span> e <span class="token">ImGuiUtils.EmptyState.cs</span>.
+      Todos os valores hex calculados de <code>Vector4 × 255</code>. Medidas escalam com <span class="token">ImGuiHelpers.GlobalScale</span>.
     </div>
 
   </main>
 </div>
 
 <script>
-  // Highlight active nav link on scroll
   const sections = document.querySelectorAll('.ds-section');
   const links    = document.querySelectorAll('.ds-nav-link');
 
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (e.isIntersecting) {
+      if (e.isIntersecting)
         links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
-      }
     });
   }, { threshold: 0.3 });
 

@@ -12,6 +12,8 @@ Craftimizer é um plugin Dalamud para Final Fantasy XIV que fornece:
 - **Simulador de crafting**: engine puro em C# sem dependências do jogo (`Simulator/`)
 - **Solver**: MCTS + solver Raphael (Rust via `Raphael.Net`) (`Solver/`)
 - **Plugin Dalamud**: UI ImGui, hooks no jogo, leitura de dados via Lumina (`Craftimizer/`)
+- **Biblioteca de UI**: componentes ImGui standalone sem Dalamud (`Craftimizer.UI/`)
+- **UI Studio**: app Storybook desktop (Silk.NET/OpenGL) para desenvolver componentes fora do jogo (`Craftimizer.UIStudio/`)
 - **Testes/Benchmarks**: `Test/`, `Benchmark/`
 
 ## Stack Tecnológica
@@ -29,6 +31,18 @@ Craftimizer é um plugin Dalamud para Final Fantasy XIV que fornece:
 ## Estrutura de Arquivos Críticos
 
 ```
+Craftimizer.UI/               ← biblioteca standalone (sem Dalamud)
+  Colors.cs                   ← tokens de cor (Vector4) — fonte de verdade do design system
+  Theme.cs                    ← Push/Pop de estilo ImGui (17 cores + 3 vars)
+  ImGuiUtils.cs               ← GroupPanel, Badge, helpers de layout
+  ImGuiUtils.Cosmic.cs        ← DrawResearchTypeRow, DrawResearchTypeBar, DrawCosmicStageBadge
+  ImGuiUtils.Charts.cs        ← DrawStatArc, DrawBarRow
+  ProgressBarComponent.cs     ← modos Horizontal/Arc/Compact/Stacked com estados
+  ImRaii2.cs                  ← wrappers RAII GroupPanel e TextWrapPos
+  IUiServices.cs              ← interface abstraindo deps Dalamud de runtime
+Craftimizer.UIStudio/         ← app Storybook desktop (Silk.NET/OpenGL)
+  Program.cs                  ← ponto de entrada, lista de stories
+  Stories/                    ← uma classe IStory por componente/template
 Craftimizer/
   Craftimizer.csproj          ← versão do SDK, PackageReferences
   Craftimizer.json            ← manifesto do plugin (ApplicableVersion)
@@ -45,10 +59,10 @@ Craftimizer/
       CSRecipeNote.cs         ← acesso unsafe à struct RecipeNote nativa
       Gearsets.cs             ← leitura de gear sets do jogador
       CosmicToolTracker.cs    ← tracker de progresso de Cosmic Exploration (WKS)
-    UI/
-      Colors.cs               ← cores ImGui do tema
-      ImGuiUtils.cs           ← utilitários ImGui
-      ImGuiUtils.Cosmic.cs    ← widgets específicos do Cosmic Tracker
+    UI/                       ← extensões plugin-específicas (partial classes)
+      ProgressBarComponent.Solver.cs  ← integração solver com ProgressBar
+      DynamicBars.cs          ← barras dinâmicas de síntese
+      IFontHandleExtensions.cs ← helpers de fonte Dalamud
   Windows/
     MacroEditor.cs            ← editor principal (CharacterStats, RecipeData, solver)
     SynthHelper.cs            ← overlay mid-craft
@@ -73,7 +87,17 @@ Solver/
 - Structs FFXIVClientStructs acessadas via `unsafe` blocks com `fixed` quando necessário
 - `IS_DETERMINISTIC` define compilação sem randomness (benchmarks/testes)
 - Nullable e ImplicitUsings habilitados em todos os projetos
-- `AllowUnsafeBlocks = true` apenas no projeto plugin
+- `AllowUnsafeBlocks = true` apenas no projeto plugin (`Craftimizer/`)
+
+### Craftimizer.UI / UIStudio
+
+- Novos componentes ImGui reutilizáveis vão em `Craftimizer.UI/` (sem dependência Dalamud)
+- Extensions plugin-específicas (ex: integração com solver) vão em `Craftimizer/Utils/UI/` como partial classes
+- `Craftimizer.UI` usa `Microsoft.NET.Sdk` + `ImGui.NET` NuGet — **não** referenciar `Dalamud.NET.Sdk`
+- `cimgui.dll` e `ImGui.NET.dll` são removidos do output do plugin pelo target `RemoveImGuiNativeDlls` em `Craftimizer.csproj`
+- Para desenvolver/testar componentes sem abrir o FFXIV: `dotnet run --project Craftimizer.UIStudio`
+- Novas stories no UIStudio: implementar `IStory` com `Category` e `Name`, registrar em `Program.cs`
+- Atomic Design: Atoms → Molecules → Templates → Pages (categoria da story = nível do design)
 
 ### Gerenciamento de Versão do Plugin
 
@@ -103,15 +127,16 @@ Solver/
 
 Usar sempre as skills em vez de reproduzir manualmente os procedimentos:
 
-| Skill              | Quando usar                                                             |
-| ------------------ | ----------------------------------------------------------------------- |
-| `/commit`        | Ao concluir uma implementação — faz README, bump, commit, tag e push |
-| `/version-bump`  | Só para incrementar a versão isoladamente (chamado por `/commit`)   |
-| `/deploy`        | Compilar e deployar para XIVLauncher local para teste in-game           |
-| `/backlog`       | Criar novo item de backlog (bug, rascunho ou feature completa)          |
-| `/patch-check`   | Analisar compatibilidade com novo patch do FFXIV                        |
-| `/offset-debug`  | Diagnosticar e corrigir memory offsets quebrados                        |
-| `/update-readme` | Atualizar README isoladamente (chamado por `/commit`)                 |
+| Skill                    | Quando usar                                                             |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `/commit`              | Ao concluir uma implementação — faz README, bump, commit, tag e push |
+| `/version-bump`        | Só para incrementar a versão isoladamente (chamado por `/commit`)   |
+| `/deploy`              | Compilar e deployar para XIVLauncher local para teste in-game           |
+| `/backlog`             | Criar novo item de backlog (bug, rascunho ou feature completa)          |
+| `/patch-check`         | Analisar compatibilidade com novo patch do FFXIV                        |
+| `/offset-debug`        | Diagnosticar e corrigir memory offsets quebrados                        |
+| `/update-readme`       | Atualizar README isoladamente (chamado por `/commit`)                 |
+| `/update-design-system` | Sincronizar `mockup/design-system.html` com `Craftimizer.UI/Colors.cs` e `Theme.cs` |
 
 **Fluxo padrão pós-implementação:**
 
