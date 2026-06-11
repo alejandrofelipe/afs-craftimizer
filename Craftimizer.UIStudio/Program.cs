@@ -9,4 +9,5 @@ StudioApp.Run(
     new ProgressBarStory(),
     new ChartsStory(),
     new BarsStory(),
+    new TabbedWindowStory(),
 ]);
