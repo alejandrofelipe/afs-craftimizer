@@ -19,4 +19,5 @@ StudioApp.Run(
     new MacroEditorStory(),
     new SynthHelperStory(),
     new RecipeNoteStory(),
+    new CosmicTrackerStory(),
 ]);
