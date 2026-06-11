@@ -33,18 +33,18 @@ jobs:
           unzip /tmp/dalamud.zip -d $HOME/.xlcore/dalamud/Hooks/dev
 
       - name: Restore dependencies
-        run: dotnet restore Craftimizer/Craftimizer.csproj /p:RestoreLockedMode=false
+        run: dotnet restore Artificer/Artificer.csproj /p:RestoreLockedMode=false
 
       - name: Build Release
-        run: dotnet build Craftimizer/Craftimizer.csproj -c Release --no-restore --nologo
+        run: dotnet build Artificer/Artificer.csproj -c Release --no-restore --nologo
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Craftimizer/bin/Release/Craftimizer/latest.zip
+          files: Artificer/bin/Release/Artificer/latest.zip
           generate_release_notes: false
           body: |
-            ## Craftimizer (AFS Fork) ${{ github.ref_name }}
+            ## Artificer (AFS Fork) ${{ github.ref_name }}
 
             ### Instalação via Dalamud Plugin Installer
 
@@ -54,7 +54,7 @@ jobs:
                https://raw.githubusercontent.com/alejandrofelipe/afs-craftimizer/main/repo.json
                ```
             3. Clique **Save and Close**
-            4. Procure por "Craftimizer" no Plugin Installer e instale
+            4. Procure por "Artificer" no Plugin Installer e instale
 
             Atualizações futuras aparecem automaticamente no Plugin Installer.
 
@@ -66,8 +66,8 @@ jobs:
           $timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds().ToString()
 
           $repo = Get-Content repo.json -Raw | ConvertFrom-Json
-          $repo[0].AssemblyVersion = $version
-          $repo[0].LastUpdate = $timestamp
+          $repo.AssemblyVersion = $version
+          $repo.LastUpdate = $timestamp
           $repo | ConvertTo-Json -Depth 5 | Set-Content repo.json -Encoding UTF8
 
           Write-Host "Updated repo.json: AssemblyVersion=$version, LastUpdate=$timestamp"
