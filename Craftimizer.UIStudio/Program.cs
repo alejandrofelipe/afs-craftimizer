@@ -18,4 +18,5 @@ StudioApp.Run(
     // Pages
     new MacroEditorStory(),
     new SynthHelperStory(),
+    new RecipeNoteStory(),
 ]);
