@@ -10,4 +10,5 @@ StudioApp.Run(
     new ChartsStory(),
     new BarsStory(),
     new TabbedWindowStory(),
+    new ListWindowStory(),
 ]);
