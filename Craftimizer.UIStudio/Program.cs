@@ -17,4 +17,5 @@ StudioApp.Run(
     new SinglePanelStory(),
     // Pages
     new MacroEditorStory(),
+    new SynthHelperStory(),
 ]);
