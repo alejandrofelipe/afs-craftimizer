@@ -23,4 +23,5 @@ StudioApp.Run(
     new MacroClipboardStory(),
     new MacroListStory(),
     new SettingsStory(),
+    new CraftingListWindowStory(),
 ]);
