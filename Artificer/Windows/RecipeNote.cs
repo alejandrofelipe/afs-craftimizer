@@ -1003,112 +1003,141 @@ public sealed unsafe class RecipeNote : Window, IDisposable
             if (actions.Any(a => a.Category() == ActionCategory.Combo))
                 throw new InvalidOperationException("Combo actions should be sanitized away");
 
-            var spacing   = ImGui.GetStyle().ItemSpacing;
-            var miniRowH  = (windowHeight - spacing.Y) / 2f;
-            var arcColW   = miniRowH * 2 + spacing.X;
-            var botRowH   = ImGui.GetFrameHeight();
-            var innerW    = panelWidth;                        // panelWidth é derivado da tabela de stats (fixed columns) — estável
-            var rightColW = MathF.Max(1f, innerW - arcColW - 1f);
-
-            using var table = ImRaii.Table("macroCard", 2,
-                ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH,
-                new Vector2(innerW, 0));
-            if (table)
+            if (actions.Count == 0)
             {
-                ImGui.TableSetupColumn("left",  ImGuiTableColumnFlags.WidthFixed, arcColW);
-                ImGui.TableSetupColumn("right", ImGuiTableColumnFlags.WidthFixed, rightColW);
+                var availW   = panelWidth;
+                var iconH    = ImGui.GetTextLineHeight() * 1.6f;
+                var hasRetry = state.Type == MacroTaskType.Suggested;
+                var totalH   = iconH + ImGui.GetStyle().ItemSpacing.Y
+                                     + ImGui.GetTextLineHeightWithSpacing()
+                                     + ImGui.GetTextLineHeight()
+                                     + (hasRetry
+                                         ? ImGui.GetStyle().ItemSpacing.Y + ImGui.GetFrameHeight()
+                                         : 0f);
+                var startY = ImGui.GetCursorPosY() + Math.Max(0f, (windowHeight - totalH) / 2f);
+                ImGui.SetCursorPosY(startY);
 
-                // ── Row 1: 2×2 arc grid | action slots ──────────────────────────
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, windowHeight);
-                ImGui.TableSetColumnIndex(0);
-                PluginImGuiUtils.DrawMacroStatArcs(simState, windowHeight, asGrid: true);
+                using (ImRaii.PushFont(UiBuilder.IconFont))
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                    ImGuiUtils.TextCentered(FontAwesomeIcon.ExclamationTriangle.ToIconString(), availW);
 
-                ImGui.TableSetColumnIndex(1);
+                ImGuiUtils.TextCentered("Couldn't generate a macro", availW);
+
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                    ImGuiUtils.TextCentered("Try adjusting solver settings", availW);
+
+                if (hasRetry && ImGuiUtils.ButtonCentered("Suggest Again"))
+                    CalculateSuggestedMacro();
+
+                ImGui.SetCursorPosY(startY + windowHeight + ImGui.GetStyle().ItemSpacing.Y);
+            }
+            else
+            {
+                var spacing   = ImGui.GetStyle().ItemSpacing;
+                var miniRowH  = (windowHeight - spacing.Y) / 2f;
+                var arcColW   = miniRowH * 2 + spacing.X;
+                var botRowH   = ImGui.GetFrameHeight();
+                var innerW    = panelWidth;
+                var rightColW = MathF.Max(1f, innerW - arcColW - 1f);
+
+                using var table = ImRaii.Table("macroCard", 2,
+                    ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH,
+                    new Vector2(innerW, 0));
+                if (table)
                 {
-                    var itemsPerRow = (int)MathF.Floor((rightColW + spacing.X) / (miniRowH + spacing.X));
-                    itemsPerRow     = Math.Max(1, itemsPerRow);
-                    var itemCount   = actions.Count;
-                    for (var i = 0; i < itemsPerRow * 2; i++)
+                    ImGui.TableSetupColumn("left",  ImGuiTableColumnFlags.WidthFixed, arcColW);
+                    ImGui.TableSetupColumn("right", ImGuiTableColumnFlags.WidthFixed, rightColW);
+
+                    // ── Row 1: 2×2 arc grid | action slots ──────────────────────────
+                    ImGui.TableNextRow(ImGuiTableRowFlags.None, windowHeight);
+                    ImGui.TableSetColumnIndex(0);
+                    PluginImGuiUtils.DrawMacroStatArcs(simState, windowHeight, asGrid: true);
+
+                    ImGui.TableSetColumnIndex(1);
                     {
-                        if (i % itemsPerRow != 0)
-                            ImGui.SameLine(0, spacing.X);
-                        if (i < itemCount)
+                        var itemsPerRow = (int)MathF.Floor((rightColW + spacing.X) / (miniRowH + spacing.X));
+                        itemsPerRow     = Math.Max(1, itemsPerRow);
+                        var itemCount   = actions.Count;
+                        for (var i = 0; i < itemsPerRow * 2; i++)
                         {
-                            var shouldShowMore = i + 1 == itemsPerRow * 2 && i + 1 < itemCount;
-                            if (!shouldShowMore)
+                            if (i % itemsPerRow != 0)
+                                ImGui.SameLine(0, spacing.X);
+                            if (i < itemCount)
                             {
-                                ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH));
-                                if (ImGui.IsItemHovered())
-                                    ImGuiUtils.Tooltip(actions[i].GetName(RecipeData!.ClassJob));
+                                var shouldShowMore = i + 1 == itemsPerRow * 2 && i + 1 < itemCount;
+                                if (!shouldShowMore)
+                                {
+                                    ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH));
+                                    if (ImGui.IsItemHovered())
+                                        ImGuiUtils.Tooltip(actions[i].GetName(RecipeData!.ClassJob));
+                                }
+                                else
+                                {
+                                    var amtMore = itemCount - itemsPerRow * 2;
+                                    var aPos = ImGui.GetCursorPos();
+                                    ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH), default, Vector2.One, new(1, 1, 1, .5f));
+                                    if (ImGui.IsItemHovered())
+                                        ImGuiUtils.Tooltip($"{actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
+                                    ImGui.SetCursorPos(aPos);
+                                    ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), ImGui.GetColorU32(ImGuiCol.FrameBg), miniRowH / 8f);
+                                    ImGui.GetWindowDrawList().AddTextClippedEx(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), $"+{amtMore}", null, new(.5f), null);
+                                }
                             }
                             else
+                                ImGui.Dummy(new(miniRowH));
+                        }
+                    }
+
+                    // ── Row 2: HQ % | macro name + edit + copy ──────────────────────
+                    ImGui.TableNextRow(ImGuiTableRowFlags.None, botRowH);
+                    ImGui.TableSetColumnIndex(0);
+                    {
+                        var hqPct    = simState.HQPercent;
+                        var pctColor = RecipeData!.RecipeInfo.MaxQuality <= 0 ? Colors.TextMuted :
+                                       hqPct >= 100 ? Colors.Progress :
+                                       hqPct >=  75 ? Colors.Quality :
+                                       hqPct >=  50 ? Colors.ActionBuff :
+                                                      Colors.Bad;
+                        ImGui.AlignTextToFramePadding();
+                        using (ImRaii.PushColor(ImGuiCol.Text, pctColor))
+                            ImGuiUtils.TextCentered($"{hqPct}%", arcColW);
+                    }
+
+                    ImGui.TableSetColumnIndex(1);
+                    {
+                        var cellStart  = ImGui.GetCursorPos();
+                        var cellAvailW = ImGui.GetContentRegionAvail().X;
+                        var iconH      = botRowH;
+
+                        var editX = cellStart.X + cellAvailW - iconH * 2 - spacing.X;
+                        ImGui.SetCursorPos(new Vector2(editX, cellStart.Y));
+                        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, iconH))
+                            _plugin.OpenMacroEditor(CharacterStats!, RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), CalculateIngredientHqCounts(), actions, state.MacroEditorSetter);
+                        if (ImGui.IsItemHovered())
+                            ImGuiUtils.Tooltip("Open in Macro Editor");
+                        ImGui.SameLine(0, spacing.X);
+                        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, iconH))
+                            MacroCopy.Copy(actions, _plugin);
+                        if (ImGui.IsItemHovered())
+                            ImGuiUtils.Tooltip("Copy to Clipboard");
+
+                        var nameMaxW  = cellAvailW - iconH * 2 - spacing.X * 2;
+                        ImGui.SetCursorPos(new Vector2(cellStart.X, cellStart.Y + (botRowH - ImGui.GetTextLineHeight()) * 0.5f));
+                        var nameScrnMin = ImGui.GetCursorScreenPos();
+                        ImGui.PushClipRect(nameScrnMin, nameScrnMin + new Vector2(nameMaxW, botRowH), true);
+                        var displayName = state.MacroName ?? (state.Type == MacroTaskType.Suggested ? "AI Suggestion" : "");
+                        if (!string.IsNullOrEmpty(displayName))
+                        {
+                            if (state.MacroUrl is { } macroUrl)
+                                ImGuiUtils.Hyperlink(displayName, macroUrl, false);
+                            else
                             {
-                                var amtMore = itemCount - itemsPerRow * 2;
-                                var aPos = ImGui.GetCursorPos();
-                                ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH), default, Vector2.One, new(1, 1, 1, .5f));
-                                if (ImGui.IsItemHovered())
-                                    ImGuiUtils.Tooltip($"{actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
-                                ImGui.SetCursorPos(aPos);
-                                ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), ImGui.GetColorU32(ImGuiCol.FrameBg), miniRowH / 8f);
-                                ImGui.GetWindowDrawList().AddTextClippedEx(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), $"+{amtMore}", null, new(.5f), null);
+                                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                                    ImGui.TextUnformatted(displayName);
                             }
                         }
-                        else
-                            ImGui.Dummy(new(miniRowH));
+                        ImGui.PopClipRect();
                     }
-                }
-
-                // ── Row 2: HQ % | macro name + edit + copy ──────────────────────
-                ImGui.TableNextRow(ImGuiTableRowFlags.None, botRowH);
-                ImGui.TableSetColumnIndex(0);
-                {
-                    var hqPct    = simState.HQPercent;
-                    var pctColor = RecipeData!.RecipeInfo.MaxQuality <= 0 ? Colors.TextMuted :
-                                   hqPct >= 100 ? Colors.Progress :
-                                   hqPct >=  75 ? Colors.Quality :
-                                   hqPct >=  50 ? Colors.ActionBuff :
-                                                  Colors.Bad;
-                    ImGui.AlignTextToFramePadding();
-                    using (ImRaii.PushColor(ImGuiCol.Text, pctColor))
-                        ImGuiUtils.TextCentered($"{hqPct}%", arcColW);
-                }
-
-                ImGui.TableSetColumnIndex(1);
-                {
-                    var cellStart  = ImGui.GetCursorPos();
-                    var cellAvailW = ImGui.GetContentRegionAvail().X; // lido dentro da célula → limitado pela coluna WidthFixed
-                    var iconH      = botRowH;
-
-                    // Edit + Copy buttons anchored to the right
-                    var editX = cellStart.X + cellAvailW - iconH * 2 - spacing.X;
-                    ImGui.SetCursorPos(new Vector2(editX, cellStart.Y));
-                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, iconH))
-                        _plugin.OpenMacroEditor(CharacterStats!, RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), CalculateIngredientHqCounts(), actions, state.MacroEditorSetter);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Open in Macro Editor");
-                    ImGui.SameLine(0, spacing.X);
-                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, iconH))
-                        MacroCopy.Copy(actions, _plugin);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Copy to Clipboard");
-
-                    // Name: left-aligned, clipped before the buttons
-                    var nameMaxW  = cellAvailW - iconH * 2 - spacing.X * 2;
-                    ImGui.SetCursorPos(new Vector2(cellStart.X, cellStart.Y + (botRowH - ImGui.GetTextLineHeight()) * 0.5f));
-                    var nameScrnMin = ImGui.GetCursorScreenPos();
-                    ImGui.PushClipRect(nameScrnMin, nameScrnMin + new Vector2(nameMaxW, botRowH), true);
-                    var displayName = state.MacroName ?? (state.Type == MacroTaskType.Suggested ? "AI Suggestion" : "");
-                    if (!string.IsNullOrEmpty(displayName))
-                    {
-                        if (state.MacroUrl is { } macroUrl)
-                            ImGuiUtils.Hyperlink(displayName, macroUrl, false);
-                        else
-                        {
-                            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                                ImGui.TextUnformatted(displayName);
-                        }
-                    }
-                    ImGui.PopClipRect();
                 }
             }
         }
