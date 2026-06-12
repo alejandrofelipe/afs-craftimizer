@@ -27,9 +27,15 @@ Dalamud moveu `DisabledAlpha` do índice 1 para o índice 24 no seu enum `ImGuiS
 
 **Sintoma quando não corrigido:** assertion `"Called PushStyleVar() ImVec2 variant but variable is not a ImVec2!"` no log do Dalamud, seguido de crash C0000005 no próximo frame.
 
-**Fix implementado em `Artificer.UI`:**
-- `Theme.cs`: static fields `_windowPadding`, `_frameRounding`, `_childRounding` inicializados com valores ImGuiNET e sobrescritos via `Theme.ConfigureForDalamud()` chamado no construtor do plugin.
-- `ImRaiiShim.cs`: método `Remap(ImGuiStyleVar idx)` converte qualquer valor ImGuiNET para o valor Dalamud correspondente. Ativado por `ImRaii.ConfigureForDalamud()`, chamado dentro de `Theme.ConfigureForDalamud()`.
+**Fix implementado em `Artificer.UI` (v2.20.8.1+):**
+- `IUiServices.cs`: novo enum `ImGuiStyleVarId` (5 valores) + métodos `PushStyleVar` na interface
+- `DalamudUiServices.cs`: implementação com `Dalamud.Bindings.ImGui.ImGuiStyleVar.*` (named constants)
+- `StubUiServices.cs`: implementação com `ImGuiNET.ImGuiStyleVar.*` (named constants)
+- `Theme.cs` e `ImRaiiShim.cs`: roteiam para `UiServices.Current.PushStyleVar` — sem inteiros hardcoded
+
+**Por que named constants são mais robustos que inteiros:**
+Se o Dalamud renomear `ImGuiStyleVar.FrameRounding` para `ImGuiStyleVar.Rounding`, o build de
+`DalamudUiServices.cs` falhará em tempo de compilação — nunca mais um crash silencioso em runtime.
 
 **Por que apenas `Artificer.UI` precisa do remap:**
 O projeto `Artificer` (plugin principal) usa `Dalamud.Bindings.ImGui` diretamente via Dalamud.NET.Sdk — os enums já têm os valores corretos. O projeto `Artificer.UI` (biblioteca compartilhada, sem SDK Dalamud) usa `ImGuiNET` (package NuGet padrão) — daí a necessidade do remap.

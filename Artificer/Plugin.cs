@@ -63,7 +63,6 @@ public sealed class Plugin : IDalamudPlugin
     {
         Service.Initialize(pluginInterface);
         UiServices.Current = new DalamudUiServices(pluginInterface);
-        Theme.ConfigureForDalamud();
 
         WindowSystem = new("Artificer");
         MacroRepository = new(pluginInterface);

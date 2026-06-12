@@ -1,6 +1,7 @@
 // Artificer.UI/ImRaiiShim.cs
 // Provides ImRaii RAII helpers equivalent to Dalamud.Interface.Utility.Raii.ImRaii.
 // Put in ImGuiNET namespace so 'global using ImGuiNET' makes it available project-wide.
+using Artificer.Utils;
 using System;
 using System.Numerics;
 
@@ -8,19 +9,20 @@ namespace ImGuiNET;
 
 public static class ImRaii
 {
-    private static bool _dalamud;
-
-    // Called from Theme.ConfigureForDalamud() so all PushStyle calls remap to Dalamud's
-    // ImGuiStyleVar values (Dalamud moved DisabledAlpha from index 1 to 24, shifting all
-    // other indices down by 1).
-    public static void ConfigureForDalamud() { _dalamud = true; }
-
-    private static ImGuiStyleVar Remap(ImGuiStyleVar idx)
+    // Maps ImGuiNET's named ImGuiStyleVar constants to the platform-neutral ImGuiStyleVarId.
+    // This is a name-to-name mapping — no hardcoded integers.
+    // If a caller passes a var not in this list, it throws immediately rather than silently
+    // using the wrong enum index.
+    private static ImGuiStyleVarId ToId(ImGuiStyleVar var) => var switch
     {
-        if (!_dalamud || (int)idx == 0) return idx;
-        if ((int)idx == 1) return (ImGuiStyleVar)24; // DisabledAlpha: ImGuiNET=1 → Dalamud=24
-        return (ImGuiStyleVar)((int)idx - 1);
-    }
+        ImGuiStyleVar.WindowPadding => ImGuiStyleVarId.WindowPadding,
+        ImGuiStyleVar.FrameRounding => ImGuiStyleVarId.FrameRounding,
+        ImGuiStyleVar.ChildRounding  => ImGuiStyleVarId.ChildRounding,
+        ImGuiStyleVar.FramePadding   => ImGuiStyleVarId.FramePadding,
+        ImGuiStyleVar.ItemSpacing    => ImGuiStyleVarId.ItemSpacing,
+        _ => throw new ArgumentOutOfRangeException(nameof(var), var,
+                 "Style var not registered in ImGuiStyleVarId. Add it to ImGuiStyleVarId and all IUiServices implementations.")
+    };
 
     public struct FontDisposable : IDisposable
     {
@@ -85,13 +87,13 @@ public static class ImRaii
 
     public static StyleDisposable PushStyle(ImGuiStyleVar idx, float val)
     {
-        ImGui.PushStyleVar(Remap(idx), val);
+        UiServices.Current.PushStyleVar(ToId(idx), val);
         return new StyleDisposable(1);
     }
 
     public static StyleDisposable PushStyle(ImGuiStyleVar idx, Vector2 val)
     {
-        ImGui.PushStyleVar(Remap(idx), val);
+        UiServices.Current.PushStyleVar(ToId(idx), val);
         return new StyleDisposable(1);
     }
 
