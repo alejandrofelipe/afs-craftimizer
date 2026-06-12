@@ -1005,7 +1005,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
 
             if (actions.Count == 0)
             {
-                var availW   = panelWidth;
+                var availW   = ImGui.GetContentRegionAvail().X - stepsAvailWidthOffset;
                 var iconH    = ImGui.GetTextLineHeight() * 1.6f;
                 var hasRetry = state.Type == MacroTaskType.Suggested;
                 var totalH   = iconH + ImGui.GetStyle().ItemSpacing.Y
