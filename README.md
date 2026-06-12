@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.20.8.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.20.9.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -131,6 +131,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Reorganização de conteúdo das Settings por contexto de uso
 - Empty states nas janelas que ficavam em branco
 - **Lista de Coleta completa** (P0–P2): dados (SQLite, InventoryScanner, IngredientResolver), helpers (busca, restrições, coleta, mercado, exportação) e UI completa (FeatureHub, List, Add, Detail, Merge windows)
+- 🐛 Fix: "Suggested Macro" exibia card confuso com arcos de estatística e botão Copy inutilizável quando o solver retornava 0 ações; agora exibe estado de erro claro com botão "Suggest Again"
 
 ---
 
