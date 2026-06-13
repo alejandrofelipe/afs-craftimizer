@@ -27,7 +27,7 @@ public sealed class CosmicTracker : Window, IDisposable
     private readonly TitleBarButton _minimizeButton;
 
     public CosmicTracker(Plugin.Plugin plugin) : base(
-        "Cosmic Tool###Artificer-cosmic",
+        "Cosmic Tracker###Artificer-cosmic",
         ImGuiWindowFlags.AlwaysAutoResize |
         ImGuiWindowFlags.NoScrollbar |
         ImGuiWindowFlags.NoFocusOnAppearing |
@@ -138,7 +138,7 @@ public sealed class CosmicTracker : Window, IDisposable
             var jobRowId  = Service.Objects.LocalPlayer?.ClassJob.RowId ?? 0;
             var jobRow    = LuminaSheets.ClassJobSheet.GetRowOrDefault(jobRowId);
             var rawName   = jobRow?.Name.ToString() ?? "";
-            var jobName   = rawName.Length > 0 ? char.ToUpper(rawName[0]) + rawName[1..] : "Cosmic Tool";
+            var jobName   = rawName.Length > 0 ? char.ToUpper(rawName[0]) + rawName[1..] : "Cosmic Tracker";
             var stagePart = p.MaxStage > 0 ? $"Stage {p.Stage}/{p.MaxStage}" : $"Stage {p.Stage}";
             WindowName = $"{jobName} — {stagePart}###Artificer-cosmic";
         }
