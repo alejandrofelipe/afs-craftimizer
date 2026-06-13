@@ -12,11 +12,11 @@ using PluginClass = Artificer.Plugin.Plugin;
 
 namespace Artificer.Windows;
 
-public sealed class FeatureHubWindow : Window, IDisposable
+public sealed class FeatureHub : Window, IDisposable
 {
     private readonly PluginClass _plugin;
 
-    public FeatureHubWindow(PluginClass plugin) : base("###Artificer-feature-hub",
+    public FeatureHub(PluginClass plugin) : base("###Artificer-feature-hub",
         ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar |
         ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNav)
     {

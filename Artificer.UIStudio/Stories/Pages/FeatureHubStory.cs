@@ -3,10 +3,10 @@ using ImGuiNET;
 
 namespace Artificer.UIStudio.Stories;
 
-internal sealed class FeatureHubWindowStory : IStory
+internal sealed class FeatureHubStory : IStory
 {
     public string Category => "Pages";
-    public string Name     => "FeatureHubWindow";
+    public string Name     => "FeatureHub";
 
     private static readonly string[] Estados =
     [
@@ -25,7 +25,7 @@ internal sealed class FeatureHubWindowStory : IStory
 
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
             ImGui.TextWrapped(
-                "(FeatureHubWindow é uma janela flutuante no canto inferior direito do jogo)");
+                "(FeatureHub é uma janela flutuante no canto inferior direito do jogo)");
 
         ImGui.Spacing();
 
