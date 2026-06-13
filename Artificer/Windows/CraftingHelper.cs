@@ -434,7 +434,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         if (CraftStatus != CraftableStatus.OK)
             return;
 
-        ImGui.Separator();
+        ImGui.Spacing();
 
         var panelWidth = availWidth - ImGui.GetStyle().ItemSpacing.X * 2;
 
