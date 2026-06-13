@@ -5,10 +5,10 @@ using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
 
-internal sealed class RecipeNoteStory : IStory
+internal sealed class CraftingHelperStory : IStory
 {
     public string Category => "Pages";
-    public string Name     => "RecipeNote";
+    public string Name     => "CraftingHelper";
 
     private static readonly string[] Estados =
     [

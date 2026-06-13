@@ -26,7 +26,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public WindowSystem WindowSystem { get; }
     public Settings SettingsWindow { get; }
-    public RecipeNote RecipeNoteWindow { get; }
+    public CraftingHelper RecipeNoteWindow { get; }
     public SynthHelper SynthHelperWindow { get; }
     public MacroList ListWindow { get; private set; }
     public MacroEditor? EditorWindow { get; private set; }

@@ -18,7 +18,7 @@ StudioApp.Run(
     // Pages
     new MacroEditorStory(),
     new SynthHelperStory(),
-    new RecipeNoteStory(),
+    new CraftingHelperStory(),
     new CosmicTrackerStory(),
     new MacroClipboardStory(),
     new MacroListStory(),

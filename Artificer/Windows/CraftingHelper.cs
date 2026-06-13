@@ -34,7 +34,7 @@ using RecipeIngredient2 = Artificer.Utils.CSRecipeNote.RecipeIngredient;
 
 namespace Artificer.Windows;
 
-public sealed unsafe class RecipeNote : Window, IDisposable
+public sealed unsafe class CraftingHelper : Window, IDisposable
 {
     private const ImGuiWindowFlags WindowFlagsPinned = WindowFlagsFloating
       | ImGuiWindowFlags.NoSavedSettings;
@@ -82,7 +82,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
 
     private readonly global::Artificer.Plugin.Plugin _plugin;
 
-    public RecipeNote(global::Artificer.Plugin.Plugin plugin) : base(WindowNamePinned)
+    public CraftingHelper(global::Artificer.Plugin.Plugin plugin) : base(WindowNamePinned)
     {
         _plugin = plugin;
         _cosmicProgress = _plugin.CosmicToolTracker.CachedProgress;
