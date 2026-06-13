@@ -164,7 +164,13 @@ public static partial class ImGuiUtils
             iconOffset = Vector2.Zero;
         }
 
-        ImGui.GetWindowDrawList().AddText(UiServices.Current.IconFont, UiServices.Current.IconFont.FontSize * UiServices.Current.GlobalScale * scale, offset + iconOffset, ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled), icon.ToIconString());
+        using (ImRaii.PushFont(UiServices.Current.IconFont))
+            ImGui.GetWindowDrawList().AddText(
+                ImGui.GetFont(),
+                UiServices.Current.IconFont.FontSize * UiServices.Current.GlobalScale * scale,
+                offset + iconOffset,
+                ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled),
+                icon.ToIconString());
     }
 
     // Overload for cross-assembly use: Dalamud.Interface.FontAwesomeIcon is int-based.
