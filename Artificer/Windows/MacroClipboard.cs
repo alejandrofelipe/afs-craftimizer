@@ -32,6 +32,14 @@ public sealed class MacroClipboard : Window, IDisposable
         _plugin.WindowSystem.AddWindow(this);
     }
 
+    public override void PreDraw() => Theme.Push();
+
+    public override void PostDraw()
+    {
+        Theme.Pop();
+        base.PostDraw();
+    }
+
     public override void Draw()
     {
         var idx = 0;
@@ -41,50 +49,37 @@ public sealed class MacroClipboard : Window, IDisposable
 
     private void DrawMacro(int idx, string macro)
     {
-        using var id = ImRaii.PushId(idx);
+        using var id    = ImRaii.PushId(idx);
         using var panel = ImRaii2.GroupPanel(Macros.Count == 1 ? "Macro" : $"Macro {idx + 1}", -1, out var availWidth);
 
-        var cursor = ImGui.GetCursorPos();
-
-        ImGuiUtils.AlignRight(ImGui.GetFrameHeight(), availWidth);
-        var buttonCursor = ImGui.GetCursorPos();
-        ImGui.InvisibleButton("##copyInvButton", new(ImGui.GetFrameHeight()));
-        var buttonHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlapped | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
-        var buttonActive = buttonHovered && ImGui.GetIO().MouseDown[(int)ImGuiMouseButton.Left];
-        var buttonClicked = buttonHovered && ImGui.GetIO().MouseReleased[(int)ImGuiMouseButton.Left];
-        ImGui.SetCursorPos(buttonCursor);
+        // Text area
         {
-            using var color = ImRaii.PushColor(ImGuiCol.Button, ImGui.GetColorU32(buttonActive ? ImGuiCol.ButtonActive : ImGuiCol.ButtonHovered), buttonHovered);
-            ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste);
-            if (buttonClicked)
-            {
-                ImGui.SetClipboardText(macro);
-                if (_plugin.Configuration.MacroCopy.ShowCopiedMessage)
-                {
-                    Plugin.Plugin.DisplayNotification(new()
-                    {
-                        Content = Macros.Count == 1 ? "Copied macro to clipboard." : $"Copied macro {idx + 1} to clipboard.",
-                        MinimizedText = Macros.Count == 1 ? "Copied macro" : $"Copied macro {idx + 1}",
-                        Title = "Macro Copied",
-                        Type = NotificationType.Success
-                    });
-                }
-            }
-        }
-        if (buttonHovered)
-            ImGuiUtils.Tooltip("Copy to Clipboard");
-
-        ImGui.SetCursorPos(cursor);
-        {
-            using var font = ImRaii.PushFont(UiBuilder.MonoFont);
+            using var font    = ImRaii.PushFont(UiBuilder.MonoFont);
             using var padding = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, Vector2.Zero);
-            using var bg = ImRaii.PushColor(ImGuiCol.FrameBg, Vector4.Zero);
+            using var bg      = ImRaii.PushColor(ImGuiCol.FrameBg, Vector4.Zero);
             var lineCount = macro.Count(c => c == '\n') + 1;
-            ImGui.InputTextMultiline("", ref macro, macro.Length + 1, new(availWidth, ImGui.GetTextLineHeight() * Math.Max(15, lineCount) + ImGui.GetStyle().FramePadding.Y), ImGuiInputTextFlags.ReadOnly | ImGuiInputTextFlags.AutoSelectAll);
+            ImGui.InputTextMultiline("", ref macro, macro.Length + 1,
+                new(availWidth, ImGui.GetTextLineHeight() * Math.Max(15, lineCount) + ImGui.GetStyle().FramePadding.Y),
+                ImGuiInputTextFlags.ReadOnly | ImGuiInputTextFlags.AutoSelectAll);
         }
 
-        if (buttonHovered)
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Arrow);
+        // Footer: separator + copy button aligned right
+        ImGui.Separator();
+        ImGuiUtils.AlignRight(ImGui.GetFrameHeight(), availWidth);
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste))
+        {
+            ImGui.SetClipboardText(macro);
+            if (_plugin.Configuration.MacroCopy.ShowCopiedMessage)
+                Plugin.Plugin.DisplayNotification(new()
+                {
+                    Content       = Macros.Count == 1 ? "Copied macro to clipboard." : $"Copied macro {idx + 1} to clipboard.",
+                    MinimizedText = Macros.Count == 1 ? "Copied macro" : $"Copied macro {idx + 1}",
+                    Title         = "Macro Copied",
+                    Type          = NotificationType.Success
+                });
+        }
+        if (ImGui.IsItemHovered())
+            ImGuiUtils.Tooltip("Copy to Clipboard");
     }
 
     public void Dispose()
