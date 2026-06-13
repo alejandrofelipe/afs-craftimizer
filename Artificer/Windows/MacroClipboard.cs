@@ -64,7 +64,13 @@ public sealed class MacroClipboard : Window, IDisposable
         }
 
         // Footer: separator + copy button aligned right
-        ImGui.Separator();
+        var separatorPos = ImGui.GetCursorScreenPos();
+        ImGui.GetWindowDrawList().AddLine(
+            separatorPos,
+            separatorPos + new Vector2(availWidth, 0),
+            ImGui.GetColorU32(ImGuiCol.Separator),
+            1f);
+        ImGui.Dummy(new Vector2(availWidth, 1f));
         ImGuiUtils.AlignRight(ImGui.GetFrameHeight(), availWidth);
         if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste))
         {
