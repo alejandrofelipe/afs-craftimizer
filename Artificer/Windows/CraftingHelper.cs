@@ -407,7 +407,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         {
             if (crPanel)
             {
-                using var table = ImRaii.Table("stats", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.NoSavedSettings);
+                using var table = ImRaii.Table("stats", 2, ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.NoSavedSettings);
                 if (table)
                 {
                     if (StatsChanged)

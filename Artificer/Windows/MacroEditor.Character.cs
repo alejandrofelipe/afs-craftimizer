@@ -39,7 +39,7 @@ public sealed partial class MacroEditor
         ImGui.SameLine(0, 5);
         AxisFont.Text(textClassName);
 
-        using (var statsTable = ImRaii.Table("stats", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchSame))
+        using (var statsTable = ImRaii.Table("stats", 3, ImGuiTableFlags.SizingStretchSame))
         {
             if (statsTable)
             {
@@ -77,7 +77,7 @@ public sealed partial class MacroEditor
             }
         }
 
-        using (var paramTable = ImRaii.Table("params", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchSame))
+        using (var paramTable = ImRaii.Table("params", 3, ImGuiTableFlags.SizingStretchSame))
         {
             if (paramTable)
             {

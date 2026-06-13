@@ -167,7 +167,7 @@ public sealed partial class MacroEditor
             ImGuiUtils.DrawBadgePill("Expert", Colors.ActionSpecial);
         }
 
-        using (var statsTable = ImRaii.Table("stats", 3, ImGuiTableFlags.BordersInnerV))
+        using (var statsTable = ImRaii.Table("stats", 3, ImGuiTableFlags.None))
         {
             if (statsTable)
             {
@@ -193,7 +193,7 @@ public sealed partial class MacroEditor
             }
         }
 
-        using (var table = ImRaii.Table("ingredientTable", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchSame))
+        using (var table = ImRaii.Table("ingredientTable", 4, ImGuiTableFlags.SizingStretchSame))
         {
             if (table)
             {

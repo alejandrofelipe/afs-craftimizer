@@ -245,7 +245,7 @@ public sealed partial class MacroEditor : Window, IDisposable
     {
         var modifiedInput = false;
 
-        using (var table = ImRaii.Table("params", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchSame))
+        using (var table = ImRaii.Table("params", 2, ImGuiTableFlags.SizingStretchSame))
         {
             if (table)
             {
@@ -261,7 +261,7 @@ public sealed partial class MacroEditor : Window, IDisposable
         if (modifiedInput)
             RecalculateState();
 
-        using (var table = ImRaii.Table("macroInfo", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingStretchSame))
+        using (var table = ImRaii.Table("macroInfo", 2, ImGuiTableFlags.SizingStretchSame))
         {
             if (table)
             {

@@ -229,7 +229,7 @@ public sealed class MacroLibrary : Window, IDisposable
         var spacing = ImGui.GetStyle().ItemSpacing.Y;
         var miniRowHeight = (windowHeight - spacing) / 2f;
 
-        using (var table = ImRaii.Table("table", stateNullable.HasValue ? 3 : 2, ImGuiTableFlags.BordersInnerV))
+        using (var table = ImRaii.Table("table", stateNullable.HasValue ? 3 : 2, ImGuiTableFlags.None))
         {
             if (table)
             {
