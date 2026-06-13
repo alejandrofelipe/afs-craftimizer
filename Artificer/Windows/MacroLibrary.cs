@@ -16,7 +16,7 @@ using Dalamud.Utility;
 
 namespace Artificer.Windows;
 
-public sealed class MacroList : Window, IDisposable
+public sealed class MacroLibrary : Window, IDisposable
 {
     private const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags.None;
 
@@ -29,7 +29,7 @@ public sealed class MacroList : Window, IDisposable
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
 
-    public MacroList(global::Artificer.Plugin.Plugin plugin) : base("Macro Library", WindowFlags, false)
+    public MacroLibrary(global::Artificer.Plugin.Plugin plugin) : base("Macro Library", WindowFlags, false)
     {
         _plugin = plugin;
         RefreshSearch();

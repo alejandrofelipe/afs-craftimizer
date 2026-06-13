@@ -21,7 +21,7 @@ StudioApp.Run(
     new CraftingHelperStory(),
     new CosmicTrackerStory(),
     new MacroClipboardStory(),
-    new MacroListStory(),
+    new MacroLibraryStory(),
     new SettingsStory(),
     new CraftingListWindowStory(),
     new CraftingListAddWindowStory(),

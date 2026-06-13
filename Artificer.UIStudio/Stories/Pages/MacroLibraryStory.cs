@@ -4,10 +4,10 @@ using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
 
-internal sealed class MacroListStory : IStory
+internal sealed class MacroLibraryStory : IStory
 {
     public string Category => "Pages";
-    public string Name     => "MacroList";
+    public string Name     => "MacroLibrary";
 
     private static readonly string[] Estados =
     [

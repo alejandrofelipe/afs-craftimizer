@@ -28,7 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     public Settings SettingsWindow { get; }
     public CraftingHelper RecipeNoteWindow { get; }
     public SynthesisHelper SynthHelperWindow { get; }
-    public MacroList ListWindow { get; private set; }
+    public MacroLibrary ListWindow { get; private set; }
     public MacroEditor? EditorWindow { get; private set; }
     public MacroClipboard? ClipboardWindow { get; private set; }
     public CosmicTracker CosmicTrackerWindow { get; }
