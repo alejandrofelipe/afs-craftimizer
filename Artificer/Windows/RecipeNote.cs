@@ -1041,7 +1041,7 @@ public sealed unsafe class RecipeNote : Window, IDisposable
                 var rightColW = MathF.Max(1f, innerW - arcColW - 1f);
 
                 using var table = ImRaii.Table("macroCard", 2,
-                    ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH,
+                    ImGuiTableFlags.None,
                     new Vector2(innerW, 0));
                 if (table)
                 {
