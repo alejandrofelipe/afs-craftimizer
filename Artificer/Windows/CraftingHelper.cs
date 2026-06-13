@@ -423,8 +423,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
                     // Ensure that we know the window should be the same size as this table. Any more and it'll grow slowly and won't shrink when it could
                     ImGui.SameLine(0, 0);
-                    // The -1 is to account for the extra vertical separator on the right that ImGui draws for some reason
-                    availWidth = ImGui.GetCursorPosX() - ImGui.GetStyle().WindowPadding.X + ImGui.GetStyle().CellPadding.X - 1;
+                    availWidth = ImGui.GetCursorPosX() - ImGui.GetStyle().WindowPadding.X + ImGui.GetStyle().CellPadding.X;
                 }
             }
         }
