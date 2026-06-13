@@ -5,10 +5,10 @@ using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
 
-internal sealed class SynthHelperStory : IStory
+internal sealed class SynthesisHelperStory : IStory
 {
     public string Category => "Pages";
-    public string Name     => "SynthHelper";
+    public string Name     => "SynthesisHelper";
 
     private static readonly string[] Estados =
     [

@@ -28,7 +28,7 @@ using SimNoRandom = Artificer.Simulator.SimulatorNoRandom;
 
 namespace Artificer.Windows;
 
-public sealed unsafe class SynthHelper : Window, IDisposable
+public sealed unsafe class SynthesisHelper : Window, IDisposable
 {
     private static readonly EffectType[] AllEffectTypes = Enum.GetValues<EffectType>();
     private const ImGuiWindowFlags WindowFlagsPinned = WindowFlagsFloating
@@ -54,7 +54,7 @@ public sealed unsafe class SynthHelper : Window, IDisposable
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
 
-    public SynthHelper(global::Artificer.Plugin.Plugin plugin) : base(WindowNamePinned)
+    public SynthesisHelper(global::Artificer.Plugin.Plugin plugin) : base(WindowNamePinned)
     {
         _plugin = plugin;
         Session = new CraftingSession(plugin);

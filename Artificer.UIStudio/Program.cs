@@ -17,7 +17,7 @@ StudioApp.Run(
     new SinglePanelStory(),
     // Pages
     new MacroEditorStory(),
-    new SynthHelperStory(),
+    new SynthesisHelperStory(),
     new CraftingHelperStory(),
     new CosmicTrackerStory(),
     new MacroClipboardStory(),
