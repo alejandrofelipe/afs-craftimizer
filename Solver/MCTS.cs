@@ -300,7 +300,7 @@ public sealed class MCTS
         var actions = new List<ActionType>();
         var node = rootNode;
 
-        while (node.Children.Count != 0 && !node.State.IsComplete)
+        while (node.Children.Count != 0 && node.State.SimulationCompletionState == CompletionState.Incomplete)
         {
             node = node.ChildAt(ChildMaxScore(in node.ChildScores))!;
 
