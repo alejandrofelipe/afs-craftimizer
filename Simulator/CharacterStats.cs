@@ -9,4 +9,14 @@ public sealed record CharacterStats
     public bool CanUseManipulation { get; init; }
     public bool HasSplendorousBuff { get; init; }
     public bool IsSpecialist { get; init; }
+
+    public static int ComputeHash(CharacterStats s) =>
+        HashCode.Combine(
+            s.Craftsmanship,
+            s.Control,
+            s.CP,
+            s.Level,
+            s.CanUseManipulation,
+            s.HasSplendorousBuff,
+            s.IsSpecialist);
 }

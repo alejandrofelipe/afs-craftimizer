@@ -107,6 +107,8 @@ public class Macro
     /// <summary>Score from 0 to 1 representing quality/collectability achieved. Used to determine if a newer craft result is better.</summary>
     public float SavedScore { get; set; }
 
+    public int? CharacterStatsHash { get; set; }
+
     [JsonInclude] [JsonPropertyName("Actions")]
     internal ActionType[] actions { get; set; } = [];
     [JsonIgnore]
