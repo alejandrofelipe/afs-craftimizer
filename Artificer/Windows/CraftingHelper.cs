@@ -440,33 +440,43 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         var panelWidth = availWidth - ImGui.GetStyle().ItemSpacing.X * 2;
 
         {
-            var macroTaskResult = SavedMacroTask?.Result;
+            var savedResult = SavedMacroTask?.Result;
+            var bestMacro  = savedResult?.Item1;
             var state = new MacroTaskState()
             {
-                Type = MacroTaskType.Saved,
-                Exception = SavedMacroTask?.Exception,
-                Started = SavedMacroTask != null,
-                Completed = SavedMacroTask?.Completed ?? false,
-                Actions = macroTaskResult?.Item1?.Actions,
-                MacroName = macroTaskResult?.Item1?.Name,
-                State = macroTaskResult?.Item2,
+                Type          = MacroTaskType.Saved,
+                Exception     = SavedMacroTask?.Exception,
+                Started       = SavedMacroTask != null,
+                Completed     = SavedMacroTask?.Completed ?? false,
+                Actions       = bestMacro?.Actions,
+                MacroName     = bestMacro?.Name,
+                State         = savedResult?.Item2,
+                HasHashMismatch = bestMacro?.CharacterStatsHash != null
+                               && bestMacro.CharacterStatsHash != _currentCharacterHash,
             };
-            if (macroTaskResult is { } macro && macro.Item1 is { } savedMacro)
+            if (bestMacro is { } savedMacro)
                 state.MacroEditorSetter = a => { savedMacro.ActionEnumerable = a; _plugin.MacroRepository.Update(savedMacro); };
             DrawMacro(in state, panelWidth);
         }
 
         {
-            var macroTaskResult = SuggestedMacroTask?.Result;
+            var solverResult  = SuggestedMacroTask?.Result;
+            var solverDone    = SuggestedMacroTask?.Completed ?? false;
+            var savedResult   = SavedMacroTask?.Result;
+            var hashMatch     = savedResult?.Item3;
+            var hashMatchState = savedResult?.Item4;
+            var isPrefilled   = hashMatch != null && !solverDone;
+
             var state = new MacroTaskState()
             {
-                Type = MacroTaskType.Suggested,
+                Type      = MacroTaskType.Suggested,
                 Exception = SuggestedMacroTask?.Exception,
-                Started = SuggestedMacroTask != null,
-                Completed = SuggestedMacroTask?.Completed ?? false,
-                Actions = macroTaskResult?.Actions,
-                State = macroTaskResult?.State,
-                Solver = BestMacroSolver,
+                Started   = SuggestedMacroTask != null || isPrefilled,
+                Completed = solverDone || isPrefilled,
+                Actions   = solverResult?.Actions ?? (isPrefilled ? hashMatch!.Actions : null),
+                State     = solverResult?.State   ?? (isPrefilled ? hashMatchState     : null),
+                Solver    = BestMacroSolver,
+                IsPrefilled = isPrefilled && solverResult == null,
             };
             DrawMacro(in state, panelWidth);
         }
@@ -896,7 +906,20 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             _ => throw new ArgumentOutOfRangeException(nameof(state), "state.Type must have a valid type")
         };
 
-        using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out _);
+        Action? titleSuffix = state.IsPrefilled ? () =>
+        {
+            ImGui.SameLine(0, 4);
+            using (ImRaii.PushFont(UiBuilder.IconFont))
+            using (ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled)))
+            {
+                ImGui.AlignTextToFramePadding();
+                ImGui.TextUnformatted(FontAwesomeIcon.Bookmark.ToIconString());
+            }
+            if (ImGui.IsItemHovered())
+                ImGuiUtils.Tooltip("Pre-filled from saved macro — solver still comparing");
+        } : null;
+
+        using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out _, titleSuffix: titleSuffix);
         if (!panel)
             return;
 
@@ -1108,6 +1131,19 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
                     ImGui.TableSetColumnIndex(1);
                     {
+                        if (state.HasHashMismatch)
+                        {
+                            using (ImRaii.PushFont(UiBuilder.IconFont))
+                            using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                            {
+                                ImGui.AlignTextToFramePadding();
+                                ImGui.TextUnformatted(FontAwesomeIcon.ExclamationTriangle.ToIconString());
+                            }
+                            if (ImGui.IsItemHovered())
+                                ImGuiUtils.TooltipWrapped("This macro was saved with different character stats and may not perform as expected");
+                            ImGui.SameLine();
+                        }
+
                         var cellStart  = ImGui.GetCursorPos();
                         var cellAvailW = ImGui.GetContentRegionAvail().X;
                         var iconH      = botRowH;
