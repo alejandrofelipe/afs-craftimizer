@@ -1,6 +1,6 @@
 # Progresso de Implementação — Artificer
 
-Última revisão: 2026-06-10 (sessão 9)
+Última revisão: 2026-06-13 (sessão 10)
 
 ---
 
@@ -32,6 +32,10 @@
 | Settings: reorganizar conteúdo das abas — opções movidas para abas corretas | v2.18.0.0 |
 | 🐛 Fix: Ações destrutivas sem confirmação (remover receita + limpar gear wear) | v2.18.1.0 |
 | Migração de componentes visuais para Artificer.UI | v2.20.0.0 |
+| 🐛 Fix: Separadores ultrapassando container e divisores verticais desnecessários | v2.20.10.0 |
+| 🐛 Fix: Botões de ícone em branco (DrawCenteredIcon / AddText 5-arg em PushFont) | v2.20.10.0 |
+| Character Hash: pre-fill Suggested Macro + indicador de mismatch no Saved | v2.20.11.0 |
+| UIStudio Pages stories (13 stories) + skill /update-studio | v2.20.10.0 |
 
 ---
 
