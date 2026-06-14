@@ -15,7 +15,7 @@ public interface IMacroStore
     /// <summary>Fired when the macro list itself changes (add, remove, reorder).</summary>
     event Action? MacroListChanged;
 
-    void Add(Macro macro);
+    void Add(Macro macro, int? characterStatsHash = null);
     void Remove(Macro macro);
     void Swap(int fromIdx, int toIdx);
     void Move(int fromIdx, int toIdx);

@@ -110,7 +110,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
             }
         }
 
-        using var macroCmd = Command("SELECT Id, Name, RecipeId, SavedScore FROM Macros ORDER BY DisplayOrder, Id");
+        using var macroCmd = Command("SELECT Id, Name, RecipeId, SavedScore, CharacterStatsHash FROM Macros ORDER BY DisplayOrder, Id");
         using var mr = macroCmd.ExecuteReader();
         while (mr.Read())
         {
@@ -121,6 +121,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
                 Name = mr.GetString(1),
                 RecipeId = mr.IsDBNull(2) ? null : (ushort)mr.GetInt64(2),
                 SavedScore = (float)mr.GetDouble(3),
+                CharacterStatsHash = mr.IsDBNull(4) ? null : mr.GetInt32(4),
             };
             if (actionsByMacro.TryGetValue(id, out var actions))
                 macro.actions = [.. actions];
@@ -131,8 +132,9 @@ public sealed class MacroRepository : IDisposable, IMacroStore
     // ── Public API ────────────────────────────────────────────────────────────
 
     /// <summary>Adds a new macro and persists it to the database.</summary>
-    public void Add(Macro macro)
+    public void Add(Macro macro, int? characterStatsHash = null)
     {
+        macro.CharacterStatsHash = characterStatsHash;
         using var tx = _db.BeginTransaction();
         try
         {
@@ -239,12 +241,13 @@ public sealed class MacroRepository : IDisposable, IMacroStore
     private long InsertMacroRow(Macro macro, int displayOrder, SqliteTransaction tx)
     {
         using var cmd = Command(
-            "INSERT INTO Macros (Name, RecipeId, SavedScore, DisplayOrder) VALUES ($name, $recipeId, $score, $order); SELECT last_insert_rowid()",
+            "INSERT INTO Macros (Name, RecipeId, SavedScore, DisplayOrder, CharacterStatsHash) VALUES ($name, $recipeId, $score, $order, $hash); SELECT last_insert_rowid()",
             tx);
         cmd.Parameters.AddWithValue("$name", macro.Name);
         cmd.Parameters.AddWithValue("$recipeId", macro.RecipeId.HasValue ? (object)macro.RecipeId.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$score", macro.SavedScore);
         cmd.Parameters.AddWithValue("$order", displayOrder);
+        cmd.Parameters.AddWithValue("$hash", macro.CharacterStatsHash.HasValue ? (object)macro.CharacterStatsHash.Value : DBNull.Value);
         return (long)cmd.ExecuteScalar()!;
     }
 

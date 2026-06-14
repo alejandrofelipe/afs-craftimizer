@@ -199,7 +199,7 @@ public sealed class CraftingSession : IDisposable
                 SavedScore = newScore,
             };
             macro.Actions = actions;
-            _plugin.MacroRepository.Add(macro);
+            _plugin.MacroRepository.Add(macro, CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : null);
             global::Artificer.Plugin.Plugin.DisplayNotification(new()
             {
                 Content = $"Macro saved for \"{itemName}\".",
