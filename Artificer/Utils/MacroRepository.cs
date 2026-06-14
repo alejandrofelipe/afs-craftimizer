@@ -217,11 +217,12 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         using var tx = _db.BeginTransaction();
         try
         {
-            using (var cmd = Command("UPDATE Macros SET Name=$name, RecipeId=$recipeId, SavedScore=$score WHERE Id=$id", tx))
+            using (var cmd = Command("UPDATE Macros SET Name=$name, RecipeId=$recipeId, SavedScore=$score, CharacterStatsHash=$hash WHERE Id=$id", tx))
             {
                 cmd.Parameters.AddWithValue("$name", macro.Name);
                 cmd.Parameters.AddWithValue("$recipeId", macro.RecipeId.HasValue ? (object)macro.RecipeId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("$score", macro.SavedScore);
+                cmd.Parameters.AddWithValue("$hash", macro.CharacterStatsHash.HasValue ? (object)macro.CharacterStatsHash.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("$id", macro.Id);
                 cmd.ExecuteNonQuery();
             }
