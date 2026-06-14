@@ -66,7 +66,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     private int StartingQuality { get; set; }
     public CraftableStatus CraftStatus { get; private set; }
 
-    private BackgroundTask<(Macro?, SimulationState?)>? SavedMacroTask { get; set; }
+    private int? _currentCharacterHash;
+    private BackgroundTask<(Macro?, SimulationState?, Macro?, SimulationState?)>? SavedMacroTask { get; set; }
     private BackgroundTask<SolverSolution>? SuggestedMacroTask { get; set; }
     private BackgroundTask<(CommunityMacros.CommunityMacro?, SimulationState?)>? CommunityMacroTask { get; set; }
 
@@ -280,6 +281,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 RecipeData = new(RecipeData.RecipeId);
             }
             CharacterStats = characterStats;
+            _currentCharacterHash = CharacterStats.ComputeHash(characterStats);
             StatsChanged = true;
         }
 
@@ -880,6 +882,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         public SimulationState? State;
         public Solver.Solver? Solver;
         public Action<IEnumerable<ActionType>>? MacroEditorSetter;
+        public bool HasHashMismatch;  // only valid for MacroTaskType.Saved
+        public bool IsPrefilled;      // only valid for MacroTaskType.Suggested
     }
 
     private void DrawMacro(in MacroTaskState state, float panelWidth)
@@ -1251,6 +1255,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     {
         SavedMacroTask?.Cancel();
         var hasDelineations = Gearsets.HasDelineations();
+        var currentHash = _currentCharacterHash;
         SavedMacroTask = new(token =>
         {
             var input = new SimulationInput(CharacterStats!, RecipeData!.RecipeInfo, StartingQuality);
@@ -1266,18 +1271,28 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             token.ThrowIfCancellationRequested();
 
             if (macros.Count == 0)
-                return (null, null);
-            var bestSaved = macros
+                return (null, null, null, null);
+
+            var results = macros
                 .Select(macro =>
                 {
                     var (score, outState) = CommunityMacros.CommunityMacro.CalculateScore(macro.Actions, simulator, in state, in mctsConfig);
                     return (macro, outState, score);
                 })
-                .MaxBy(m => m.score);
+                .ToList();
 
             token.ThrowIfCancellationRequested();
 
-            return (bestSaved.macro, bestSaved.outState);
+            var bestSaved = results.MaxBy(m => m.score);
+
+            var hashMatchResults = currentHash.HasValue
+                ? results.Where(r => r.macro.CharacterStatsHash == currentHash && r.score > 0).ToList()
+                : new();
+            (Macro macro, SimulationState? outState, float score)? bestHashMatch = hashMatchResults.Count > 0
+                ? hashMatchResults.MaxBy(r => r.score)
+                : null;
+
+            return (bestSaved.macro, bestSaved.outState, bestHashMatch?.macro, bestHashMatch?.outState);
         });
         SavedMacroTask.Start();
     }
