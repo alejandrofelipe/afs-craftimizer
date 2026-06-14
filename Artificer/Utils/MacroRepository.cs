@@ -33,16 +33,36 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         var dbPath = Path.Combine(dir, "macros.db");
         _db = new SqliteConnection($"Data Source={dbPath}");
         _db.Open();
-        EnsureSchema();
+        RunMigrations();
         _macros.AddRange(LoadAll());
     }
 
-    // ── Schema ────────────────────────────────────────────────────────────────
+    // ── Schema migrations ─────────────────────────────────────────────────────
 
-    private void EnsureSchema()
+    private const int TargetSchemaVersion = 2;
+
+    private void RunMigrations()
     {
         Exec("PRAGMA journal_mode=WAL");
         Exec("PRAGMA foreign_keys=ON");
+
+        var version = GetUserVersion();
+
+        if (version < 1) ApplyV1_InitialSchema();
+        if (version < 2) ApplyV2_CharacterHash();
+
+        Exec($"PRAGMA user_version = {TargetSchemaVersion}");
+    }
+
+    private int GetUserVersion()
+    {
+        using var cmd = Command("PRAGMA user_version");
+        using var r = cmd.ExecuteReader();
+        return r.Read() ? r.GetInt32(0) : 0;
+    }
+
+    private void ApplyV1_InitialSchema()
+    {
         Exec("""
             CREATE TABLE IF NOT EXISTS Macros (
                 Id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,6 +82,11 @@ public sealed class MacroRepository : IDisposable, IMacroStore
             """);
         Exec("CREATE INDEX IF NOT EXISTS idx_macros_order  ON Macros(DisplayOrder)");
         Exec("CREATE INDEX IF NOT EXISTS idx_macros_recipe ON Macros(RecipeId)");
+    }
+
+    private void ApplyV2_CharacterHash()
+    {
+        Exec("ALTER TABLE Macros ADD COLUMN CharacterStatsHash INTEGER");
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
