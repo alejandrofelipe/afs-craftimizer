@@ -142,32 +142,16 @@ public static partial class ImGuiUtils
         return ImGui.CalcTextSize(icon.ToIconString());
     }
 
+    internal static Vector2 CenteredOffset(Vector2 iconSize, Vector2 area) =>
+        (area - iconSize) * 0.5f;
+
     private static void DrawCenteredIcon(FontAwesomeIcon icon, Vector2 offset, Vector2 size, bool isDisabled = false)
     {
         var iconSize = GetIconSize(icon);
-
-        float scale;
-        Vector2 iconOffset;
-        if (iconSize.X > iconSize.Y)
-        {
-            scale = size.X / iconSize.X;
-            iconOffset = new(0, (size.Y - (iconSize.Y * scale)) / 2f);
-        }
-        else if (iconSize.Y > iconSize.X)
-        {
-            scale = size.Y / iconSize.Y;
-            iconOffset = new((size.X - (iconSize.X * scale)) / 2f, 0);
-        }
-        else
-        {
-            scale = size.X / iconSize.X;
-            iconOffset = Vector2.Zero;
-        }
+        var iconOffset = CenteredOffset(iconSize, size);
 
         using (ImRaii.PushFont(UiServices.Current.IconFont))
             ImGui.GetWindowDrawList().AddText(
-                ImGui.GetFont(),
-                UiServices.Current.IconFont.FontSize * UiServices.Current.GlobalScale * scale,
                 offset + iconOffset,
                 ImGui.GetColorU32(!isDisabled ? ImGuiCol.Text : ImGuiCol.TextDisabled),
                 icon.ToIconString());
