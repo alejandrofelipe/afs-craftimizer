@@ -14,7 +14,7 @@ public static partial class ImGuiUtils
     // width = 0 -> size to content
     // returns available width (better since it accounts for the right side padding)
     // ^ only useful if width = -1
-    public static float BeginGroupPanel(string name, float width, bool accentLabel = true)
+    public static float BeginGroupPanel(string name, float width, bool accentLabel = true, Action? titleSuffix = null)
     {
         ImGui.PushID(name);
 
@@ -56,6 +56,7 @@ public static partial class ImGuiUtils
                         ImGui.PopStyleColor();
                 }
                 GroupPanelLabelStack.Push((ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), textFrameHeight / 2f)); // push rect to stack
+                titleSuffix?.Invoke();
                 ImGui.SameLine(0, 0);
                 ImGui.Dummy(new Vector2(0f, textFrameHeight + itemSpacing.Y)); // shifts content by fh + is.y
             }

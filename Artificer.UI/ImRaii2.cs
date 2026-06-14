@@ -37,9 +37,9 @@ public static partial class ImRaii2
         }
     }
 
-    public static RaiiObject GroupPanel(string name, float width, out float internalWidth, bool accentLabel = true)
+    public static RaiiObject GroupPanel(string name, float width, out float internalWidth, bool accentLabel = true, Action? titleSuffix = null)
     {
-        internalWidth = ImGuiUtils.BeginGroupPanel(name, width, accentLabel);
+        internalWidth = ImGuiUtils.BeginGroupPanel(name, width, accentLabel, titleSuffix);
         return new RaiiObject(ImGuiUtils.EndGroupPanel, true, false);
     }
 
