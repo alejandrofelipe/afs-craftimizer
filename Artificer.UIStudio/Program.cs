@@ -15,6 +15,7 @@ StudioApp.Run(
     new FloatingOverlayStory(),
     new DialogStory(),
     new SinglePanelStory(),
+    new IconButtonsStory(),
     // Pages
     new MacroEditorStory(),
     new SynthesisHelperStory(),
