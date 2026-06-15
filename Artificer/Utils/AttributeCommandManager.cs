@@ -55,6 +55,7 @@ public sealed class AttributeCommandManager : IDisposable
             if (!RegisteredCommands.Add(command.Name))
                 throw new InvalidOperationException($"Command '{command.Name}' is already registered.");
 
+            Service.CommandManager.RemoveHandler(command.Name);
             if (!Service.CommandManager.AddHandler(command.Name, info))
                 throw new InvalidOperationException($"Failed to register command '{command.Name}'.");
 
@@ -63,6 +64,7 @@ public sealed class AttributeCommandManager : IDisposable
                 if (!RegisteredCommands.Add(alias))
                     throw new InvalidOperationException($"Command '{alias}' is already registered.");
 
+                Service.CommandManager.RemoveHandler(alias);
                 if (!Service.CommandManager.AddHandler(alias, aliasInfo))
                     throw new InvalidOperationException($"Failed to register command '{alias}'.");
             }
