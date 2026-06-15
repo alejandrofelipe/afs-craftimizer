@@ -1042,6 +1042,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             }
 
             // Overlay: progress bar centrada verticalmente sobre o card
+            var afterCardPos = ImGui.GetCursorPos(); // save cursor at bottom of card
             if (state.Solver is { } regenSolver)
             {
                 var cardH     = windowHeight + spacing.Y + botRowH;
@@ -1066,6 +1067,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     3f);
 
                 ProgressBarComponent.DrawSingle(snapshot, barConfig);
+                ImGui.SetCursorPos(afterCardPos); // restore cursor to bottom of card
             }
         }
         else if (!state.Completed)
