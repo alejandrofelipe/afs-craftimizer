@@ -67,6 +67,9 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     public CraftableStatus CraftStatus { get; private set; }
 
     private int? _currentCharacterHash;
+    private IReadOnlyList<ActionType>? _prevSuggestedActions;
+    private SimulationState?           _prevSuggestedState;
+    private readonly Dictionary<MacroTaskType, DateTimeOffset> _copiedAt = new();
     private BackgroundTask<(Macro?, SimulationState?, Macro?, SimulationState?)>? SavedMacroTask { get; set; }
     private BackgroundTask<SolverSolution>? SuggestedMacroTask { get; set; }
     private BackgroundTask<(CommunityMacros.CommunityMacro?, SimulationState?)>? CommunityMacroTask { get; set; }
@@ -894,6 +897,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         public Action<IEnumerable<ActionType>>? MacroEditorSetter;
         public bool HasHashMismatch;  // only valid for MacroTaskType.Saved
         public bool IsPrefilled;      // only valid for MacroTaskType.Suggested
+        public bool IsRegenerating;   // only valid for MacroTaskType.Suggested
+        public (IReadOnlyList<ActionType> Actions, SimulationState State)? RegeneratingSnapshot;
     }
 
     private void DrawMacro(in MacroTaskState state, float panelWidth)
