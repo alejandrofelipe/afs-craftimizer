@@ -176,6 +176,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 {
                     SuggestedMacroTask?.Cancel();
                     SuggestedMacroTask = null;
+                    _prevSuggestedActions = null;
+                    _prevSuggestedState   = null;
                 }
 
                 // If it didn't exist before or it already ran, we need to recalculate
@@ -313,6 +315,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             {
                 SuggestedMacroTask?.Cancel();
                 SuggestedMacroTask = null;
+                _prevSuggestedActions = null;
+                _prevSuggestedState   = null;
             }
 
             // If we want to search automatically, we should recalculate
