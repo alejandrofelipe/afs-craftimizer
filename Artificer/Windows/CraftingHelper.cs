@@ -1021,7 +1021,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                         }
                     }
 
-                    // Row 2: HQ% | "Regenerando..."
+                    // Row 2: HQ% | "Regenerating..."
                     ImGui.TableNextRow(ImGuiTableRowFlags.None, botRowH);
                     ImGui.TableSetColumnIndex(0);
                     {
@@ -1035,7 +1035,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                         {
                             ImGui.AlignTextToFramePadding();
-                            ImGui.TextUnformatted("Regenerando...");
+                            ImGui.TextUnformatted("Regenerating...");
                         }
                     }
                 }
