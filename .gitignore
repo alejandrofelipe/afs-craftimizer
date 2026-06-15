@@ -56,3 +56,15 @@ logs/
 
 # Node (caso ferramentas JS sejam adicionadas)
 node_modules/
+
+# Superpowers runtime (brainstorm server state, HTML content, PIDs)
+.superpowers/
+
+# ImGui window layout state (local only)
+imgui.ini
+
+# Local mockups and prototypes
+mockup/
+
+# Test output files
+test_output.txt
