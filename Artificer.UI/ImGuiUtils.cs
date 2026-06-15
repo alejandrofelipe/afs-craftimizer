@@ -146,7 +146,7 @@ public static partial class ImGuiUtils
     internal static Vector2 CenteredOffset(Vector2 iconSize, Vector2 area) =>
         (area - iconSize) * 0.5f;
 
-    private static void DrawCenteredIcon(FontAwesomeIcon icon, Vector2 offset, Vector2 size, bool isDisabled = false)
+    public static void DrawCenteredIcon(FontAwesomeIcon icon, Vector2 offset, Vector2 size, bool isDisabled = false)
     {
         var iconSize = GetIconSize(icon);
         var iconOffset = CenteredOffset(iconSize, size);
