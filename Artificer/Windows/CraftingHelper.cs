@@ -1268,10 +1268,26 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                         if (ImGui.IsItemHovered())
                             ImGuiUtils.Tooltip("Open in Macro Editor");
                         ImGui.SameLine(0, spacing.X);
-                        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, iconH))
+                        var justCopied = _copiedAt.TryGetValue(state.Type, out var copiedAt)
+                                      && (DateTimeOffset.UtcNow - copiedAt).TotalSeconds < 2.0;
+                        var copyIcon   = justCopied ? FontAwesomeIcon.Check : FontAwesomeIcon.Paste;
+                        bool copyClicked;
+                        if (justCopied)
+                        {
+                            using (ImRaii.PushColor(ImGuiCol.Text, Colors.Progress))
+                                copyClicked = ImGuiUtils.IconButtonSquare((int)copyIcon, iconH);
+                        }
+                        else
+                        {
+                            copyClicked = ImGuiUtils.IconButtonSquare((int)copyIcon, iconH);
+                        }
+                        if (copyClicked)
+                        {
                             MacroCopy.Copy(actions, _plugin);
+                            _copiedAt[state.Type] = DateTimeOffset.UtcNow;
+                        }
                         if (ImGui.IsItemHovered())
-                            ImGuiUtils.Tooltip("Copy to Clipboard");
+                            ImGuiUtils.Tooltip(justCopied ? "Copied!" : "Copy to Clipboard");
 
                         var nameMaxW  = cellAvailW - iconH * 2 - spacing.X * 2;
                         ImGui.SetCursorPos(new Vector2(cellStart.X, cellStart.Y + (botRowH - ImGui.GetTextLineHeight()) * 0.5f));
