@@ -126,6 +126,12 @@ public partial class Configuration
     /// <summary>Enable the Crafting Lists feature (default: off).</summary>
     public bool EnableCraftingLists { get; set; }
 
+    /// <summary>FeatureHub anchored below _NaviMap (default: true).</summary>
+    public bool FeatureHubAnchored { get; set; } = true;
+
+    /// <summary>FeatureHub starts minimized (default: true).</summary>
+    public bool FeatureHubMinimized { get; set; } = true;
+
     /// <summary>Auto-delete completed lists (default: off).</summary>
     public bool AutoDeleteCompletedLists { get; set; }
 
