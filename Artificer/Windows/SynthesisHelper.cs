@@ -713,7 +713,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             return;
         if (Addon->AtkUnitBase.WindowNode == null)
             return;
-        if (Session.SimulationInput == null)
+        if (Session.SimulationInput == null) // not ready: plugin loaded during active synthesis before StartCrafting runs
             return;
 
         Session.RegisterActionUsed(action, GetCurrentState());
