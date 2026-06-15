@@ -979,6 +979,95 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     }
             }
         }
+        else if (state.IsRegenerating && state.RegeneratingSnapshot is { } rsnap)
+        {
+            // Desenha o card anterior dimmed como âncora de tamanho
+            var cardTopPos = ImGui.GetCursorPos();
+            var spacing    = ImGui.GetStyle().ItemSpacing;
+            var miniRowH   = (windowHeight - spacing.Y) / 2f;
+            var arcColW    = miniRowH * 2 + spacing.X;
+            var innerW     = panelWidth;
+            var rightColW  = MathF.Max(1f, innerW - arcColW - 1f);
+            var botRowH    = ImGui.GetFrameHeight();
+
+            using (ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0.25f))
+            {
+                using var table = ImRaii.Table("macroCardRegen", 2,
+                    ImGuiTableFlags.None,
+                    new Vector2(innerW, 0));
+                if (table)
+                {
+                    ImGui.TableSetupColumn("left",  ImGuiTableColumnFlags.WidthFixed, arcColW);
+                    ImGui.TableSetupColumn("right", ImGuiTableColumnFlags.WidthFixed, rightColW);
+
+                    // Row 1: arcs | action icons
+                    ImGui.TableNextRow(ImGuiTableRowFlags.None, windowHeight);
+                    ImGui.TableSetColumnIndex(0);
+                    PluginImGuiUtils.DrawMacroStatArcs(rsnap.State, windowHeight, asGrid: true);
+
+                    ImGui.TableSetColumnIndex(1);
+                    {
+                        var itemsPerRow = (int)MathF.Floor((rightColW + spacing.X) / (miniRowH + spacing.X));
+                        itemsPerRow     = Math.Max(1, itemsPerRow);
+                        var itemCount   = rsnap.Actions.Count;
+                        for (var i = 0; i < itemsPerRow * 2; i++)
+                        {
+                            if (i % itemsPerRow != 0)
+                                ImGui.SameLine(0, spacing.X);
+                            if (i < itemCount)
+                                ImGui.Image(rsnap.Actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH));
+                            else
+                                ImGui.Dummy(new(miniRowH));
+                        }
+                    }
+
+                    // Row 2: HQ% | "Regenerando..."
+                    ImGui.TableNextRow(ImGuiTableRowFlags.None, botRowH);
+                    ImGui.TableSetColumnIndex(0);
+                    {
+                        var hqPct = rsnap.State.HQPercent;
+                        ImGui.AlignTextToFramePadding();
+                        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                            ImGuiUtils.TextCentered($"{hqPct}%", arcColW);
+                    }
+                    ImGui.TableSetColumnIndex(1);
+                    {
+                        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                        {
+                            ImGui.AlignTextToFramePadding();
+                            ImGui.TextUnformatted("Regenerando...");
+                        }
+                    }
+                }
+            }
+
+            // Overlay: progress bar centrada verticalmente sobre o card
+            if (state.Solver is { } regenSolver)
+            {
+                var cardH     = windowHeight + spacing.Y + botRowH;
+                var snapshot  = SolverProgressBar.FromSolver(regenSolver, "Solver");
+                var barConfig = new ProgressBarComponent.VisualConfig(
+                    Mode: ProgressBarComponent.DisplayMode.Horizontal,
+                    ColorTheme: _plugin.Configuration.ProgressType,
+                    Width: panelWidth,
+                    ShowPercentage: true,
+                    ShowDetailedTooltip: true
+                );
+
+                // Fundo semi-transparente — posicionar cursor antes de obter screenPos
+                var barH     = ImGui.GetFrameHeightWithSpacing();
+                var overlayY = cardTopPos.Y + (cardH - barH) / 2f;
+                ImGui.SetCursorPos(new Vector2(cardTopPos.X, overlayY));
+                var screenMin = ImGui.GetCursorScreenPos();
+                ImGui.GetWindowDrawList().AddRectFilled(
+                    screenMin,
+                    screenMin + new Vector2(panelWidth, barH),
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
+                    3f);
+
+                ProgressBarComponent.DrawSingle(snapshot, barConfig);
+            }
+        }
         else if (!state.Completed)
         {
             switch (state.Type)
