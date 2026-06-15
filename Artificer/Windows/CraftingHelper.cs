@@ -463,12 +463,14 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         }
 
         {
-            var solverResult  = SuggestedMacroTask?.Result;
-            var solverDone    = SuggestedMacroTask?.Completed ?? false;
-            var savedResult   = SavedMacroTask?.Result;
-            var hashMatch     = savedResult?.Item3;
+            var solverResult   = SuggestedMacroTask?.Result;
+            var solverDone     = SuggestedMacroTask?.Completed ?? false;
+            var savedResult    = SavedMacroTask?.Result;
+            var hashMatch      = savedResult?.Item3;
             var hashMatchState = savedResult?.Item4;
-            var isPrefilled   = hashMatch != null && !solverDone;
+            var isRegenerating = _prevSuggestedActions != null
+                              && SuggestedMacroTask is { Completed: false };
+            var isPrefilled    = hashMatch != null && !solverDone && !isRegenerating;
 
             var state = new MacroTaskState()
             {
@@ -479,8 +481,19 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 Actions   = solverResult?.Actions ?? (isPrefilled ? hashMatch!.Actions : null),
                 State     = solverResult?.State   ?? (isPrefilled ? hashMatchState     : null),
                 Solver    = BestMacroSolver,
-                IsPrefilled = isPrefilled && solverResult == null,
+                IsPrefilled          = isPrefilled && solverResult == null,
+                IsRegenerating       = isRegenerating,
+                RegeneratingSnapshot = isRegenerating
+                    ? (_prevSuggestedActions!, _prevSuggestedState!.Value)
+                    : null,
             };
+
+            if (solverDone)
+            {
+                _prevSuggestedActions = null;
+                _prevSuggestedState   = null;
+            }
+
             DrawMacro(in state, panelWidth);
         }
 
