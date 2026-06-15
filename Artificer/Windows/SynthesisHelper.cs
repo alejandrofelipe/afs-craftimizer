@@ -713,6 +713,8 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             return;
         if (Addon->AtkUnitBase.WindowNode == null)
             return;
+        if (Session.SimulationInput == null)
+            return;
 
         Session.RegisterActionUsed(action, GetCurrentState());
     }
