@@ -1340,6 +1340,16 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
     private void CalculateSuggestedMacro()
     {
+        if (SuggestedMacroTask?.Result is { } prev)
+        {
+            _prevSuggestedActions = prev.Actions;
+            _prevSuggestedState   = prev.State;
+        }
+        else
+        {
+            _prevSuggestedActions = null;
+            _prevSuggestedState   = null;
+        }
         SuggestedMacroTask?.Cancel();
         var hasDelineations = Gearsets.HasDelineations();
         SuggestedMacroTask = new(token =>
