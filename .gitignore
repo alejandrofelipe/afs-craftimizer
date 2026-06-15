@@ -57,8 +57,9 @@ logs/
 # Node (caso ferramentas JS sejam adicionadas)
 node_modules/
 
-# Superpowers runtime (brainstorm server state, HTML content, PIDs)
+# Superpowers runtime and generated docs
 .superpowers/
+docs/superpowers/
 
 # ImGui window layout state (local only)
 imgui.ini
