@@ -360,6 +360,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
         if (waitTime > 0)
         {
             var timeStr = $"{waitTime} sec";
+            ImGui.SameLine();
             ImGuiUtils.AlignRight(ImGui.CalcTextSize(timeStr).X);
             using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                 ImGui.TextUnformatted(timeStr);
