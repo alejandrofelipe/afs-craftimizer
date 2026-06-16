@@ -1041,33 +1041,26 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 }
             }
 
-            // Overlay: progress bar centrada verticalmente sobre o card
-            var afterCardPos = ImGui.GetCursorPos(); // save cursor at bottom of card
+            // Overlay: novo componente de progresso (chip + dots + algo + barra) centrado sobre o card
+            var afterCardPos = ImGui.GetCursorPos();
             if (state.Solver is { } regenSolver)
             {
-                var cardH     = windowHeight + spacing.Y + botRowH;
-                var snapshot  = SolverProgressBar.FromSolver(regenSolver, "Solver");
-                var barConfig = new ProgressBarComponent.VisualConfig(
-                    Mode: ProgressBarComponent.DisplayMode.Horizontal,
-                    ColorTheme: _plugin.Configuration.ProgressType,
-                    Width: panelWidth,
-                    ShowPercentage: true,
-                    ShowDetailedTooltip: true
-                );
+                var cardH    = windowHeight + spacing.Y + botRowH;
+                var snapshot = SolverProgressBar.FromSolver(regenSolver, "Solver");
+                var overlayH = ImGui.GetFrameHeightWithSpacing() * 2f; // 2 linhas: chip+dots / barra
+                var overlayY = cardTopPos.Y + (cardH - overlayH) / 2f;
 
-                // Fundo semi-transparente — posicionar cursor antes de obter screenPos
-                var barH     = ImGui.GetFrameHeightWithSpacing();
-                var overlayY = cardTopPos.Y + (cardH - barH) / 2f;
                 ImGui.SetCursorPos(new Vector2(cardTopPos.X, overlayY));
                 var screenMin = ImGui.GetCursorScreenPos();
                 ImGui.GetWindowDrawList().AddRectFilled(
                     screenMin,
-                    screenMin + new Vector2(panelWidth, barH),
+                    screenMin + new Vector2(panelWidth, overlayH),
                     ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
                     3f);
 
-                ProgressBarComponent.DrawSingle(snapshot, barConfig);
-                ImGui.SetCursorPos(afterCardPos); // restore cursor to bottom of card
+                PluginImGuiUtils.DrawSolverProgressArea(
+                    panelWidth, [snapshot], _plugin.Configuration.ProgressType);
+                ImGui.SetCursorPos(afterCardPos);
             }
         }
         else if (!state.Completed)
@@ -1080,18 +1073,11 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 case MacroTaskType.Suggested:
                     {
                         if (state.Solver is not { } solver)
-                            throw new ArgumentNullException(nameof(state), "Solver should not be null");
+                            break; // solver not yet assigned by background thread — skip this frame
 
                         var snapshot = SolverProgressBar.FromSolver(solver, "Solver");
-                        var config = new ProgressBarComponent.VisualConfig(
-                            Mode: ProgressBarComponent.DisplayMode.Horizontal,
-                            ColorTheme: _plugin.Configuration.ProgressType,
-                            Width: panelWidth,
-                            ShowPercentage: true,
-                            ShowDetailedTooltip: true
-                        );
-                        
-                        ProgressBarComponent.DrawSingle(snapshot, config);
+                        PluginImGuiUtils.DrawSolverProgressArea(
+                            panelWidth, [snapshot], _plugin.Configuration.ProgressType);
                         break;
                     }
                 case MacroTaskType.Community:
@@ -1474,6 +1460,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             _prevSuggestedActions = null;
             _prevSuggestedState   = null;
         }
+        BestMacroSolver = null;
         SuggestedMacroTask?.Cancel();
         var hasDelineations = Gearsets.HasDelineations();
         SuggestedMacroTask = new(token =>
