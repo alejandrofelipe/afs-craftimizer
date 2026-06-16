@@ -2,7 +2,7 @@
   "Author": "alejandrofelipe",
   "Name": "Artificer",
   "InternalName": "Artificer",
-  "AssemblyVersion": "2.21.1.1",
+  "AssemblyVersion": "2.21.1.2",
   "Description": "Fork pessoal do Craftimizer com melhorias de UI, tracking de Cosmic Tool em tempo real e monitoramento de durabilidade de gear. Gera macros e simula crafts com MCTS/Raphael.",
   "Punchline": "Gerador de macros e simulador de crafting com solver MCTS e Raphael.",
   "RepoUrl": "https://github.com/alejandrofelipe/afs-craftimizer",
@@ -22,5 +22,5 @@
   "IsTestingExclusive": false,
   "DownloadLinkInstall": "https://github.com/alejandrofelipe/afs-craftimizer/releases/latest/download/latest.zip",
   "DownloadLinkUpdate": "https://github.com/alejandrofelipe/afs-craftimizer/releases/latest/download/latest.zip",
-  "LastUpdate": "1781637250"
+  "LastUpdate": "1781638728"
 }
