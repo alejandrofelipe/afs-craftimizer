@@ -281,4 +281,67 @@ public sealed partial class MacroEditor
         );
         ProgressBarComponent.DrawAggregated(snapshots, config);
     }
+
+    private static void DrawStageDots(ProgressBarComponent.ProgressSnapshot snapshot)
+    {
+        if (snapshot.Stage is not { } stage) return;
+
+        var dl = ImGui.GetWindowDrawList();
+        var dotRadius = 3f * ImGuiHelpers.GlobalScale;
+        var dotDiameter = dotRadius * 2f;
+        var dotGap = 3f * ImGuiHelpers.GlobalScale;
+        var cursor = ImGui.GetCursorScreenPos();
+        var centerY = cursor.Y + ImGui.GetFrameHeight() * 0.5f;
+
+        if (snapshot.IsIndeterminate)
+        {
+            // 3 dots em wave animation para estado indeterminado
+            for (var i = 0; i < 3; i++)
+            {
+                var phase = (float)((ImGui.GetTime() * 5.0 - i * 0.5) % (Math.PI * 2));
+                var alpha = (MathF.Sin(phase) + 1f) * 0.4f + 0.2f;
+                var scale = 0.85f + (MathF.Sin(phase) + 1f) * 0.15f;
+                var cx = cursor.X + dotRadius + i * (dotDiameter + dotGap);
+                dl.AddCircleFilled(
+                    new Vector2(cx, centerY),
+                    dotRadius * scale,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.29f, 0.565f, 0.851f, alpha)));
+            }
+            ImGui.Dummy(new Vector2(3 * dotDiameter + 2 * dotGap, ImGui.GetFrameHeight()));
+            return;
+        }
+
+        var dotCount = snapshot.IsComplete
+            ? Math.Min(stage + 1, 8)
+            : Math.Min(stage + 2, 8);
+
+        for (var i = 0; i < dotCount; i++)
+        {
+            var cx = cursor.X + dotRadius + i * (dotDiameter + dotGap);
+            // GetSolverProgressColors(i, Colorful).Foreground == SolverProgressFgColorful[i % 7]
+            // SolverProgressFgColorful é private; este é o accessor público equivalente.
+            var color = Colors.GetSolverProgressColors(i, ProgressBarType.Colorful).Foreground;
+
+            if (i < stage)
+            {
+                dl.AddCircleFilled(new Vector2(cx, centerY), dotRadius,
+                    ImGui.ColorConvertFloat4ToU32(color));
+            }
+            else if (i == stage && !snapshot.IsComplete)
+            {
+                var pulse = (MathF.Sin((float)(ImGui.GetTime() % 1.2 / 1.2 * (Math.PI * 2.0))) + 1f) * 0.5f;
+                var scale = 0.85f + pulse * 0.30f;
+                var alpha = 0.5f + pulse * 0.5f;
+                dl.AddCircleFilled(new Vector2(cx, centerY), dotRadius * scale,
+                    ImGui.ColorConvertFloat4ToU32(color with { W = alpha }));
+            }
+            else
+            {
+                dl.AddCircle(new Vector2(cx, centerY), dotRadius,
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.27f, 0.27f, 0.36f, 1f)), 0, 1f);
+            }
+        }
+
+        ImGui.Dummy(new Vector2(dotCount * dotDiameter + (dotCount - 1) * dotGap, ImGui.GetFrameHeight()));
+    }
 }
