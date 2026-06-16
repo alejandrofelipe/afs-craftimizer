@@ -305,22 +305,102 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
 
         if (Session.SolverSnapshots.Any())
         {
-            ImGuiHelpers.ScaledDummy(5);
-            ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving);
-            
-            var config = new ProgressBarComponent.VisualConfig(
-                Mode: ProgressBarComponent.DisplayMode.Horizontal,
-                ColorTheme: _plugin.Configuration.ProgressType,
-                Width: ImGui.GetContentRegionAvail().X,
-                ShowPercentage: true,
-                ShowDetailedTooltip: true,
-                ShowSummaryWhenAggregated: true
-            );
-            
-            ProgressBarComponent.DrawAggregated(Session.SolverSnapshots, config);
+            ImGuiHelpers.ScaledDummy(3);
+            DrawSolverProgress();
         }
 
         DrawMacroActions();
+    }
+
+    private void DrawSolverProgress()
+    {
+        var snapshots = Session.SolverSnapshots;
+        var snapshot  = snapshots[0];
+
+        var chipState = snapshot.State switch
+        {
+            ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
+            ProgressBarComponent.ProgressState.Cancelled or ProgressBarComponent.ProgressState.Failed
+                => ImGuiUtils.SolverState.Failed,
+            _ => ImGuiUtils.SolverState.Solving,
+        };
+        ImGuiUtils.DrawStateChip(chipState);
+
+        var config = new ProgressBarComponent.VisualConfig(
+            Mode: ProgressBarComponent.DisplayMode.Horizontal,
+            ColorTheme: _plugin.Configuration.ProgressType,
+            Width: ImGui.GetContentRegionAvail().X,
+            ShowPercentage: true,
+            ShowDetailedTooltip: true,
+            ShowSummaryWhenAggregated: true
+        );
+
+        if (snapshots.Count == 1)
+            ProgressBarComponent.DrawSingle(snapshots[0], config);
+        else
+            ProgressBarComponent.DrawAggregated(snapshots, config);
+    }
+
+    private void DrawStatusStrip(SimulationState state)
+    {
+        var condition = state.Condition;
+        var spacing   = ImGui.GetStyle().ItemSpacing.X;
+
+        PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
+        ImGuiUtils.HoveredTooltip(condition.Description(Session.CharacterStats!.HasSplendorousBuff));
+
+        var stepCount  = state.StepCount + 1;
+        var totalSteps = Session.Macro.Count;
+        ImGui.SameLine(0, spacing * 2);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted(totalSteps > 0 ? $"Step {stepCount}/{totalSteps}" : $"Step {stepCount}");
+
+        var actions  = Session.Macro.Actions.ToArray();
+        var waitTime = actions.Sum(a => a.Base().MacroWaitTime);
+        if (waitTime > 0)
+        {
+            var timeStr = $"{waitTime} sec";
+            ImGuiUtils.AlignRight(ImGui.CalcTextSize(timeStr).X);
+            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                ImGui.TextUnformatted(timeStr);
+        }
+    }
+
+    private string BuildGearMessage(float pct)
+    {
+        if (!_plugin.Configuration.EnableGearWearTracking || Session.RecipeData == null)
+            return $"{pct:0}% — Repair gear before continuing!";
+
+        var recipe      = Session.RecipeData.Recipe;
+        var recipeLevel = (ushort)Session.RecipeData.Table.RowId;
+        var estimate    = _plugin.GearWearTracker.EstimateCraftsRemaining(recipe.RowId, recipeLevel);
+
+        return estimate switch
+        {
+            null                   => $"{pct:0}% — Repair gear before continuing!",
+            { Confidence: > 0f } e => e.MinCrafts == e.MaxCrafts
+                ? $"{pct:0}% · ~{e.MinCrafts} crafts left"
+                : $"{pct:0}% · ~{e.MinCrafts}–{e.MaxCrafts} crafts left",
+            { } e                  => $"{pct:0}% · ~{e.MinCrafts} crafts left (no data)",
+        };
+    }
+
+    private void DrawGearConditionAlert()
+    {
+        if (!_plugin.Configuration.ShowGearCondition) return;
+
+        var gearCondition = Gearsets.GetMinimumGearCondition();
+        if (!gearCondition.HasValue) return;
+
+        var pct = gearCondition.Value;
+        if (pct >= 50f) return;
+
+        ImGuiHelpers.ScaledDummy(2);
+
+        if (pct < 25f)
+            ImGuiUtils.DrawAlert(AlertVariant.Danger,  "Gear Condition", BuildGearMessage(pct), ImGuiHelpers.GlobalScale);
+        else
+            ImGuiUtils.DrawAlert(AlertVariant.Warning, "Gear Condition", BuildGearMessage(pct), ImGuiHelpers.GlobalScale);
     }
 
     private SimulationState? hoveredState;
@@ -410,6 +490,39 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
     {
         var state = DisplayedState;
 
+        // 1. Status strip: condition dot + Step X/Y + tempo estimado
+        DrawStatusStrip(state);
+
+        ImGuiHelpers.ScaledDummy(5);
+
+        // 2. Progress bars
+        var reliability = Session.Macro.GetReliability(Session.RecipeData!, _plugin.Configuration.SynthHelperDisplayOnlyFirstStep ? 0 : ^1);
+        {
+            var allBars = new List<DynamicBars.BarData>
+            {
+                new("Progress",   Colors.Progress,   reliability.Progress, state.Progress,  Session.RecipeData!.RecipeInfo.MaxProgress),
+                new("Quality",    Colors.Quality,    reliability.Quality,  state.Quality,   Session.RecipeData.RecipeInfo.MaxQuality),
+                new("CP",         Colors.CP,         state.CP,             Session.CharacterStats!.CP),
+                new("Durability", Colors.Durability, state.Durability,     Session.RecipeData.RecipeInfo.MaxDurability),
+            };
+            if (Session.RecipeData.RecipeInfo.MaxQuality <= 0)
+                allBars.RemoveAt(1);
+            if (Session.RecipeData.IsCollectable)
+                allBars.Add(new("Collect.", Colors.Collectability, reliability.ParamScore, state.Collectability, state.MaxCollectability, Session.RecipeData.CollectableThresholds, $"{state.Collectability}"));
+            else if (Session.RecipeData.Recipe.RequiredQuality > 0)
+            {
+                var qualityPercent = (float)state.Quality / Session.RecipeData.Recipe.RequiredQuality * 100;
+                allBars.Add(new("Quality %", Colors.HQ, reliability.ParamScore, qualityPercent, 100, null, $"{qualityPercent:0}%"));
+            }
+            else if (Session.RecipeData.RecipeInfo.MaxQuality > 0)
+                allBars.Add(new("HQ %", Colors.HQ, reliability.ParamScore, state.HQPercent, 100, null, $"{state.HQPercent}%"));
+
+            DynamicBars.DrawRow(allBars);
+        }
+
+        ImGuiHelpers.ScaledDummy(3);
+
+        // 3. Buffs (movido para depois das barras)
         using (var panel = ImRaii2.GroupPanel("Buffs", -1, out _))
         {
             using var _font = AxisFont.Push();
@@ -426,7 +539,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             }
             else
             {
-                var iconHeight = ImGui.GetFrameHeight() * 1.75f;
+                var iconHeight    = ImGui.GetFrameHeight() * 1.75f;
                 var durationShift = iconHeight * .2f;
 
                 ImGui.Dummy(new(0, iconHeight + ImGui.GetStyle().ItemSpacing.Y + ImGui.GetTextLineHeight() - durationShift));
@@ -461,147 +574,14 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             }
         }
 
-        ImGuiHelpers.ScaledDummy(5);
+        // 4. Gear condition alert
+        DrawGearConditionAlert();
 
-        var reliability = Session.Macro.GetReliability(Session.RecipeData!, _plugin.Configuration.SynthHelperDisplayOnlyFirstStep ? 0 : ^1);
-        {
-            var allBars = new List<DynamicBars.BarData>
-            {
-                new("Progress",   Colors.Progress,   reliability.Progress, state.Progress,  Session.RecipeData!.RecipeInfo.MaxProgress),
-                new("Quality",    Colors.Quality,    reliability.Quality,  state.Quality,   Session.RecipeData.RecipeInfo.MaxQuality),
-                new("CP",         Colors.CP,         state.CP,             Session.CharacterStats!.CP),
-                new("Durability", Colors.Durability, state.Durability,     Session.RecipeData.RecipeInfo.MaxDurability),
-            };
-            if (Session.RecipeData.RecipeInfo.MaxQuality <= 0)
-                allBars.RemoveAt(1);
-            if (Session.RecipeData.IsCollectable)
-                allBars.Add(new("Collect.", Colors.Collectability, reliability.ParamScore, state.Collectability, state.MaxCollectability, Session.RecipeData.CollectableThresholds, $"{state.Collectability}"));
-            else if (Session.RecipeData.Recipe.RequiredQuality > 0)
-            {
-                var qualityPercent = (float)state.Quality / Session.RecipeData.Recipe.RequiredQuality * 100;
-                allBars.Add(new("Quality %", Colors.HQ, reliability.ParamScore, qualityPercent, 100, null, $"{qualityPercent:0}%"));
-            }
-            else if (Session.RecipeData.RecipeInfo.MaxQuality > 0)
-                allBars.Add(new("HQ %", Colors.HQ, reliability.ParamScore, state.HQPercent, 100, null, $"{state.HQPercent}%"));
-
-            DynamicBars.DrawRow(allBars);
-        }
-
-        // Gear condition indicator
-        if (_plugin.Configuration.ShowGearCondition)
-        {
-            var gearCondition = Gearsets.GetMinimumGearCondition();
-            if (gearCondition.HasValue)
-            {
-                ImGuiHelpers.ScaledDummy(2);
-                
-                var conditionPercent = gearCondition.Value;
-                var conditionColor = conditionPercent switch
-                {
-                    >= 70f => new Vector4(0.3f, 0.9f, 0.3f, 1f), // Verde
-                    >= 30f => new Vector4(0.9f, 0.9f, 0.3f, 1f), // Amarelo
-                    _      => new Vector4(0.9f, 0.3f, 0.3f, 1f)  // Vermelho
-                };
-
-                using (ImRaii.PushColor(ImGuiCol.Text, conditionColor))
-                {
-                    ImGui.TextUnformatted($"⚙ Gear: {conditionPercent:0}%");
-                }
-                
-                ImGuiUtils.HoveredTooltip("Condição mínima do equipamento atual.\nValor atualizado em tempo real.");
-
-                // Low durability warning
-                if (_plugin.Configuration.ShowLowDurabilityWarning && 
-                    conditionPercent <= _plugin.Configuration.LowDurabilityThreshold)
-                {
-                    ImGuiHelpers.ScaledDummy(2);
-                    
-                    // Pulsating warning effect
-                    var pulseAlpha = 0.7f + 0.3f * MathF.Sin((float)ImGui.GetTime() * 3f);
-                    var warningColor = new Vector4(0.9f, 0.3f, 0.3f, pulseAlpha);
-
-                    using (ImRaii.PushColor(ImGuiCol.Text, warningColor))
-                    {
-                        ImGui.TextUnformatted("⚠ LOW GEAR DURABILITY!");
-                    }
-
-                    // Show prediction if tracking is enabled
-                    if (_plugin.Configuration.EnableGearWearTracking && Session.RecipeData != null)
-                    {
-                        var recipe = Session.RecipeData.Recipe;
-                        var recipeLevel = (ushort)Session.RecipeData.Table.RowId;
-                        var estimate = _plugin.GearWearTracker.EstimateCraftsRemaining(recipe.RowId, recipeLevel);
-
-                        if (estimate.HasValue)
-                        {
-                            var (minCrafts, maxCrafts, confidence) = estimate.Value;
-                            
-                            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                            {
-                                if (confidence > 0f)
-                                {
-                                    if (minCrafts == maxCrafts)
-                                        ImGui.TextUnformatted($"Estimated: ~{minCrafts} crafts left");
-                                    else
-                                        ImGui.TextUnformatted($"Estimated: {minCrafts}-{maxCrafts} crafts left");
-                                }
-                                else
-                                {
-                                    ImGui.TextUnformatted($"Estimated: ~{minCrafts} crafts left (no data)");
-                                }
-                            }
-
-                            if (ImGui.IsItemHovered())
-                            {
-                                var tooltip = confidence > 0f
-                                    ? $"Based on {_plugin.Configuration.GearWearData.Values.FirstOrDefault(s => s.RecipeId == recipe.RowId)?.SampleCount ?? 0} crafts of this recipe.\nConfidence: {confidence * 100:F0}%"
-                                    : "No tracking data for this recipe yet.\nUsing conservative estimate (~1% per craft).\nEnable tracking in Settings → General.";
-                                ImGuiUtils.Tooltip(tooltip);
-                            }
-                        }
-                        else
-                        {
-                            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                            {
-                                ImGui.TextUnformatted("Repair your gear before continuing!");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                        {
-                            ImGui.TextUnformatted("Repair your gear before continuing!");
-                        }
-                    }
-                }
-            }
-        }
-
-        ImGuiHelpers.ScaledDummy(4);
-
-        // Condition row
-        {
-            var spacing   = ImGui.GetStyle().ItemSpacing.X;
-            var condition = state.Condition;
-            using (var g = ImRaii.Group())
-            {
-                var labelW     = ImGui.CalcTextSize("CONDITION").X;
-                var indicatorW = ImGui.GetFrameHeight() + spacing + ImGui.CalcTextSize(condition.Name()).X;
-                ImGuiUtils.AlignCentered(labelW + spacing * 2 + indicatorW);
-                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                    ImGui.TextUnformatted("CONDITION");
-                ImGui.SameLine(0, spacing * 2);
-                PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
-            }
-            ImGuiUtils.HoveredTooltip(condition.Description(Session.CharacterStats!.HasSplendorousBuff));
-        }
-
-        // Craft Complete notification (based on final macro state)
+        // 5. Craft Complete banner
         if (Session.Macro.State.Progress >= Session.RecipeData!.RecipeInfo.MaxProgress)
         {
             var isHQ = Session.RecipeData.RecipeInfo.MaxQuality > 0 && Session.Macro.State.HQPercent > 0;
-            var text = isHQ ? "\u2713 Craft Complete \u2014 HQ" : "\u2713 Craft Complete";
+            var text = isHQ ? "✓ Craft Complete — HQ" : "✓ Craft Complete";
             DrawStatusBanner(text, Colors.Good);
         }
     }
