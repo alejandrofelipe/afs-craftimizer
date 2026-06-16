@@ -72,8 +72,9 @@ public sealed partial class MacroEditor
                         ImGui.GetWindowDrawList().AddLine(v1, v2, ImGui.GetColorU32(Colors.Bad with { W = ImGui.GetStyle().DisabledAlpha / 2 }), 5 * ImGuiHelpers.GlobalScale);
                         ImGui.PopClipRect();
                     }
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        ImGuiUtils.Tooltip($"{actions[i].GetName(RecipeData!.ClassJob)}\n{actionBase.GetTooltip(sim, true)}");
+                    ImGuiUtils.HoveredTooltip(
+                        $"{actions[i].GetName(RecipeData!.ClassJob)}\n{actionBase.GetTooltip(sim, true)}",
+                        (int)ImGuiHoveredFlags.AllowWhenDisabled);
 
                     using var _padding = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, Vector2.Zero);
                     using (var _source = ImRaii.DragDropSource())

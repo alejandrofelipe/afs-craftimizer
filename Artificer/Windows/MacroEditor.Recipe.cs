@@ -141,8 +141,7 @@ public sealed partial class MacroEditor
         {
             ImGui.SameLine(0, 3);
             ImGui.Image(CosmicExplorationBadge.Handle, new(imageSize));
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.Tooltip($"Cosmic Exploration");
+            ImGuiUtils.HoveredTooltip($"Cosmic Exploration");
 
             if (_plugin.Configuration.EnableCosmicToolTracking && _cosmicProgress is { } cp)
             {
@@ -150,8 +149,7 @@ public sealed partial class MacroEditor
                 ImGui.SameLine(0, 6);
                 var frac = active.Needed > 0 ? (float)active.Current / active.Needed : 0f;
                 ImGui.ProgressBar(frac, new Vector2(90 * ImGuiHelpers.GlobalScale, imageSize));
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"Research Data Type {ToRomanType(cp.ActiveType)}: {active.Current:N0} / {active.Needed:N0}");
+                ImGuiUtils.HoveredTooltip($"Research Data Type {ToRomanType(cp.ActiveType)}: {active.Current:N0} / {active.Needed:N0}");
             }
         }
 
