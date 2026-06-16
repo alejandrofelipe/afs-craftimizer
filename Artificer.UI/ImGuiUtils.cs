@@ -182,7 +182,7 @@ public static partial class ImGuiUtils
         FontAwesomeIcon icon,
         string tooltip,
         float size = -1,
-        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None)
+        int flags = 0)
     {
         var clicked = IconButtonSquare(icon, size);
         HoveredTooltip(tooltip, flags);
@@ -194,7 +194,7 @@ public static partial class ImGuiUtils
         int icon,
         string tooltip,
         float size = -1,
-        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None)
+        int flags = 0)
         => IconButtonWithTooltip((FontAwesomeIcon)(ushort)icon, tooltip, size, flags);
 
     // https://gist.github.com/dougbinks/ef0962ef6ebe2cadae76c4e9f0586c69#file-imguiutils-h-L219
@@ -243,10 +243,10 @@ public static partial class ImGuiUtils
 
     public static void HoveredTooltip(
         string text,
-        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None,
+        int flags = 0,
         float? wrapWidth = null)
     {
-        if (ImGui.IsItemHovered(flags))
+        if (ImGui.IsItemHovered((ImGuiHoveredFlags)flags))
             Tooltip(text, wrapWidth);
     }
 

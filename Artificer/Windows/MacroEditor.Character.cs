@@ -115,7 +115,7 @@ public sealed partial class MacroEditor
                             CharacterStats = CharacterStats with { HasSplendorousBuff = !v };
                     }
                     ImGuiUtils.HoveredTooltip(CharacterStats.HasSplendorousBuff ? $"Splendorous Tool" : "No Splendorous Tool",
-                        (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
+                        (int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
                 ImGui.SameLine(0, 5);
                 bool? newIsSpecialist = null;
@@ -135,7 +135,7 @@ public sealed partial class MacroEditor
                             newIsSpecialist = v;
                         }
                     }
-                    ImGuiUtils.HoveredTooltip(v ? $"Specialist" : "Not a Specialist", (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
+                    ImGuiUtils.HoveredTooltip(v ? $"Specialist" : "Not a Specialist", (int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
                 ImGui.SameLine(0, 5);
                 {
@@ -148,7 +148,7 @@ public sealed partial class MacroEditor
                             CharacterStats = CharacterStats with { CanUseManipulation = !v };
                     }
                     ImGuiUtils.HoveredTooltip(CharacterStats.CanUseManipulation && manipLevel <= CharacterStats.Level
-                        ? $"Can Use Manipulation" : "Cannot Use Manipulation", (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
+                        ? $"Can Use Manipulation" : "Cannot Use Manipulation", (int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
 
                 ImGui.TableNextColumn();
