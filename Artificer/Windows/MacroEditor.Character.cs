@@ -114,8 +114,8 @@ public sealed partial class MacroEditor
                         if (ImGui.ImageButton(SplendorousBadge.Handle, new Vector2(imageButtonSize), default, Vector2.One, imageButtonPadding, default, tint))
                             CharacterStats = CharacterStats with { HasSplendorousBuff = !v };
                     }
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        ImGuiUtils.Tooltip(CharacterStats.HasSplendorousBuff ? $"Splendorous Tool" : "No Splendorous Tool");
+                    ImGuiUtils.HoveredTooltip(CharacterStats.HasSplendorousBuff ? $"Splendorous Tool" : "No Splendorous Tool",
+                        (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
                 ImGui.SameLine(0, 5);
                 bool? newIsSpecialist = null;
@@ -135,8 +135,7 @@ public sealed partial class MacroEditor
                             newIsSpecialist = v;
                         }
                     }
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        ImGuiUtils.Tooltip(v ? $"Specialist" : "Not a Specialist");
+                    ImGuiUtils.HoveredTooltip(v ? $"Specialist" : "Not a Specialist", (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
                 ImGui.SameLine(0, 5);
                 {
@@ -148,8 +147,8 @@ public sealed partial class MacroEditor
                         if (ImGui.ImageButton((v ? ManipulationBadge : NoManipulationBadge).Handle, new Vector2(imageButtonSize), default, Vector2.One, imageButtonPadding, default, tint))
                             CharacterStats = CharacterStats with { CanUseManipulation = !v };
                     }
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        ImGuiUtils.Tooltip(CharacterStats.CanUseManipulation && manipLevel <= CharacterStats.Level ? $"Can Use Manipulation" : "Cannot Use Manipulation");
+                    ImGuiUtils.HoveredTooltip(CharacterStats.CanUseManipulation && manipLevel <= CharacterStats.Level
+                        ? $"Can Use Manipulation" : "Cannot Use Manipulation", (ImGuiNET.ImGuiHoveredFlags)(int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
 
                 ImGui.TableNextColumn();
@@ -165,14 +164,12 @@ public sealed partial class MacroEditor
                 ImGui.Image(EatFromTheHandBadge.Handle, buffBadgeSize);
                 var fcBuffName = "Eat from the Hand";
                 var fcStatName = "Craftsmanship";
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip(fcBuffName);
+                ImGuiUtils.HoveredTooltip(fcBuffName);
                 ImGui.SameLine(0, 5);
                 {
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
                     using var combo = ImRaii.Combo("##fcCraftsmanship", FormatFCBuff(fcBuffName, Buffs.FC.Craftsmanship));
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip(FormatFCBuffDescription(fcBuffName, fcStatName, Buffs.FC.Craftsmanship));
+                    ImGuiUtils.HoveredTooltip(FormatFCBuffDescription(fcBuffName, fcStatName, Buffs.FC.Craftsmanship));
                     if (combo)
                     {
                         if (ImGui.Selectable("None", Buffs.FC.Craftsmanship == 0))
@@ -182,8 +179,7 @@ public sealed partial class MacroEditor
                         {
                             if (ImGui.Selectable(FormatFCBuff(fcBuffName, i), Buffs.FC.Craftsmanship == i))
                                 newFCCraftsmanshipBuff = i;
-                            if (ImGui.IsItemHovered())
-                                ImGuiUtils.Tooltip(FormatFCBuffDescription(fcBuffName, fcStatName, i));
+                            ImGuiUtils.HoveredTooltip(FormatFCBuffDescription(fcBuffName, fcStatName, i));
                         }
                     }
                 }
@@ -192,14 +188,12 @@ public sealed partial class MacroEditor
                 ImGui.Image(InControlBadge.Handle, buffBadgeSize);
                 fcBuffName = "In Control";
                 fcStatName = "Control";
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip(fcBuffName);
+                ImGuiUtils.HoveredTooltip(fcBuffName);
                 ImGui.SameLine(0, 5);
                 {
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
                     using var combo = ImRaii.Combo("##fcControl", FormatFCBuff(fcBuffName, Buffs.FC.Control));
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip(FormatFCBuffDescription(fcBuffName, fcStatName, Buffs.FC.Control));
+                    ImGuiUtils.HoveredTooltip(FormatFCBuffDescription(fcBuffName, fcStatName, Buffs.FC.Control));
                     if (combo)
                     {
                         if (ImGui.Selectable("None", Buffs.FC.Control == 0))
@@ -209,8 +203,7 @@ public sealed partial class MacroEditor
                         {
                             if (ImGui.Selectable(FormatFCBuff(fcBuffName, i), Buffs.FC.Control == i))
                                 newFCControlBuff = i;
-                            if (ImGui.IsItemHovered())
-                                ImGuiUtils.Tooltip(FormatFCBuffDescription(fcBuffName, fcStatName, i));
+                            ImGuiUtils.HoveredTooltip(FormatFCBuffDescription(fcBuffName, fcStatName, i));
                         }
                     }
                 }
@@ -284,10 +277,7 @@ public sealed partial class MacroEditor
                     ImGui.TextUnformatted($"⚙ Gear: {conditionPercent:0}%");
                 }
                 
-                if (ImGui.IsItemHovered())
-                {
-                    ImGuiUtils.Tooltip("Condição mínima do equipamento atual.\nRepare o equipamento se estiver baixo.");
-                }
+                ImGuiUtils.HoveredTooltip("Condição mínima do equipamento atual.\nRepare o equipamento se estiver baixo.");
             }
         }
 
@@ -449,14 +439,12 @@ public sealed partial class MacroEditor
         IEnumerable<FoodStatus.Food> items)
     {
         ImGui.Image(badge.Handle, badgeSize);
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip(badgeTooltip);
+        ImGuiUtils.HoveredTooltip(badgeTooltip);
         ImGui.SameLine(0, 5);
         ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
         (uint ItemId, bool HQ)? result = null;
         using var combo = ImRaii.Combo(comboId, FormatItemBuff(current));
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip(FormatItemBuffDescription(current));
+        ImGuiUtils.HoveredTooltip(FormatItemBuffDescription(current));
         if (combo)
         {
             if (ImGui.Selectable("None", current.ItemId == 0))
@@ -466,15 +454,13 @@ public sealed partial class MacroEditor
                 var row = (food.Item.RowId, false);
                 if (ImGui.Selectable(FormatItemBuff(row), current == row))
                     result = row;
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip(FormatItemBuffDescription(row));
+                ImGuiUtils.HoveredTooltip(FormatItemBuffDescription(row));
                 if (food.Item.CanBeHq)
                 {
                     row = (food.Item.RowId, true);
                     if (ImGui.Selectable(FormatItemBuff(row), current == row))
                         result = row;
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip(FormatItemBuffDescription(row));
+                    ImGuiUtils.HoveredTooltip(FormatItemBuffDescription(row));
                 }
             }
         }
