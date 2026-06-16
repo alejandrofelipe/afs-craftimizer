@@ -67,10 +67,8 @@ public sealed partial class MacroEditor
         }
 
         ImGui.SameLine();
-        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste))
+        if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Paste, "Copy to Clipboard"))
             MacroCopy.Copy(Macro.Actions.ToArray(), _plugin);
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Copy to Clipboard");
 
         ImGui.SameLine();
         using (var _disabled = ImRaii.Disabled(SolverRunning))
@@ -78,8 +76,7 @@ public sealed partial class MacroEditor
             if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.FileImport))
                 ShowImportPopup();
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.Tooltip("Import Macro");
+        ImGuiUtils.HoveredTooltip("Import Macro", (int)ImGuiHoveredFlags.AllowWhenDisabled);
         DrawImportPopup();
 
         if (hasDefault)
@@ -95,8 +92,7 @@ public sealed partial class MacroEditor
                         AddStep(action);
                 }
             }
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGuiUtils.Tooltip("Reset");
+            ImGuiUtils.HoveredTooltip("Reset", (int)ImGuiHoveredFlags.AllowWhenDisabled);
         }
 
         if (hasMacro)
@@ -112,8 +108,7 @@ public sealed partial class MacroEditor
                 }
             }
             Theme.PopDangerButton();
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGuiUtils.Tooltip("Clear");
+            ImGuiUtils.HoveredTooltip("Clear", (int)ImGuiHoveredFlags.AllowWhenDisabled);
         }
     }
 
