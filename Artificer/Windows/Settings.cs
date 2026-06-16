@@ -78,8 +78,7 @@ public sealed partial class Settings : Window, IDisposable
             setter(val);
             isDirty = true;
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.TooltipWrapped(tooltip);
+        ImGuiUtils.HoveredTooltip(tooltip, (int)ImGuiHoveredFlags.AllowWhenDisabled, wrapWidth: 300);
         if (description != null)
         {
             ImGui.SetCursorPosX(startX + ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X);
@@ -123,8 +122,7 @@ public sealed partial class Settings : Window, IDisposable
                 isDirty = true;
             }
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.TooltipWrapped(tooltip);
+        ImGuiUtils.HoveredTooltip(tooltip, (int)ImGuiHoveredFlags.AllowWhenDisabled, wrapWidth: 300);
     }
 
     private static void DrawOption(string label, string tooltip, string value, Action<string> setter, ref bool isDirty)
@@ -139,8 +137,7 @@ public sealed partial class Settings : Window, IDisposable
                 isDirty = true;
             }
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.TooltipWrapped(tooltip);
+        ImGuiUtils.HoveredTooltip(tooltip, (int)ImGuiHoveredFlags.AllowWhenDisabled, wrapWidth: 300);
     }
 
     private static void DrawOption<T>(string label, string tooltip, Func<T, string> getName, Func<T, string> getTooltip, T value, Action<T> setter, ref bool isDirty, params T[] excludedValues) where T : struct, Enum
@@ -160,12 +157,11 @@ public sealed partial class Settings : Window, IDisposable
                         isDirty = true;
                     }
                     if (ImGui.IsItemHovered())
-                        ImGuiUtils.TooltipWrapped(getTooltip(type));
+                        ImGuiUtils.HoveredTooltip(getTooltip(type), wrapWidth: 300);
                 }
             }
         }
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.TooltipWrapped(tooltip);
+        ImGuiUtils.HoveredTooltip(tooltip, (int)ImGuiHoveredFlags.AllowWhenDisabled, wrapWidth: 300);
     }
 
     // ── Name/tooltip helpers ──────────────────────────────────────────────────

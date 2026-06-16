@@ -83,7 +83,7 @@ public sealed partial class Settings
                     ImGui.TextUnformatted(FontAwesomeIcon.ExclamationCircle.ToIconString());
                 }
                 if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip("Macro Mate is not installed");
+                    ImGuiUtils.HoveredTooltip("Macro Mate is not installed");
             }
 
             if (Config.MacroCopy.Type == MacroCopyConfiguration.CopyType.CopyToMacro)
@@ -173,7 +173,7 @@ public sealed partial class Settings
                         ImGui.TextUnformatted(FontAwesomeIcon.ExclamationCircle.ToIconString());
                     }
                     if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Macro Chain is not installed");
+                        ImGuiUtils.HoveredTooltip("Macro Chain is not installed");
                 }
             }
 

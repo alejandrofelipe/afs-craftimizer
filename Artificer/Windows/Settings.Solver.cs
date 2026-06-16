@@ -202,7 +202,7 @@ public sealed partial class Settings
                         ImGui.TextUnformatted(FontAwesomeIcon.ExclamationCircle.ToIconString());
                     }
                     if (ImGui.IsItemHovered())
-                        ImGuiUtils.TooltipWrapped("\"Ensure Reliability\" uses a lot more memory and can significantly increase solve times.");
+                        ImGuiUtils.HoveredTooltip("\"Ensure Reliability\" uses a lot more memory and can significantly increase solve times.", wrapWidth: 300);
                 }
             }
         }
@@ -217,10 +217,10 @@ public sealed partial class Settings
                 isDirty = true;
             }
             if (ImGui.IsItemHovered())
-                ImGuiUtils.TooltipWrapped(
+                ImGuiUtils.HoveredTooltip(
                     "The quality % to aim for. The solver stops increasing quality once this " +
                     "target is reached, freeing CP and steps for fewer/safer actions.\n" +
-                    "100% = always aim for maximum quality (default behavior).");
+                    "100% = always aim for maximum quality (default behavior).", wrapWidth: 300);
 
             DrawOption(
                 "Cap at Max Collectability Tier",

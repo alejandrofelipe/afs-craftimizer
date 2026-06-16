@@ -159,7 +159,7 @@ public sealed partial class Settings
                     if (ImGui.Button("Limpar dados de rastreamento", OptionButtonSize))
                         _confirmClearGearWear = true;
                     if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Apaga todos os dados de desgaste coletados. O rastreamento reinicia do zero.");
+                        ImGuiUtils.HoveredTooltip("Apaga todos os dados de desgaste coletados. O rastreamento reinicia do zero.");
                 }
             }
         }
