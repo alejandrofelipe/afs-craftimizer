@@ -279,7 +279,8 @@ public sealed partial class MacroEditor
 
         var algoName = snapshot.Name;
         var algoWidth = ImGui.CalcTextSize(algoName).X;
-        ImGui.SameLine(availWidth - algoWidth);
+        ImGui.SameLine(0, 0);
+        ImGuiUtils.AlignRight(algoWidth);
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
             ImGui.TextUnformatted(algoName);
 
@@ -297,8 +298,6 @@ public sealed partial class MacroEditor
 
     private static void DrawStageDots(ProgressBarComponent.ProgressSnapshot snapshot)
     {
-        if (snapshot.Stage is not { } stage) return;
-
         var dl = ImGui.GetWindowDrawList();
         var dotRadius = 3f * ImGuiHelpers.GlobalScale;
         var dotDiameter = dotRadius * 2f;
@@ -323,6 +322,8 @@ public sealed partial class MacroEditor
             ImGui.Dummy(new Vector2(3 * dotDiameter + 2 * dotGap, ImGui.GetFrameHeight()));
             return;
         }
+
+        if (snapshot.Stage is not { } stage) return;
 
         var dotCount = snapshot.IsComplete
             ? Math.Min(stage + 1, 8)
