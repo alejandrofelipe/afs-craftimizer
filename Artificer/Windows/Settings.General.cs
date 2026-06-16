@@ -276,29 +276,16 @@ public sealed partial class Settings
 
         ImGuiHelpers.ScaledDummy(5);
 
-        using (var panel = ImRaii2.GroupPanel("Gear Durability Warning", -1, out _))
+        using (var panel = ImRaii2.GroupPanel("Gear Condition Alert", -1, out _))
         {
             DrawOption(
-                "Show Low Durability Warning",
-                "Display prominent warning when gear condition is low. Helps prevent failed crafts due to broken gear.",
-                Config.ShowLowDurabilityWarning,
-                v => Config.ShowLowDurabilityWarning = v,
+                "Show Gear Condition Alert",
+                "Display a warning alert when gear condition drops below 50%. Helps prevent failed crafts due to broken gear.",
+                Config.ShowGearCondition,
+                v => Config.ShowGearCondition = v,
                 ref isDirty,
-                "⚠ Warn me when my crafting gear needs repair soon."
+                "⚙ Warn me when my crafting gear needs repair."
             );
-
-            if (Config.ShowLowDurabilityWarning)
-            {
-                DrawOption(
-                    "Warning Threshold (%)",
-                    "Show warning when minimum gear condition falls below this percentage.",
-                    Config.LowDurabilityThreshold,
-                    1, 30,
-                    v => Config.LowDurabilityThreshold = v,
-                    ref isDirty
-                );
-            }
-
         }
 
         if (isDirty)
