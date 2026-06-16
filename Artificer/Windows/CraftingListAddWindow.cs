@@ -129,8 +129,7 @@ public sealed class CraftingListAddWindow : Window, IDisposable
             foreach (var r in restrictions)
             {
                 ImGuiUtils.DrawBadgePill(r.Title, Colors.Durability);
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.TooltipWrapped($"{r.Detail}\n{r.HowToDetail}".Trim());
+                ImGuiUtils.HoveredTooltip($"{r.Detail}\n{r.HowToDetail}".Trim(), wrapWidth: 300);
             }
         }
 

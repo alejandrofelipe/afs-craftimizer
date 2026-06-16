@@ -347,8 +347,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     using (ImRaii.PushFont(UiBuilder.IconFont))
                     using (ImRaii.PushColor(ImGuiCol.Text, Colors.Durability))
                         ImGui.TextUnformatted(FontAwesomeIcon.ExclamationCircle.ToIconString());
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.TooltipWrapped(string.Join('\n', restrictions.Select(r => r.Title)));
+                    ImGuiUtils.HoveredTooltip(string.Join('\n', restrictions.Select(r => r.Title)), wrapWidth: 300);
                 }
 
                 ImGui.SameLine();
@@ -535,8 +534,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             }
         }
 
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip($"{collected}/{needed} coletado");
+        ImGuiUtils.HoveredTooltip($"{collected}/{needed} coletado");
     }
 
     private void DrawPreCraftRow(ResolvedIngredient preCraft)
@@ -628,10 +626,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     private void DrawFooter()
     {
-        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Sync))
+        if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Sync, "Sincronizar inventário"))
             _ = SyncInventoryAsync();
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Sincronizar inventário");
 
         ImGui.SameLine();
         if (_lastSyncTime is { } t)
@@ -657,8 +653,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     _ = LoadPricesAsync();
                 }
             }
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.Tooltip("Atualizar preços");
+            ImGuiUtils.HoveredTooltip("Atualizar preços");
         }
     }
 
