@@ -508,10 +508,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
                     ImGui.TextUnformatted($"⚙ Gear: {conditionPercent:0}%");
                 }
                 
-                if (ImGui.IsItemHovered())
-                {
-                    ImGuiUtils.Tooltip("Condição mínima do equipamento atual.\nValor atualizado em tempo real.");
-                }
+                ImGuiUtils.HoveredTooltip("Condição mínima do equipamento atual.\nValor atualizado em tempo real.");
 
                 // Low durability warning
                 if (_plugin.Configuration.ShowLowDurabilityWarning && 
@@ -597,8 +594,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
                 ImGui.SameLine(0, spacing * 2);
                 PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
             }
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.Tooltip(condition.Description(Session.CharacterStats!.HasSplendorousBuff));
+            ImGuiUtils.HoveredTooltip(condition.Description(Session.CharacterStats!.HasSplendorousBuff));
         }
 
         // Craft Complete notification (based on final macro state)
@@ -641,8 +637,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             {
                 using var _disabled = ImRaii.Disabled();
                 ImGui.Button("Stopping", new(-1, 0));
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.TooltipWrapped("This might could a while, sorry! Please report if this takes longer than a second.");
+                ImGuiUtils.HoveredTooltip("This might could a while, sorry! Please report if this takes longer than a second.", wrapWidth: 300);
             }
             else
             {
@@ -672,12 +667,11 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             Theme.PushPrimaryButton();
             if (ImGui.Button(label, new(-1, 0)))
                 AttemptRetry();
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.TooltipWrapped(hasMacro
-                    ? "Generate a new macro suggestion from scratch, discarding the current one."
-                    : "Suggest a way to finish the crafting recipe. " +
-                      "Results aren't perfect, and levels of success " +
-                      "can vary wildly depending on the solver's settings.");
+            ImGuiUtils.HoveredTooltip(hasMacro
+                ? "Generate a new macro suggestion from scratch, discarding the current one."
+                : "Suggest a way to finish the crafting recipe. " +
+                  "Results aren't perfect, and levels of success " +
+                  "can vary wildly depending on the solver's settings.", wrapWidth: 300);
             Theme.PopPrimaryButton();
             if (ImGui.Button("Open in Macro Editor", new(-1, 0)))
                 _plugin.OpenMacroEditor(Session.CharacterStats!, Session.RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), null, [], null);
