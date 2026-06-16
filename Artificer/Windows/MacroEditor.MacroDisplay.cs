@@ -161,11 +161,19 @@ public sealed partial class MacroEditor
         var imageSize = ImGui.GetFrameHeight() * 2;
         var lastState = Macro.InitialState;
 
+        // Capturar snapshots ANTES do cálculo de altura: garante que altura e conteúdo
+        // são determinados pelo mesmo estado, eliminando o layout shift.
+        ProgressBarComponent.ProgressSnapshot[] solverSnapshots;
+        lock (_solverSnapshots)
+            solverSnapshots = [.. _solverSnapshots];
+
         using var panel = ImRaii2.GroupPanel("Macro", -1, out var availSpace);
         ImGui.Dummy(new(0, imageSize));
         ImGui.SameLine(0, 0);
 
-        var macroActionsHeight = ImGui.GetFrameHeightWithSpacing() * (1 + (SolverRunning ? 1 : 0));
+        // Altura fixa: sempre 2 frames (1 para chip/dots/algo-name + 1 para barra+%).
+        // Quando não há snapshots, um Dummy preenche o espaço — sem shift ao iniciar solve.
+        var macroActionsHeight = ImGui.GetFrameHeightWithSpacing() * 2;
         var childHeight = ImGui.GetContentRegionAvail().Y - ImGui.GetStyle().ItemSpacing.Y * 2 - ImGui.GetStyle().CellPadding.Y - macroActionsHeight - ImGui.GetStyle().ItemSpacing.Y * 2;
 
         using (var child = ImRaii.Child("##macroActions", new(availSpace, childHeight)))
@@ -243,29 +251,34 @@ public sealed partial class MacroEditor
         ImGui.Dummy(default);
         ImGui.GetWindowDrawList().AddLine(pos, pos + new Vector2(availSpace, 0), ImGui.GetColorU32(ImGuiCol.Border));
         ImGui.Dummy(default);
-        ProgressBarComponent.ProgressSnapshot[] solverSnapshots;
-        lock (_solverSnapshots)
-            solverSnapshots = [.. _solverSnapshots];
 
         if (solverSnapshots.Length > 0)
-        {
-            var chipState = solverSnapshots[0].State switch
-            {
-                ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
-                ProgressBarComponent.ProgressState.Cancelled => ImGuiUtils.SolverState.Failed,
-                _ => ImGuiUtils.SolverState.Solving
-            };
-            ImGuiUtils.DrawStateChip(chipState);
-            var config = new ProgressBarComponent.VisualConfig(
-                Mode: ProgressBarComponent.DisplayMode.Horizontal,
-                ColorTheme: _plugin.Configuration.ProgressType,
-                Width: availSpace,
-                ShowPercentage: true,
-                ShowDetailedTooltip: true,
-                ShowSummaryWhenAggregated: true
-            );
-            ProgressBarComponent.DrawAggregated(solverSnapshots, config);
-        }
+            DrawProgressArea(availSpace, solverSnapshots);
+        else
+            ImGui.Dummy(new Vector2(availSpace, ImGui.GetFrameHeightWithSpacing()));
+
         DrawMacroActions(availSpace);
+    }
+
+    private void DrawProgressArea(float availWidth, ProgressBarComponent.ProgressSnapshot[] snapshots)
+    {
+        // Stub — will be fully implemented in Task 4 (DrawProgressArea)
+        var snapshot = snapshots[0];
+        var chipState = snapshot.State switch
+        {
+            ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
+            ProgressBarComponent.ProgressState.Cancelled => ImGuiUtils.SolverState.Failed,
+            _ => ImGuiUtils.SolverState.Solving
+        };
+        ImGuiUtils.DrawStateChip(chipState);
+        var config = new ProgressBarComponent.VisualConfig(
+            Mode: ProgressBarComponent.DisplayMode.Horizontal,
+            ColorTheme: _plugin.Configuration.ProgressType,
+            Width: availWidth,
+            ShowPercentage: true,
+            ShowDetailedTooltip: true,
+            ShowSummaryWhenAggregated: true
+        );
+        ProgressBarComponent.DrawAggregated(snapshots, config);
     }
 }
