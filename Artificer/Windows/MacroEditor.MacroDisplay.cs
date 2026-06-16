@@ -31,8 +31,7 @@ public sealed partial class MacroEditor
                 ImGuiUtils.AlignCentered(size, availSize);
                 PluginImGuiUtils.DrawConditionIndicator(condition, spacing);
             }
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.Tooltip(condition.Description(CharacterStats.HasSplendorousBuff));
+            ImGuiUtils.HoveredTooltip(condition.Description(CharacterStats.HasSplendorousBuff));
 
             ImGui.SetCursorPos(pos);
             ImGuiUtils.AlignRight(ImGui.GetFrameHeight(), totalW);
@@ -46,10 +45,11 @@ public sealed partial class MacroEditor
                     RecalculateState();
                 }
             }
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                ImGuiUtils.TooltipWrapped($"Condition Randomness{(!_plugin.Configuration.ConditionRandomness ? " (Disabled)" : string.Empty)}\n" +
-                    "Allows the condition to fluctuate randomly like a real craft. " +
-                    "Turns off when generating a macro.");
+            ImGuiUtils.HoveredTooltip(
+                $"Condition Randomness{(!_plugin.Configuration.ConditionRandomness ? " (Disabled)" : string.Empty)}\n" +
+                "Allows the condition to fluctuate randomly like a real craft. " +
+                "Turns off when generating a macro.",
+                (int)ImGuiHoveredFlags.AllowWhenDisabled, wrapWidth: 300);
         }
 
         {
@@ -145,8 +145,7 @@ public sealed partial class MacroEditor
                         ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + (panelHeight - height) / 2f);
                         ImGuiUtils.TextCentered($"{actions.Length} Step{(actions.Length != 1 ? "s" : string.Empty)}");
                         ImGuiUtils.TextCentered($"{waitTime} sec");
-                        if (ImGui.IsItemHovered())
-                            ImGuiUtils.Tooltip($"Optimal Time: {waitTimeOptimal:0.#} sec");
+                        ImGuiUtils.HoveredTooltip($"Optimal Time: {waitTimeOptimal:0.#} sec");
                         if (delineationCount != 0)
                             ImGuiUtils.TextCentered($"{delineationCount} Delineation{(delineationCount != 1 ? "s" : string.Empty)}");
                     }
@@ -218,8 +217,9 @@ public sealed partial class MacroEditor
                     ImGui.GetWindowDrawList().AddLine(v1, v2, ImGui.GetColorU32(Colors.Bad with { W = ImGui.GetStyle().DisabledAlpha / 2 }), 5 * ImGuiHelpers.GlobalScale);
                     ImGui.PopClipRect();
                 }
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                    ImGuiUtils.Tooltip($"{action.GetName(RecipeData!.ClassJob)}\n{actionBase.GetTooltip(CreateSim(lastState), true)}");
+                ImGuiUtils.HoveredTooltip(
+                    $"{action.GetName(RecipeData!.ClassJob)}\n{actionBase.GetTooltip(CreateSim(lastState), true)}",
+                    (int)ImGuiHoveredFlags.AllowWhenDisabled);
 
                 if (!SolverRunning)
                 {
