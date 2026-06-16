@@ -16,6 +16,7 @@ StudioApp.Run(
     new DialogStory(),
     new SinglePanelStory(),
     new IconButtonsStory(),
+    new LayoutHelpersStory(),
     // Pages
     new MacroEditorStory(),
     new SynthesisHelperStory(),
