@@ -15,7 +15,22 @@ public sealed partial class MacroEditor
         _snapshotUpdateCts?.Cancel();
         _snapshotUpdateCts?.Dispose();
         _snapshotUpdateCts = null;
-        lock (_solverSnapshots) _solverSnapshots.Clear();
+
+        // Snapshot inicial: garante loading imediato no primeiro frame após o clique.
+        // Sem isto, solverSnapshots.Length == 0 por ~100ms e o bloco de progresso
+        // não renderiza nada (Caso A: macro salva, primeira geração da sessão).
+        var initialAlgoName = _plugin.Configuration.EditorSolverConfig.Algorithm.ToString();
+        lock (_solverSnapshots)
+        {
+            _solverSnapshots.Clear();
+            _solverSnapshots.Add(new ProgressBarComponent.ProgressSnapshot(
+                Name: initialAlgoName,
+                CurrentValue: 0,
+                MaxValue: 1,
+                State: ProgressBarComponent.ProgressState.Indeterminate
+            ));
+        }
+
         Macro.ClearQueue();
 
         RevertPreviousMacro();
