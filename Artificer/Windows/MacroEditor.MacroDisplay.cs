@@ -262,15 +262,28 @@ public sealed partial class MacroEditor
 
     private void DrawProgressArea(float availWidth, ProgressBarComponent.ProgressSnapshot[] snapshots)
     {
-        // Stub — will be fully implemented in Task 4 (DrawProgressArea)
         var snapshot = snapshots[0];
+
+        // Linha 1: chip + stage dots + nome do algoritmo right-aligned
         var chipState = snapshot.State switch
         {
             ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
-            ProgressBarComponent.ProgressState.Cancelled => ImGuiUtils.SolverState.Failed,
+            ProgressBarComponent.ProgressState.Cancelled or ProgressBarComponent.ProgressState.Failed
+                => ImGuiUtils.SolverState.Failed,
             _ => ImGuiUtils.SolverState.Solving
         };
         ImGuiUtils.DrawStateChip(chipState);
+
+        ImGui.SameLine(0, ImGui.GetStyle().ItemSpacing.X);
+        DrawStageDots(snapshot);
+
+        var algoName = snapshot.Name;
+        var algoWidth = ImGui.CalcTextSize(algoName).X;
+        ImGui.SameLine(availWidth - algoWidth);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted(algoName);
+
+        // Linha 2: barra de progresso (ProgressBarComponent inalterado)
         var config = new ProgressBarComponent.VisualConfig(
             Mode: ProgressBarComponent.DisplayMode.Horizontal,
             ColorTheme: _plugin.Configuration.ProgressType,
