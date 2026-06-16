@@ -1,6 +1,5 @@
 using Artificer.Utils;
 using ImGuiNET;
-using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
 
