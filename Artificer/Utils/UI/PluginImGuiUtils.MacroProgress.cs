@@ -46,7 +46,10 @@ internal static partial class PluginImGuiUtils
             ShowDetailedTooltip: true,
             ShowSummaryWhenAggregated: true
         );
-        ProgressBarComponent.DrawAggregated(snapshots, config);
+        if (snapshots.Length == 1)
+            ProgressBarComponent.DrawSingle(snapshots[0], config);
+        else
+            ProgressBarComponent.DrawAggregated(snapshots, config);
     }
 
     public static void DrawSolverStageDots(ProgressBarComponent.ProgressSnapshot snapshot)
