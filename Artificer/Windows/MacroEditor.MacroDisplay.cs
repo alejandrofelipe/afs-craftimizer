@@ -172,7 +172,8 @@ public sealed partial class MacroEditor
 
         // Altura fixa: sempre 2 frames (1 para chip/dots/algo-name + 1 para barra+%).
         // Quando não há snapshots, um Dummy preenche o espaço — sem shift ao iniciar solve.
-        var macroActionsHeight = ImGui.GetFrameHeightWithSpacing() * 2;
+        var progressAreaHeight = ImGui.GetFrameHeightWithSpacing() * 2;    // chip+algo + barra
+        var macroActionsHeight = progressAreaHeight + ImGui.GetFrameHeightWithSpacing(); // + row de botões
         var childHeight = ImGui.GetContentRegionAvail().Y - ImGui.GetStyle().ItemSpacing.Y * 2 - ImGui.GetStyle().CellPadding.Y - macroActionsHeight - ImGui.GetStyle().ItemSpacing.Y * 2;
 
         using (var child = ImRaii.Child("##macroActions", new(availSpace, childHeight)))
@@ -255,7 +256,7 @@ public sealed partial class MacroEditor
         if (solverSnapshots.Length > 0)
             DrawProgressArea(availSpace, solverSnapshots);
         else
-            ImGui.Dummy(new Vector2(availSpace, ImGui.GetFrameHeightWithSpacing()));
+            ImGui.Dummy(new Vector2(availSpace, progressAreaHeight));
 
         DrawMacroActions(availSpace);
     }
