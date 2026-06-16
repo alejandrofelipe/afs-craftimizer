@@ -67,8 +67,7 @@ public sealed class FeatureHub : Window, IDisposable
             _plugin.Configuration.FeatureHubMinimized = false;
             _plugin.Configuration.Save();
         }
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Artificer — Clique para expandir");
+        ImGuiUtils.HoveredTooltip("Artificer — Clique para expandir");
     }
 
     // ── Expanded ─────────────────────────────────────────────────────────────
@@ -102,8 +101,7 @@ public sealed class FeatureHub : Window, IDisposable
                 _plugin.Configuration.Save();
             }
         }
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip(isAnchored ? "Ancorado — clique para liberar" : "Livre — clique para ancorar");
+        ImGuiUtils.HoveredTooltip(isAnchored ? "Ancorado — clique para liberar" : "Livre — clique para ancorar");
 
         ImGui.SameLine(0, 4 * scale);
 
@@ -116,8 +114,7 @@ public sealed class FeatureHub : Window, IDisposable
                 _plugin.Configuration.Save();
             }
         }
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Minimizar");
+        ImGuiUtils.HoveredTooltip("Minimizar");
     }
 
     private void DrawTiles()
@@ -127,17 +124,15 @@ public sealed class FeatureHub : Window, IDisposable
 
         if (DrawTile((int)DalamudIcon.Boxes, "Coleta", !craftingEnabled))
             _plugin.CraftingListWindow.Toggle();
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-            ImGuiUtils.Tooltip(craftingEnabled
-                ? "Lista de Coleta"
-                : "Lista de Coleta\n(Habilite em Configurações → General)");
+        ImGuiUtils.HoveredTooltip(craftingEnabled
+            ? "Lista de Coleta"
+            : "Lista de Coleta\n(Habilite em Configurações → General)", (int)ImGuiHoveredFlags.AllowWhenDisabled);
 
         ImGui.SameLine(0, 5 * scale);
 
         if (DrawTile((int)DalamudIcon.Cog, "Config."))
             _plugin.OpenSettingsTab("General");
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Configurações");
+        ImGuiUtils.HoveredTooltip("Configurações");
     }
 
     // ── Tile widget ───────────────────────────────────────────────────────────
