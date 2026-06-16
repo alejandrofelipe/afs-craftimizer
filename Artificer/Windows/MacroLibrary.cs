@@ -247,21 +247,16 @@ public sealed class MacroLibrary : Window, IDisposable
 
                 ImGui.TableNextColumn();
                 {
-                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, miniRowHeight))
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Edit, "Open in Macro Editor", miniRowHeight))
                         OpenEditor(macro);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Open in Macro Editor");
                     ImGui.SameLine(0, spacing);
                     if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.PencilAlt, miniRowHeight))
                         ShowRenamePopup(macro);
                     DrawRenamePopup(macro);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Rename");
+                    ImGuiUtils.HoveredTooltip("Rename");
 
-                    if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Paste, miniRowHeight))
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Paste, "Copy to Clipboard", miniRowHeight))
                         MacroCopy.Copy(macro.Actions, _plugin);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Copy to Clipboard");
                     ImGui.SameLine(0, spacing);
                     Theme.PushDangerButton();
                     using (var _disabled = ImRaii.Disabled(!ImGui.GetIO().KeyShift))
@@ -270,8 +265,7 @@ public sealed class MacroLibrary : Window, IDisposable
                             _plugin.MacroRepository.Remove(macro);
                     }
                     Theme.PopDangerButton();
-                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-                        ImGuiUtils.Tooltip("Delete (Hold Shift)");
+                    ImGuiUtils.HoveredTooltip("Delete (Hold Shift)", (int)ImGuiHoveredFlags.AllowWhenDisabled);
                 }
 
                 ImGui.TableNextColumn();
@@ -288,16 +282,14 @@ public sealed class MacroLibrary : Window, IDisposable
                             if (!shouldShowMore)
                             {
                                 ImGui.Image(macro.Actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowHeight));
-                                if (ImGui.IsItemHovered())
-                                    ImGuiUtils.Tooltip(macro.Actions[i].GetName(RecipeData!.ClassJob));
+                                ImGuiUtils.HoveredTooltip(macro.Actions[i].GetName(RecipeData!.ClassJob));
                             }
                             else
                             {
                                 var amtMore = itemCount - itemsPerRow * 2;
                                 var pos = ImGui.GetCursorPos();
                                 ImGui.Image(macro.Actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowHeight), default, Vector2.One, new(1, 1, 1, .5f));
-                                if (ImGui.IsItemHovered())
-                                    ImGuiUtils.Tooltip($"{macro.Actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
+                                ImGuiUtils.HoveredTooltip($"{macro.Actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
                                 ImGui.SetCursorPos(pos);
                                 ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowHeight), ImGui.GetColorU32(ImGuiCol.FrameBg), miniRowHeight / 8f);
                                 ImGui.GetWindowDrawList().AddTextClippedEx(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowHeight), $"+{amtMore}", null, new(.5f), null);

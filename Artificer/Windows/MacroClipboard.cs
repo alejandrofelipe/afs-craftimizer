@@ -84,8 +84,7 @@ public sealed class MacroClipboard : Window, IDisposable
                     Type          = NotificationType.Success
                 });
         }
-        if (ImGui.IsItemHovered())
-            ImGuiUtils.Tooltip("Copy to Clipboard");
+        ImGuiUtils.HoveredTooltip("Copy to Clipboard");
     }
 
     public void Dispose()
