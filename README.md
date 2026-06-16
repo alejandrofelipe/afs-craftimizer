@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.20.11.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.21.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -133,6 +133,10 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - **Lista de Coleta completa** (P0–P2): dados (SQLite, InventoryScanner, IngredientResolver), helpers (busca, restrições, coleta, mercado, exportação) e UI completa (FeatureHub, List, Add, Detail, Merge windows)
 - 🐛 Fix: "Suggested Macro" exibia card confuso com arcos de estatística e botão Copy inutilizável quando o solver retornava 0 ações; agora exibe estado de erro claro com botão "Suggest Again"
 - 🐛 Fix: `MCTS.Solution()` retornava lista vazia porque `AvailableActions.PopRandom` (chamado durante a busca) esgotava o `ActionSet` do nó raiz, fazendo `IsComplete` ser `true` por `NoMoreActions`; corrigido usando `SimulationCompletionState` diretamente
+- **FeatureHubWindow** redesenhada com tiles clicáveis (ícone + label + badge de contagem), âncora dinâmica (atualiza entre frames em vez de exigir arrastar) e botão de minimizar para mostrar só os ícones
+- 🐛 Fix: indicator de carregamento ausente no MacroEditor ao regenerar macro com resultado anterior salvo (Caso A — primeira geração da sessão); snapshot `Indeterminate` agora emitido imediatamente ao iniciar o solver
+- 🐛 Fix: layout shift no MacroEditor ao iniciar sugestão de macro com lista vazia — altura da área de progresso agora é reservada com 2 frames fixos independentemente de o solver estar rodando
+- Revamp visual do progress component no MacroEditor (sugestão de macro): chip de estado + stage dots animados por DrawList (wave animation no estado indeterminate, pulse no estágio atual, cores por estágio) + nome do algoritmo right-aligned na mesma linha
 
 ---
 
@@ -166,7 +170,7 @@ UI Studio:
 dotnet run --project Artificer.UIStudio
 ```
 
-Testes (194 testes cobrindo Simulator e Solver):
+Testes (211 testes cobrindo Simulator e Solver):
 ```powershell
 dotnet test
 ```
