@@ -542,12 +542,11 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 var label = hasResult ? "Regenerate" : "Suggest Macro";
                 if (ImGui.Button(label, new(availWidth, 0)))
                     CalculateSuggestedMacro();
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.TooltipWrapped(hasResult
-                        ? "Generate a new macro suggestion from scratch, discarding the current one."
-                        : "Suggest a way to finish the crafting recipe. " +
-                          "Results aren't perfect, and levels of success " +
-                          "can vary wildly depending on the solver's settings.");
+                ImGuiUtils.HoveredTooltip(hasResult
+                    ? "Generate a new macro suggestion from scratch, discarding the current one."
+                    : "Suggest a way to finish the crafting recipe. " +
+                      "Results aren't perfect, and levels of success " +
+                      "can vary wildly depending on the solver's settings.", wrapWidth: 300);
             }
             Theme.PopPrimaryButton();
         }
@@ -638,8 +637,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     ImGui.SameLine(0, 5);
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Flag))
                         Service.GameGui.OpenMapWithMapLink(mapPayload);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Open in map");
+                    ImGuiUtils.HoveredTooltip("Open in map");
 
                     ImGuiUtils.TextCentered($"{questTerritory} ({GetCoordinatesString(questLocation)})");
                 }
@@ -652,8 +650,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     {
                         if (ImGuiUtils.ButtonCentered("Switch Job"))
                             RaptureGearsetModule.Instance()->EquipGearset(gearsetId.Value);
-                        if (ImGui.IsItemHovered())
-                            ImGuiUtils.Tooltip($"Swap to gearset {gearsetId + 1}");
+                        ImGuiUtils.HoveredTooltip($"Swap to gearset {gearsetId + 1}");
                     }
                     else
                         ImGuiUtils.TextCentered($"You do not have any {RecipeData.ClassJob.GetName()} gearsets.");
@@ -673,8 +670,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     ImGui.SameLine(0, 5);
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Flag))
                         Service.GameGui.OpenMapWithMapLink(mapPayload);
-                    if (ImGui.IsItemHovered())
-                        ImGuiUtils.Tooltip("Open in map");
+                    ImGuiUtils.HoveredTooltip("Open in map");
 
                     ImGuiUtils.TextCentered($"{vendorTerritory} ({GetCoordinatesString(vendorLoation)})");
                 }
@@ -769,11 +765,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 {
                     ImGuiUtils.TextCentered($"⚙ Gear: {conditionPercent:0}%");
                 }
-                
-                if (ImGui.IsItemHovered())
-                {
-                    ImGuiUtils.Tooltip("Condição mínima do equipamento atual.\nRepare antes de craftar se estiver baixo.");
-                }
+
+                ImGuiUtils.HoveredTooltip("Condição mínima do equipamento atual.\nRepare antes de craftar se estiver baixo.");
             }
         }
 
@@ -827,8 +820,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             {
                 ImGui.SameLine(0, 3);
                 ImGui.Image(Service.IconManager.GetIconCached(60810).Handle, new(imageSize));
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"Cosmic Exploration");
+                ImGuiUtils.HoveredTooltip($"Cosmic Exploration");
             }
 
             if (isCollectable)
@@ -836,8 +828,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.SameLine(0, 3);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + badgeOffset);
                 ImGui.Image(CollectibleBadge.Handle, badgeSize);
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"Collectible");
+                ImGuiUtils.HoveredTooltip($"Collectible");
             }
 
             if (isExpert)
@@ -845,8 +836,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.SameLine(0, 3);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + badgeOffset);
                 ImGui.Image(ExpertBadge.Handle, badgeSize);
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"Expert Recipe");
+                ImGuiUtils.HoveredTooltip($"Expert Recipe");
             }
         }
 
@@ -881,8 +871,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.TableNextColumn();
                 var frac = active.Needed > 0 ? (float)active.Current / active.Needed : 0f;
                 ImGui.ProgressBar(frac, new Vector2(-1, ImGui.GetTextLineHeight()));
-                if (ImGui.IsItemHovered())
-                    ImGuiUtils.Tooltip($"{active.Current:N0} / {active.Needed:N0}  ({frac:P0})");
+                ImGuiUtils.HoveredTooltip($"{active.Current:N0} / {active.Needed:N0}  ({frac:P0})");
             }
         }
     }
@@ -937,8 +926,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.AlignTextToFramePadding();
                 ImGui.TextUnformatted(FontAwesomeIcon.Bookmark.ToIconString());
             }
-            if (ImGui.IsItemHovered())
-                ImGuiUtils.Tooltip("Pre-filled from saved macro — solver still comparing");
+            ImGuiUtils.HoveredTooltip("Pre-filled from saved macro — solver still comparing");
         } : null;
 
         using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out _, titleSuffix: titleSuffix);
@@ -972,8 +960,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                         ImGuiUtils.AlignMiddle(size, availSize);
                         if (ImGui.Button("Search Online"))
                             CalculateCommunityMacro();
-                        if (ImGui.IsItemHovered())
-                            ImGuiUtils.TooltipWrapped("Searches FFXIV Teamcraft to find you the best macro");
+                        ImGuiUtils.HoveredTooltip("Searches FFXIV Teamcraft to find you the best macro", wrapWidth: 300);
                         ImGui.SetCursorPos(c + new Vector2(0, availSize.Y + ImGui.GetStyle().ItemSpacing.Y));
                         break;
                     }
@@ -1193,16 +1180,14 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                                 if (!shouldShowMore)
                                 {
                                     ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH));
-                                    if (ImGui.IsItemHovered())
-                                        ImGuiUtils.Tooltip(actions[i].GetName(RecipeData!.ClassJob));
+                                    ImGuiUtils.HoveredTooltip(actions[i].GetName(RecipeData!.ClassJob));
                                 }
                                 else
                                 {
                                     var amtMore = itemCount - itemsPerRow * 2;
                                     var aPos = ImGui.GetCursorPos();
                                     ImGui.Image(actions[i].GetIcon(RecipeData!.ClassJob).Handle, new(miniRowH), default, Vector2.One, new(1, 1, 1, .5f));
-                                    if (ImGui.IsItemHovered())
-                                        ImGuiUtils.Tooltip($"{actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
+                                    ImGuiUtils.HoveredTooltip($"{actions[i].GetName(RecipeData!.ClassJob)}\nand {amtMore} more");
                                     ImGui.SetCursorPos(aPos);
                                     ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), ImGui.GetColorU32(ImGuiCol.FrameBg), miniRowH / 8f);
                                     ImGui.GetWindowDrawList().AddTextClippedEx(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + new Vector2(miniRowH), $"+{amtMore}", null, new(.5f), null);
@@ -1238,8 +1223,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                                 ImGui.AlignTextToFramePadding();
                                 ImGui.TextUnformatted(FontAwesomeIcon.ExclamationTriangle.ToIconString());
                             }
-                            if (ImGui.IsItemHovered())
-                                ImGuiUtils.TooltipWrapped("This macro was saved with different character stats and may not perform as expected");
+                            ImGuiUtils.HoveredTooltip("This macro was saved with different character stats and may not perform as expected", wrapWidth: 300);
                             ImGui.SameLine();
                         }
 
@@ -1249,10 +1233,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
                         var editX = cellStart.X + cellAvailW - iconH * 2 - spacing.X;
                         ImGui.SetCursorPos(new Vector2(editX, cellStart.Y));
-                        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Edit, iconH))
+                        if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Edit, "Open in Macro Editor", iconH))
                             _plugin.OpenMacroEditor(CharacterStats!, RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), CalculateIngredientHqCounts(), actions, state.MacroEditorSetter);
-                        if (ImGui.IsItemHovered())
-                            ImGuiUtils.Tooltip("Open in Macro Editor");
                         ImGui.SameLine(0, spacing.X);
                         var justCopied = _copiedAt.TryGetValue(state.Type, out var copiedAt)
                                       && (DateTimeOffset.UtcNow - copiedAt).TotalSeconds < 2.0;
