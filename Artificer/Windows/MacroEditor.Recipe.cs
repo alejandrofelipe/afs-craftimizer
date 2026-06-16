@@ -175,19 +175,13 @@ public sealed partial class MacroEditor
 
                 ImGui.TableNextColumn();
                 ImGui.AlignTextToFramePadding();
-                ImGui.TextUnformatted("Progress");
-                ImGui.SameLine();
-                ImGuiUtils.TextRight($"{RecipeData.RecipeInfo.MaxProgress}");
+                ImGuiUtils.DrawStatRow("Progress", $"{RecipeData.RecipeInfo.MaxProgress}");
 
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted("Quality");
-                ImGui.SameLine();
-                ImGuiUtils.TextRight($"{RecipeData.RecipeInfo.MaxQuality}");
+                ImGuiUtils.DrawStatRow("Quality", $"{RecipeData.RecipeInfo.MaxQuality}");
 
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted("Durability");
-                ImGui.SameLine();
-                ImGuiUtils.TextRight($"{RecipeData.RecipeInfo.MaxDurability}");
+                ImGuiUtils.DrawStatRow("Durability", $"{RecipeData.RecipeInfo.MaxDurability}");
             }
         }
 
