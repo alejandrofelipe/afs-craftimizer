@@ -178,6 +178,25 @@ public static partial class ImGuiUtils
         return ret;
     }
 
+    public static bool IconButtonWithTooltip(
+        FontAwesomeIcon icon,
+        string tooltip,
+        float size = -1,
+        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None)
+    {
+        var clicked = IconButtonSquare(icon, size);
+        HoveredTooltip(tooltip, flags);
+        return clicked;
+    }
+
+    // Overload cross-assembly: Dalamud expõe FontAwesomeIcon como int em projetos externos
+    public static bool IconButtonWithTooltip(
+        int icon,
+        string tooltip,
+        float size = -1,
+        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None)
+        => IconButtonWithTooltip((FontAwesomeIcon)(ushort)icon, tooltip, size, flags);
+
     // https://gist.github.com/dougbinks/ef0962ef6ebe2cadae76c4e9f0586c69#file-imguiutils-h-L219
     private static void UnderlineLastItem(Vector4 color)
     {
@@ -221,6 +240,15 @@ public static partial class ImGuiUtils
     }
 
     public static void TooltipWrapped(string text, float width = 300) => Tooltip(text, width);
+
+    public static void HoveredTooltip(
+        string text,
+        ImGuiHoveredFlags flags = ImGuiHoveredFlags.None,
+        float? wrapWidth = null)
+    {
+        if (ImGui.IsItemHovered(flags))
+            Tooltip(text, wrapWidth);
+    }
 
     public static void TextWrappedTo(string text, float wrapPosX = default, float basePosX = default)
     {
