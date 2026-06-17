@@ -472,7 +472,7 @@ internal sealed class CraftingHelperStory : IStory
 
     // ── Seção 5: Community Macro Card ────────────────────────────────────────
 
-    private static void DrawSection_CommunityMacro(float totalW)
+    private static void DrawSection_CommunityMacro(float _)
     {
         var states = new (string Label, Action Draw)[]
         {
@@ -496,10 +496,10 @@ internal sealed class CraftingHelperStory : IStory
     }
 
     private static void DrawComm_Searching()
-        => ImGuiUtils.TextMiddleNewLine("Searching...", new Vector2(PanelW, CardH + 1));
+        => ImGuiUtils.TextMiddleNewLine("Searching...", new Vector2(PanelW, CardH));
 
     private static void DrawComm_NotFound()
-        => ImGuiUtils.TextMiddleNewLine("No macros found!", new Vector2(PanelW, CardH + 1));
+        => ImGuiUtils.TextMiddleNewLine("No macros found!", new Vector2(PanelW, CardH));
 
     private static void DrawComm_Exception() => DrawSaved_Exception();
 
@@ -508,7 +508,7 @@ internal sealed class CraftingHelperStory : IStory
 
     // ── Seção 6: Main Button ──────────────────────────────────────────────────
 
-    private static void DrawSection_MainButton(float totalW)
+    private static void DrawSection_MainButton(float _)
     {
         const float btnW = PanelW;
 
