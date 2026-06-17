@@ -379,10 +379,9 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
 
         ImGuiHelpers.ScaledDummy(2);
 
-        if (pct < 25f)
-            ImGuiUtils.DrawAlert(AlertVariant.Danger,  "Gear Condition", PluginImGuiUtils.BuildGearMessage(pct, _plugin.Configuration.EnableGearWearTracking, Session.RecipeData, _plugin.GearWearTracker), ImGuiHelpers.GlobalScale);
-        else
-            ImGuiUtils.DrawAlert(AlertVariant.Warning, "Gear Condition", PluginImGuiUtils.BuildGearMessage(pct, _plugin.Configuration.EnableGearWearTracking, Session.RecipeData, _plugin.GearWearTracker), ImGuiHelpers.GlobalScale);
+        var message = PluginImGuiUtils.BuildGearMessage(pct, _plugin.Configuration.EnableGearWearTracking, Session.RecipeData, _plugin.GearWearTracker);
+        var variant = pct < 25f ? AlertVariant.Danger : AlertVariant.Warning;
+        ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale);
     }
 
     private SimulationState? hoveredState;
