@@ -367,25 +367,6 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
         }
     }
 
-    private string BuildGearMessage(float pct)
-    {
-        if (!_plugin.Configuration.EnableGearWearTracking || Session.RecipeData == null)
-            return $"{pct:0}% — Repair gear before continuing!";
-
-        var recipe      = Session.RecipeData.Recipe;
-        var recipeLevel = (ushort)Session.RecipeData.Table.RowId;
-        var estimate    = _plugin.GearWearTracker.EstimateCraftsRemaining(recipe.RowId, recipeLevel);
-
-        return estimate switch
-        {
-            null                   => $"{pct:0}% — Repair gear before continuing!",
-            { Confidence: > 0f } e => e.MinCrafts == e.MaxCrafts
-                ? $"{pct:0}% · ~{e.MinCrafts} crafts left"
-                : $"{pct:0}% · ~{e.MinCrafts}–{e.MaxCrafts} crafts left",
-            { } e                  => $"{pct:0}% · ~{e.MinCrafts} crafts left (no data)",
-        };
-    }
-
     private void DrawGearConditionAlert()
     {
         if (!_plugin.Configuration.ShowGearCondition) return;
@@ -399,9 +380,9 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
         ImGuiHelpers.ScaledDummy(2);
 
         if (pct < 25f)
-            ImGuiUtils.DrawAlert(AlertVariant.Danger,  "Gear Condition", BuildGearMessage(pct), ImGuiHelpers.GlobalScale);
+            ImGuiUtils.DrawAlert(AlertVariant.Danger,  "Gear Condition", PluginImGuiUtils.BuildGearMessage(pct, _plugin.Configuration.EnableGearWearTracking, Session.RecipeData, _plugin.GearWearTracker), ImGuiHelpers.GlobalScale);
         else
-            ImGuiUtils.DrawAlert(AlertVariant.Warning, "Gear Condition", BuildGearMessage(pct), ImGuiHelpers.GlobalScale);
+            ImGuiUtils.DrawAlert(AlertVariant.Warning, "Gear Condition", PluginImGuiUtils.BuildGearMessage(pct, _plugin.Configuration.EnableGearWearTracking, Session.RecipeData, _plugin.GearWearTracker), ImGuiHelpers.GlobalScale);
     }
 
     private SimulationState? hoveredState;
