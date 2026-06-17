@@ -25,7 +25,6 @@ internal sealed class CraftingHelperStory : IStory
     private const int MockCraftsmanship  = 3700;
     private const int MockControl        = 3800;
     private const int MockCP             = 590;
-    private const int MockLevel          = 90;
     private const int MockRequiredCrafts = 3900;
     private const int MockRequiredCtrl   = 3950;
 
