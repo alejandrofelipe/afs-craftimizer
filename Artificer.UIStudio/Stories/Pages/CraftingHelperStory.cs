@@ -235,9 +235,167 @@ internal sealed class CraftingHelperStory : IStory
         DrawGallery(states, PanelW);
     }
 
-    // ── Seções 3–6: stubs temporários ────────────────────────────────────────
+    // ── Seção 3: Saved Macro Card ─────────────────────────────────────────────
 
-    private static void DrawSection_SavedMacro(float _)     => ImGui.TextDisabled("(Task 3)");
+    private static void DrawSection_SavedMacro(float totalW)
+    {
+        var states = new (string Label, Action Draw)[]
+        {
+            ("Calculando",    DrawSaved_Loading),
+            ("Vazio",         DrawSaved_Empty),
+            ("Falhou",        DrawSaved_Failed),
+            ("Exceção",       DrawSaved_Exception),
+            ("Pronto",        DrawSaved_Ready),
+            ("HashMismatch",  DrawSaved_HashMismatch),
+        };
+        DrawGallery(states, PanelW);
+    }
+
+    private static void DrawSaved_Loading()
+        => ImGuiUtils.TextMiddleNewLine("Calculating...", new Vector2(PanelW, CardH));
+
+    private static void DrawSaved_Empty()
+    {
+        var availW  = PanelW;
+        var spacing = ImGui.GetStyle().ItemSpacing.Y;
+        var iconH   = ImGui.GetTextLineHeight() * 1.6f;
+        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight();
+        var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
+        ImGui.SetCursorPosY(startY);
+        ImGuiUtils.TextCentered("📂", availW);
+        ImGuiUtils.TextCentered("No saved macro for this recipe", availW);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGuiUtils.TextCentered("Create one in the Macro Editor or solve below.", availW);
+        ImGui.SetCursorPosY(startY + CardH + spacing);
+    }
+
+    private static void DrawSaved_Failed()
+    {
+        var availW  = PanelW;
+        var spacing = ImGui.GetStyle().ItemSpacing.Y;
+        var iconH   = ImGui.GetTextLineHeight() * 1.6f;
+        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight();
+        var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
+        ImGui.SetCursorPosY(startY);
+        ImGuiUtils.TextCentered("⚠", availW);
+        ImGuiUtils.TextCentered("Couldn't generate a macro", availW);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGuiUtils.TextCentered("Try adjusting solver settings", availW);
+        ImGui.SetCursorPosY(startY + CardH + spacing);
+    }
+
+    private static void DrawSaved_Exception()
+    {
+        ImGui.AlignTextToFramePadding();
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+            ImGuiUtils.TextCentered("An exception occurred");
+        if (ImGuiUtils.ButtonCentered("Copy Error Message"))
+            ImGui.SetClipboardText("System.Exception: Mock error");
+    }
+
+    private static void DrawSaved_Ready()        => DrawMockMacroCard("Iron Will", 87, hashMismatch: false);
+    private static void DrawSaved_HashMismatch() => DrawMockMacroCard("Iron Will", 87, hashMismatch: true);
+
+    // Renders the macro card without PluginImGuiUtils (replaces arcs with colored grid).
+    private static void DrawMockMacroCard(string name, int hqPct, bool hashMismatch)
+    {
+        var spacing   = ImGui.GetStyle().ItemSpacing;
+        var miniRowH  = (CardH - spacing.Y) / 2f;
+        var arcColW   = miniRowH * 2 + spacing.X;
+        var botRowH   = ImGui.GetFrameHeight();
+        var rightColW = Math.Max(1f, PanelW - arcColW - 1f);
+
+        if (!ImGui.BeginTable("mcard##sv", 2, ImGuiTableFlags.None, new Vector2(PanelW, 0))) return;
+        ImGui.TableSetupColumn("left",  ImGuiTableColumnFlags.WidthFixed, arcColW);
+        ImGui.TableSetupColumn("right", ImGuiTableColumnFlags.WidthFixed, rightColW);
+
+        // Row 1: 2×2 colored arc grid | action icon buttons
+        ImGui.TableNextRow(ImGuiTableRowFlags.None, CardH);
+        ImGui.TableSetColumnIndex(0);
+        DrawMockArcGrid(miniRowH, arcColW);
+
+        ImGui.TableSetColumnIndex(1);
+        {
+            var itemsPerRow = Math.Max(1, (int)MathF.Floor((rightColW + spacing.X) / (miniRowH + spacing.X)));
+            // Draw 2 rows of action slots using colored dummy squares
+            for (var i = 0; i < itemsPerRow * 2; i++)
+            {
+                if (i % itemsPerRow != 0) ImGui.SameLine(0, spacing.X);
+                var pos = ImGui.GetCursorScreenPos();
+                ImGui.GetWindowDrawList().AddRectFilled(pos, pos + new Vector2(miniRowH), ImGui.GetColorU32(ImGuiCol.FrameBg), 3f);
+                ImGui.Dummy(new Vector2(miniRowH));
+            }
+        }
+
+        // Row 2: HQ% | macro name + edit + copy buttons
+        ImGui.TableNextRow(ImGuiTableRowFlags.None, botRowH);
+        ImGui.TableSetColumnIndex(0);
+        {
+            var pctColor = hqPct >= 100 ? Colors.Progress
+                         : hqPct >=  75 ? Colors.Quality
+                         : hqPct >=  50 ? Colors.ActionBuff
+                         :                Colors.Bad;
+            ImGui.AlignTextToFramePadding();
+            using (ImRaii.PushColor(ImGuiCol.Text, pctColor))
+                ImGuiUtils.TextCentered($"{hqPct}%", arcColW);
+        }
+        ImGui.TableSetColumnIndex(1);
+        {
+            if (hashMismatch)
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                {
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.TextUnformatted("⚠");
+                }
+                ImGuiUtils.HoveredTooltip("Macro salvo com stats diferentes", wrapWidth: 300);
+                ImGui.SameLine();
+            }
+            var iconH      = botRowH;
+            var cellStart  = ImGui.GetCursorPos();
+            var cellAvailW = ImGui.GetContentRegionAvail().X;
+            var editX      = cellStart.X + cellAvailW - iconH * 2 - spacing.X;
+            ImGui.SetCursorPos(new Vector2(editX, cellStart.Y));
+            ImGuiUtils.IconButtonSquare(0xF044 /* edit icon codepoint */, iconH);
+            ImGuiUtils.HoveredTooltip("Open in Macro Editor");
+            ImGui.SameLine(0, spacing.X);
+            ImGuiUtils.IconButtonSquare(0xF0EA /* paste icon codepoint */, iconH);
+            ImGuiUtils.HoveredTooltip("Copy to Clipboard");
+            var nameMaxW  = cellAvailW - iconH * 2 - spacing.X * 2;
+            ImGui.SetCursorPos(new Vector2(cellStart.X, cellStart.Y + (botRowH - ImGui.GetTextLineHeight()) * 0.5f));
+            var nameMin = ImGui.GetCursorScreenPos();
+            ImGui.PushClipRect(nameMin, nameMin + new Vector2(nameMaxW, botRowH), true);
+            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                ImGui.TextUnformatted(name);
+            ImGui.PopClipRect();
+        }
+        ImGui.EndTable();
+    }
+
+    // Visual substitute for DrawMacroStatArcs: 2×2 grid of colored rectangles.
+    private static void DrawMockArcGrid(float cellH, float totalW)
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing;
+        var colors  = new[] { Colors.Progress, Colors.Quality, Colors.ActionBuff, Colors.Bad };
+        var labels  = new[] { "P", "Q", "D", "CP" };
+        for (var i = 0; i < 4; i++)
+        {
+            if (i % 2 != 0) ImGui.SameLine(0, spacing.X);
+            var pos = ImGui.GetCursorScreenPos();
+            var dl  = ImGui.GetWindowDrawList();
+            var col = colors[i];
+            dl.AddRectFilled(pos, pos + new Vector2(cellH), ImGui.ColorConvertFloat4ToU32(col with { W = 0.25f }), 4f);
+            dl.AddRect(      pos, pos + new Vector2(cellH), ImGui.ColorConvertFloat4ToU32(col), 4f);
+            dl.AddText(pos + new Vector2(3, 2), ImGui.GetColorU32(ImGuiCol.Text), labels[i]);
+            ImGui.Dummy(new Vector2(cellH));
+        }
+    }
+
+    // Default height for macro card content (2 frame rows).
+    private static float CardH => 2 * ImGui.GetFrameHeightWithSpacing();
+
+    // ── Seções 4–6: stubs temporários ────────────────────────────────────────
+
     private static void DrawSection_SuggestedMacro(float _) => ImGui.TextDisabled("(Task 4)");
     private static void DrawSection_CommunityMacro(float _) => ImGui.TextDisabled("(Task 5)");
     private static void DrawSection_MainButton(float _)     => ImGui.TextDisabled("(Task 5)");
