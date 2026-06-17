@@ -147,10 +147,96 @@ internal sealed class CraftingHelperStory : IStory
         ImGui.EndTable();
     }
 
-    // ── Seções 1–6: stubs temporários ────────────────────────────────────────
+    // ── Seção 1: Recipe Header ────────────────────────────────────────────────
 
-    private static void DrawSection_RecipeHeader(float _)   => ImGui.TextDisabled("(Task 2)");
-    private static void DrawSection_GearCondition(float _)  => ImGui.TextDisabled("(Task 2)");
+    private static void DrawSection_RecipeHeader(float totalW)
+    {
+        var states = new (string Label, Action Draw)[]
+        {
+            ("Normal",      DrawRecipe_Normal),
+            ("Expert",      DrawRecipe_Expert),
+            ("Collectible", DrawRecipe_Collectible),
+            ("Cosmic",      DrawRecipe_Cosmic),
+        };
+        DrawGallery(states, PanelW);
+    }
+
+    private static void DrawRecipe_Normal()
+    {
+        ImGuiUtils.TextCentered("Lv90 ★★★  Espada de Aço");
+        ImGui.Separator();
+        if (!ImGui.BeginTable("rn##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 90f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        DrawStatRow2("Progress",   "4100");
+        DrawStatRow2("Quality",    "7800");
+        DrawStatRow2("Durability", "70");
+        ImGui.EndTable();
+    }
+
+    private static void DrawRecipe_Expert()
+    {
+        ImGuiUtils.TextCentered("Lv90  Lâmina Expert");
+        ImGui.SameLine(0, 4);
+        ImGuiUtils.DrawBadgePill("Expert", Colors.Bad);
+        ImGui.Separator();
+        if (!ImGui.BeginTable("re##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 90f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        DrawStatRow2("Progress",   "5060");
+        DrawStatRow2("Quality",    "12628");
+        DrawStatRow2("Durability", "55");
+        ImGui.EndTable();
+    }
+
+    private static void DrawRecipe_Collectible()
+    {
+        ImGuiUtils.TextCentered("Lv90  Engrenagem Coletável");
+        ImGui.SameLine(0, 4);
+        ImGuiUtils.DrawBadgePill("Collectible", Colors.Collectability);
+        ImGui.Separator();
+        if (!ImGui.BeginTable("rc##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 90f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        DrawStatRow2("Progress",   "4300");
+        DrawStatRow2("Quality",    "9000");
+        DrawStatRow2("Durability", "80");
+        ImGui.EndTable();
+    }
+
+    private static void DrawRecipe_Cosmic()
+    {
+        ImGuiUtils.TextCentered("Lv90~100  Ferramenta Cósmica");
+        ImGui.SameLine(0, 4);
+        ImGuiUtils.DrawBadgePill("Cosmic", Colors.CosmicActive);
+        ImGui.Separator();
+        if (!ImGui.BeginTable("rco##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 110f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        DrawStatRow2("Progress",   "4100");
+        DrawStatRow2("Quality",    "7800");
+        DrawStatRow2("Durability", "70");
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("Research Type II");
+        ImGui.TableNextColumn();
+        ImGui.ProgressBar(0.62f, new Vector2(-1, ImGui.GetTextLineHeight()));
+        ImGui.EndTable();
+    }
+
+    // ── Seção 2: Gear Condition Alert ─────────────────────────────────────────
+
+    private static void DrawSection_GearCondition(float totalW)
+    {
+        var states = new (string Label, Action Draw)[]
+        {
+            ("Info (≥50%)",      () => ImGuiUtils.DrawAlert(AlertVariant.Info,    "Gear Condition", "72% · ~30 crafts left")),
+            ("Warning (25-50%)",      () => ImGuiUtils.DrawAlert(AlertVariant.Warning, "Gear Condition", "38% · ~12–15 crafts left")),
+            ("Danger (<25%)",         () => ImGuiUtils.DrawAlert(AlertVariant.Danger,  "Gear Condition", "18% · ~3 crafts left — repair now!")),
+        };
+        DrawGallery(states, PanelW);
+    }
+
+    // ── Seções 3–6: stubs temporários ────────────────────────────────────────
+
     private static void DrawSection_SavedMacro(float _)     => ImGui.TextDisabled("(Task 3)");
     private static void DrawSection_SuggestedMacro(float _) => ImGui.TextDisabled("(Task 4)");
     private static void DrawSection_CommunityMacro(float _) => ImGui.TextDisabled("(Task 5)");
