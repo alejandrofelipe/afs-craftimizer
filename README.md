@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.21.1.4 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.21.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -136,6 +136,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - **FeatureHubWindow** redesenhada com tiles clicáveis (ícone + label + badge de contagem), âncora dinâmica (atualiza entre frames em vez de exigir arrastar) e botão de minimizar para mostrar só os ícones
 - 🐛 Fix: indicator de carregamento ausente no MacroEditor ao regenerar macro com resultado anterior salvo (Caso A — primeira geração da sessão); snapshot `Indeterminate` agora emitido imediatamente ao iniciar o solver
 - 🐛 Fix: layout shift no MacroEditor ao iniciar sugestão de macro com lista vazia — altura da área de progresso agora é reservada com 2 frames fixos independentemente de o solver estar rodando
+- 🐛 Fix: barra de progresso do solver no SynthesisHelper ficava presa em "Solving..." após o solver encontrar steps suficientes — snapshot agora marcado como Completed antes do cancelamento automático
+- 🐛 Fix: macro salva continuava marcada como "incompatível com os stats atuais" no CraftingHelper mesmo após ser atualizada com os stats correntes — `CharacterStatsHash` agora atualizado junto com actions e score no auto-save
 - Revamp visual do progress component no MacroEditor (sugestão de macro): chip de estado + stage dots animados por DrawList (wave animation no estado indeterminate, pulse no estágio atual, cores por estágio) + nome do algoritmo right-aligned na mesma linha
 
 ---
