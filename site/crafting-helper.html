@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CraftingHelper — Artificer Reference</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="breadcrumb">← Index</a>
+  <h1>CraftingHelper</h1>
+</header>
+
+<main class="container">
+
+<div class="tabs-container">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-craftable">CraftableStatus</button>
+    <button class="tab-btn"        data-tab="tab-recipe">Recipe Header</button>
+    <button class="tab-btn"        data-tab="tab-gear">Gear Condition</button>
+    <button class="tab-btn"        data-tab="tab-saved">Saved Macro</button>
+    <button class="tab-btn"        data-tab="tab-suggested">Suggested Macro</button>
+    <button class="tab-btn"        data-tab="tab-community">Community Macro</button>
+    <button class="tab-btn"        data-tab="tab-button">Main Button</button>
+  </div>
+
+  <!-- ── Tab 0: CraftableStatus ── -->
+  <div class="tab-panel active" id="tab-craftable">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-ok">OK</span></div>
+        <div class="state-body">
+          <table class="mock-stat-table">
+            <tr><td>Craftsmanship</td><td>3700</td></tr>
+            <tr><td>Control</td>      <td>3800</td></tr>
+            <tr><td>CP</td>           <td>590</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">LockedClassJob</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p>You do not have <b>Weaver</b> unlocked.</p>
+          <p style="margin-top:6px;color:var(--text-dim);">Unlock it from Guildmaster Maronne<br>Ul'dah - Steps of Thal (12.5, 8.6)</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-warning">WrongClassJob</span></div>
+        <div class="state-body" style="font-size:12px;text-align:center;">
+          <p>You are not a Weaver.</p>
+          <button style="margin-top:8px;background:var(--color-progress);color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;">Switch Job</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-warning">SpecialistRequired</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p>You need to be a specialist to craft this recipe.</p>
+          <p style="margin-top:6px;color:var(--text-dim);">Trade a Soul of the Crafter to Zuzuvano<br>Ul'dah - Steps of Thal (14.2, 10.8)</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-warning">RequiredItem</span></div>
+        <div class="state-body" style="font-size:12px;text-align:center;">
+          <p>You are missing the required equipment.</p>
+          <p style="margin-top:6px;">[★] Diadochos Needle</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-warning">RequiredStatus</span></div>
+        <div class="state-body" style="font-size:12px;text-align:center;">
+          <p>You are missing the required status effect.</p>
+          <p style="margin-top:6px;">[✦] Well Fed</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">CraftsmanshipTooLow</span></div>
+        <div class="state-body">
+          <p style="font-size:12px;text-align:center;">Your Craftsmanship is too low.</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Current</td>  <td style="color:var(--color-good);">3700</td></tr>
+            <tr><td>Required</td> <td style="color:var(--color-bad);">3900</td></tr>
+            <tr><td>You need</td> <td>200</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">ControlTooLow</span></div>
+        <div class="state-body">
+          <p style="font-size:12px;text-align:center;">Your Control is too low.</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Current</td>  <td style="color:var(--color-good);">3800</td></tr>
+            <tr><td>Required</td> <td style="color:var(--color-bad);">3950</td></tr>
+            <tr><td>You need</td> <td>150</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-craftable -->
+
+  <!-- ── Tab 1: Recipe Header ── -->
+  <div class="tab-panel" id="tab-recipe">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label">Normal</div>
+        <div class="state-body" style="font-size:12px;">
+          <p style="text-align:center;font-weight:600;">Lv90 ★★★ Espada de Aço</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Progress</td>  <td>4100</td></tr>
+            <tr><td>Quality</td>   <td>7800</td></tr>
+            <tr><td>Durability</td><td>70</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Expert <span class="badge badge-error" style="margin-left:4px;">Expert</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p style="text-align:center;font-weight:600;">Lv90 Lâmina Expert</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Progress</td>  <td>5060</td></tr>
+            <tr><td>Quality</td>   <td>12628</td></tr>
+            <tr><td>Durability</td><td>55</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Collectible <span class="badge" style="background:#0a2e2a;color:var(--color-collectible);margin-left:4px;">Collectible</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p style="text-align:center;font-weight:600;">Lv90 Engrenagem Coletável</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Progress</td>  <td>4300</td></tr>
+            <tr><td>Quality</td>   <td>9000</td></tr>
+            <tr><td>Durability</td><td>80</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Cosmic <span class="badge badge-opt" style="margin-left:4px;">Cosmic</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p style="text-align:center;font-weight:600;">Lv90~100 Ferramenta Cósmica</p>
+          <table class="mock-stat-table" style="margin-top:6px;">
+            <tr><td>Progress</td>  <td>4100</td></tr>
+            <tr><td>Quality</td>   <td>7800</td></tr>
+            <tr><td>Durability</td><td>70</td></tr>
+            <tr><td>Research Type II</td><td>
+              <div class="mock-progress-bar"><div class="fill" style="width:62%;background:var(--color-cosmic);"></div></div>
+            </td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-recipe -->
+
+  <!-- ── Tab 2: Gear Condition ── -->
+  <div class="tab-panel" id="tab-gear">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label">Info (≥50%)</div>
+        <div class="state-body">
+          <div class="mock-alert info">
+            <div class="alert-title">Gear Condition</div>
+            72% · ~30 crafts left
+          </div>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Warning (25–50%)</div>
+        <div class="state-body">
+          <div class="mock-alert warning">
+            <div class="alert-title">Gear Condition</div>
+            38% · ~12–15 crafts left
+          </div>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Danger (&lt;25%)</div>
+        <div class="state-body">
+          <div class="mock-alert danger">
+            <div class="alert-title">Gear Condition</div>
+            18% · ~3 crafts left — repair now!
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-gear -->
+
+  <!-- ── Tab 3: Saved Macro ── -->
+  <div class="tab-panel" id="tab-saved">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-loading">Calculando</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:16px 12px;color:var(--text-dim);">Calculating...</div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-empty">Vazio</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="font-size:20px;color:var(--text-dim);">📂</p>
+          <p>No saved macro for this recipe</p>
+          <p style="color:var(--text-dim);margin-top:4px;">Create one in the Macro Editor or solve below.</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">Falhou</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="font-size:20px;color:var(--text-dim);">⚠️</p>
+          <p>Couldn't generate a macro</p>
+          <p style="color:var(--text-dim);margin-top:4px;">Try adjusting solver settings</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">Exceção</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="color:var(--color-bad);">An exception occurred</p>
+          <button style="margin-top:8px;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Copy Error Message</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-ok">Pronto</span></div>
+        <div class="state-body">
+          <div class="mock-macro-card">
+            <div class="mock-arc-grid">
+              <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+              <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+              <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+              <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+            </div>
+            <div class="mock-action-grid">
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+            </div>
+            <div class="mock-hq-pct" style="color:var(--color-quality);">87%</div>
+            <div class="mock-macro-name">Iron Will</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-warning">HashMismatch</span></div>
+        <div class="state-body">
+          <div class="mock-macro-card">
+            <div class="mock-arc-grid">
+              <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+              <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+              <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+              <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+            </div>
+            <div class="mock-action-grid">
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+            </div>
+            <div class="mock-hq-pct" style="color:var(--color-quality);">87%</div>
+            <div class="mock-macro-name"><span style="color:var(--color-bad);margin-right:4px;">⚠</span>Iron Will</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-saved -->
+
+  <!-- ── Tab 4: Suggested Macro ── -->
+  <div class="tab-panel" id="tab-suggested">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-empty">Não iniciado</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:12px 8px;color:var(--text-dim);">Click "Suggest Macro" below to get a suggestion</div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-loading">Solver rodando</span></div>
+        <div class="state-body" style="font-size:12px;padding:6px 0;">
+          <p style="color:var(--color-progress);">● Solver · MCTS</p>
+          <div class="mock-progress-bar" style="margin-top:6px;"><div class="fill" style="width:48%;background:var(--color-progress);"></div></div>
+          <p style="text-align:right;color:var(--text-dim);margin-top:2px;">48%</p>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-loading">Regenerando</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <div style="opacity:.25;">
+            <div class="mock-macro-card">
+              <div class="mock-arc-grid">
+                <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+                <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+                <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+                <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+              </div>
+              <div style="color:var(--text-dim);font-size:11px;">72% · AI Suggestion</div>
+              <div></div><div></div>
+            </div>
+          </div>
+          <p style="color:var(--color-progress);margin-top:4px;">● Solver · Regenerating...</p>
+          <div class="mock-progress-bar" style="margin-top:4px;"><div class="fill" style="width:31%;background:var(--color-progress);"></div></div>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-opt">Prefilled 🔖</span></div>
+        <div class="state-body" style="font-size:12px;">
+          <p style="color:var(--text-dim);margin-bottom:6px;">Solver still comparing...</p>
+          <div class="mock-macro-card">
+            <div class="mock-arc-grid">
+              <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+              <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+              <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+              <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+            </div>
+            <div class="mock-action-grid">
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+            </div>
+            <div class="mock-hq-pct" style="color:var(--color-quality);">72%</div>
+            <div class="mock-macro-name">AI Suggestion</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">Falhou</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="font-size:20px;color:var(--text-dim);">⚠️</p>
+          <p>Couldn't generate a macro</p>
+          <p style="color:var(--text-dim);margin-top:4px;">Try adjusting solver settings</p>
+          <button style="margin-top:8px;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Suggest Again</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">Exceção</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="color:var(--color-bad);">An exception occurred</p>
+          <button style="margin-top:8px;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Copy Error Message</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-ok">Pronto</span></div>
+        <div class="state-body">
+          <div class="mock-macro-card">
+            <div class="mock-arc-grid">
+              <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+              <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+              <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+              <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+            </div>
+            <div class="mock-action-grid">
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+            </div>
+            <div class="mock-hq-pct" style="color:var(--color-progress);">91%</div>
+            <div class="mock-macro-name">AI Suggestion</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-suggested -->
+
+  <!-- ── Tab 5: Community Macro ── -->
+  <div class="tab-panel" id="tab-community">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-empty">Não iniciado</span></div>
+        <div class="state-body" style="text-align:center;padding:16px 8px;">
+          <button style="background:var(--color-progress);color:#000;border:none;border-radius:4px;padding:6px 14px;cursor:pointer;font-size:13px;">Search Online</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-loading">Buscando</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:16px 8px;color:var(--text-dim);">Searching...</div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-empty">Não encontrado</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:16px 8px;color:var(--text-dim);">No macros found!</div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-error">Exceção</span></div>
+        <div class="state-body" style="text-align:center;font-size:12px;padding:10px 8px;">
+          <p style="color:var(--color-bad);">An exception occurred</p>
+          <button style="margin-top:8px;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;">Copy Error Message</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label"><span class="badge badge-ok">Pronto</span></div>
+        <div class="state-body">
+          <div class="mock-macro-card">
+            <div class="mock-arc-grid">
+              <div class="mock-arc-cell" style="background:rgba(79,195,247,.2);border:1px solid var(--color-progress);">P</div>
+              <div class="mock-arc-cell" style="background:rgba(174,213,129,.2);border:1px solid var(--color-quality);">Q</div>
+              <div class="mock-arc-cell" style="background:rgba(255,204,2,.2);border:1px solid var(--color-action-buff);">D</div>
+              <div class="mock-arc-cell" style="background:rgba(239,83,80,.15);border:1px solid var(--color-bad);">CP</div>
+            </div>
+            <div class="mock-action-grid">
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+              <div class="mock-action-slot"></div><div class="mock-action-slot"></div>
+            </div>
+            <div class="mock-hq-pct" style="color:var(--color-progress);">95%</div>
+            <div class="mock-macro-name"><a href="#" style="font-size:11px;">r/ffxivgil via Teamcraft</a></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-community -->
+
+  <!-- ── Tab 6: Main Button ── -->
+  <div class="tab-panel" id="tab-button">
+    <div class="state-gallery">
+
+      <div class="state-card">
+        <div class="state-label">Suggest Macro <span class="badge badge-empty">idle</span></div>
+        <div class="state-body">
+          <button style="width:100%;background:var(--color-progress);color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:600;">Suggest Macro</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Regenerate <span class="badge badge-ok">com resultado</span></div>
+        <div class="state-body">
+          <button style="width:100%;background:var(--color-progress);color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:600;">Regenerate</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Stop <span class="badge badge-loading">rodando</span></div>
+        <div class="state-body">
+          <button style="width:100%;background:#8b0000;color:#fff;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:600;">Stop</button>
+        </div>
+      </div>
+
+      <div class="state-card">
+        <div class="state-label">Stopping <span class="badge badge-loading">cancelando</span></div>
+        <div class="state-body">
+          <button style="width:100%;background:var(--bg-panel);color:var(--text-dim);border:1px solid var(--border);border-radius:4px;padding:6px;cursor:not-allowed;" disabled>Stopping</button>
+        </div>
+      </div>
+
+      <div class="state-card" style="width:100%;max-width:300px;">
+        <div class="state-label">Botões secundários <span class="badge badge-ok">sempre</span></div>
+        <div class="state-body" style="display:flex;flex-direction:column;gap:6px;">
+          <button style="width:100%;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px;cursor:pointer;">Open in Macro Editor</button>
+          <button style="width:100%;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:5px;cursor:pointer;">View Saved Macros</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-button -->
+
+</div><!-- /tabs-container -->
+</main>
+
+<script src="components.js"></script>
+</body>
+</html>
