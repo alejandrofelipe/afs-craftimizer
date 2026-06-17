@@ -336,7 +336,21 @@ public sealed class CraftingSession : IDisposable
     {
         var newSize = Macro.Enqueue(action, _plugin.Configuration.SynthHelperMaxDisplayCount);
         if (newSize >= _plugin.Configuration.SynthHelperStepCount || newSize >= _plugin.Configuration.SynthHelperMaxDisplayCount)
+        {
+            if (SolverObject != null)
+            {
+                var algorithmName = _plugin.Configuration.SynthHelperSolverConfig.Algorithm.ToString();
+                lock (_solverSnapshots)
+                {
+                    _solverSnapshots.Clear();
+                    _solverSnapshots.Add(SolverProgressBar.FromSolver(SolverObject, algorithmName) with
+                    {
+                        State = ProgressBarComponent.ProgressState.Completed
+                    });
+                }
+            }
             SolverTask?.Cancel();
+        }
     }
 
     private void TryUseBetterSavedMacro()
