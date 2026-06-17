@@ -1,6 +1,3 @@
-using Artificer.Application.Crafting;
-using Artificer.Simulator;
-
 namespace Artificer.Utils;
 
 internal static partial class PluginImGuiUtils
