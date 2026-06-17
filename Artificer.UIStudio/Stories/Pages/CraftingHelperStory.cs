@@ -394,9 +394,84 @@ internal sealed class CraftingHelperStory : IStory
     // Default height for macro card content (2 frame rows).
     private static float CardH => 2 * ImGui.GetFrameHeightWithSpacing();
 
-    // ── Seções 4–6: stubs temporários ────────────────────────────────────────
+    // ── Seção 4: Suggested Macro Card ────────────────────────────────────────
 
-    private static void DrawSection_SuggestedMacro(float _) => ImGui.TextDisabled("(Task 4)");
+    private static void DrawSection_SuggestedMacro(float totalW)
+    {
+        var states = new (string Label, Action Draw)[]
+        {
+            ("Não iniciado",   DrawSugg_NotStarted),
+            ("Solver rodando", DrawSugg_Running),
+            ("Regenerando",    DrawSugg_Regenerating),
+            ("Prefilled",      DrawSugg_Prefilled),
+            ("Falhou",         DrawSugg_Failed),
+            ("Exceção",        DrawSugg_Exception),
+            ("Pronto",         DrawSugg_Ready),
+        };
+        DrawGallery(states, PanelW);
+    }
+
+    private static void DrawSugg_NotStarted()
+    {
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGuiUtils.TextMiddleNewLine(
+                "Click \"Suggest Macro\" below to get a suggestion",
+                new Vector2(PanelW, CardH + 1));
+    }
+
+    private static void DrawSugg_Running()
+    {
+        // Visual substitute for DrawSolverProgressArea
+        ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Solver");
+        ImGui.SameLine(0, 6);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted("MCTS");
+        ImGui.ProgressBar(0.48f, new Vector2(-1, ImGui.GetFrameHeight()), "48%");
+    }
+
+    private static void DrawSugg_Regenerating()
+    {
+        // Old card dimmed as anchor
+        using (ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0.25f))
+            DrawMockMacroCard("regen", "AI Suggestion", 72, hashMismatch: false);
+        // Overlay: progress
+        ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Solver");
+        ImGui.SameLine(0, 6);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted("Regenerating...");
+        ImGui.ProgressBar(0.31f, new Vector2(-1, ImGui.GetFrameHeight()), "31%");
+    }
+
+    private static void DrawSugg_Prefilled()
+    {
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted("Pre-filled \U0001f516  (solver still comparing)");
+        DrawMockMacroCard("prefilled", "AI Suggestion", 72, hashMismatch: false);
+    }
+
+    private static void DrawSugg_Failed()
+    {
+        var availW  = PanelW;
+        var spacing = ImGui.GetStyle().ItemSpacing.Y;
+        var iconH   = ImGui.GetTextLineHeight() * 1.6f;
+        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing()
+                           + ImGui.GetTextLineHeight()
+                           + spacing + ImGui.GetFrameHeight();
+        var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
+        ImGui.SetCursorPosY(startY);
+        ImGuiUtils.TextCentered("⚠", availW);
+        ImGuiUtils.TextCentered("Couldn't generate a macro", availW);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGuiUtils.TextCentered("Try adjusting solver settings", availW);
+        if (ImGuiUtils.ButtonCentered("Suggest Again")) _ = 0;
+        ImGui.SetCursorPosY(startY + CardH + spacing);
+    }
+
+    private static void DrawSugg_Exception() => DrawSaved_Exception();
+    private static void DrawSugg_Ready()     => DrawMockMacroCard("sugg", "AI Suggestion", 91, hashMismatch: false);
+
+    // ── Seções 5–6: stubs temporários ────────────────────────────────────────
+
     private static void DrawSection_CommunityMacro(float _) => ImGui.TextDisabled("(Task 5)");
     private static void DrawSection_MainButton(float _)     => ImGui.TextDisabled("(Task 5)");
 
