@@ -745,28 +745,23 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 break;
         }
 
-        // Gear condition indicator (if CraftStatus is OK)
         if (CraftStatus == CraftableStatus.OK && _plugin.Configuration.ShowGearCondition)
         {
             var gearCondition = Gearsets.GetMinimumGearCondition();
             if (gearCondition.HasValue)
             {
+                var pct     = gearCondition.Value;
+                var variant = pct < 25f ? AlertVariant.Danger
+                            : pct < 50f ? AlertVariant.Warning
+                            :             AlertVariant.Info;
+                var message = PluginImGuiUtils.BuildGearMessage(
+                    pct,
+                    _plugin.Configuration.EnableGearWearTracking,
+                    RecipeData,
+                    _plugin.GearWearTracker);
+
                 ImGuiHelpers.ScaledDummy(2);
-                
-                var conditionPercent = gearCondition.Value;
-                var conditionColor = conditionPercent switch
-                {
-                    >= 70f => new Vector4(0.3f, 0.9f, 0.3f, 1f),
-                    >= 30f => new Vector4(0.9f, 0.9f, 0.3f, 1f),
-                    _      => new Vector4(0.9f, 0.3f, 0.3f, 1f)
-                };
-
-                using (ImRaii.PushColor(ImGuiCol.Text, conditionColor))
-                {
-                    ImGuiUtils.TextCentered($"⚙ Gear: {conditionPercent:0}%");
-                }
-
-                ImGuiUtils.HoveredTooltip("Condição mínima do equipamento atual.\nRepare antes de craftar se estiver baixo.");
+                ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale);
             }
         }
 
