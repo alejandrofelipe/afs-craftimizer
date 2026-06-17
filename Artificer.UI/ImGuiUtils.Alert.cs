@@ -7,9 +7,11 @@ public static partial class ImGuiUtils
 {
     /// <summary>
     /// Compact alert: 3px colored left bar + tinted background + uppercase title + body message.
+    /// All text is rendered via DrawList — the sole layout item is <c>Dummy(width, height)</c>,
+    /// so this component cannot cause horizontal window growth regardless of text length or placement.
     /// Does not reference Dalamud — pass <c>ImGuiHelpers.GlobalScale</c> as <paramref name="scale"/> from plugin context.
     /// </summary>
-    public static void DrawAlert(AlertVariant variant, string title, string message, float scale = 1f)
+    public static void DrawAlert(AlertVariant variant, string title, string message, float scale = 1f, float width = -1f)
     {
         var barColor = variant switch
         {
@@ -21,26 +23,23 @@ public static partial class ImGuiUtils
 
         var dl     = ImGui.GetWindowDrawList();
         var pos    = ImGui.GetCursorScreenPos();
-        var availW = ImGui.GetContentRegionAvail().X;
+        var availW = width > 0 ? width : ImGui.GetContentRegionAvail().X;
         var padX   = ImGui.GetStyle().WindowPadding.X;
         var padY   = ImGui.GetStyle().FramePadding.Y;
         var lineH  = ImGui.GetTextLineHeightWithSpacing();
         var totalH = lineH + ImGui.GetTextLineHeight() + padY * 2f;
         var barW   = 3f * scale;
+        var textX  = pos.X + barW + padX;
 
         dl.AddRectFilled(pos, pos + new Vector2(availW, totalH),
             ImGui.ColorConvertFloat4ToU32(barColor with { W = 0.08f }));
         dl.AddRectFilled(pos, pos + new Vector2(barW, totalH),
             ImGui.ColorConvertFloat4ToU32(barColor));
+        dl.AddText(new Vector2(textX, pos.Y + padY),
+            ImGui.ColorConvertFloat4ToU32(barColor), title.ToUpperInvariant());
+        dl.AddText(new Vector2(textX, pos.Y + padY + lineH),
+            ImGui.ColorConvertFloat4ToU32(Colors.TextMuted), message);
 
-        var textX = pos.X + barW + padX;
         ImGui.Dummy(new Vector2(availW, totalH));
-        ImGui.SetCursorScreenPos(new Vector2(textX, pos.Y + padY));
-        using (ImRaii.PushColor(ImGuiCol.Text, barColor))
-            ImGui.TextUnformatted(title.ToUpperInvariant());
-        ImGui.SetCursorScreenPos(new Vector2(textX, pos.Y + padY + lineH));
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted(message);
-        ImGui.SetCursorScreenPos(pos + new Vector2(0, totalH + ImGui.GetStyle().ItemSpacing.Y));
     }
 }
