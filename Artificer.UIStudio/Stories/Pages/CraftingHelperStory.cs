@@ -470,10 +470,78 @@ internal sealed class CraftingHelperStory : IStory
     private static void DrawSugg_Exception() => DrawSaved_Exception();
     private static void DrawSugg_Ready()     => DrawMockMacroCard("sugg", "AI Suggestion", 91, hashMismatch: false);
 
-    // ── Seções 5–6: stubs temporários ────────────────────────────────────────
+    // ── Seção 5: Community Macro Card ────────────────────────────────────────
 
-    private static void DrawSection_CommunityMacro(float _) => ImGui.TextDisabled("(Task 5)");
-    private static void DrawSection_MainButton(float _)     => ImGui.TextDisabled("(Task 5)");
+    private static void DrawSection_CommunityMacro(float totalW)
+    {
+        var states = new (string Label, Action Draw)[]
+        {
+            ("Não iniciado",   DrawComm_NotStarted),
+            ("Buscando",       DrawComm_Searching),
+            ("Não encontrado", DrawComm_NotFound),
+            ("Exceção",        DrawComm_Exception),
+            ("Pronto",         DrawComm_Ready),
+        };
+        DrawGallery(states, PanelW);
+    }
+
+    private static void DrawComm_NotStarted()
+    {
+        using var _padding = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding * 2);
+        var size = ImGui.CalcTextSize("Search Online") + ImGui.GetStyle().FramePadding * 2;
+        var availSize = new Vector2(PanelW, CardH);
+        ImGuiUtils.AlignMiddle(size, availSize);
+        if (ImGui.Button("Search Online")) _ = 0;
+        ImGuiUtils.HoveredTooltip("Searches FFXIV Teamcraft to find you the best macro", wrapWidth: 300);
+    }
+
+    private static void DrawComm_Searching()
+        => ImGuiUtils.TextMiddleNewLine("Searching...", new Vector2(PanelW, CardH + 1));
+
+    private static void DrawComm_NotFound()
+        => ImGuiUtils.TextMiddleNewLine("No macros found!", new Vector2(PanelW, CardH + 1));
+
+    private static void DrawComm_Exception() => DrawSaved_Exception();
+
+    private static void DrawComm_Ready()
+        => DrawMockMacroCard("comm", "r/ffxivgil via Teamcraft", 95, hashMismatch: false);
+
+    // ── Seção 6: Main Button ──────────────────────────────────────────────────
+
+    private static void DrawSection_MainButton(float totalW)
+    {
+        const float btnW = PanelW;
+
+        ImGuiUtils.DrawSectionHeader("Suggest Macro (idle)");
+        Theme.PushPrimaryButton();
+        ImGui.Button("Suggest Macro", new Vector2(btnW, 0));
+        Theme.PopPrimaryButton();
+
+        ImGui.Spacing();
+        ImGuiUtils.DrawSectionHeader("Regenerate (com resultado)");
+        Theme.PushPrimaryButton();
+        ImGui.Button("Regenerate", new Vector2(btnW, 0));
+        Theme.PopPrimaryButton();
+
+        ImGui.Spacing();
+        ImGuiUtils.DrawSectionHeader("Stop (rodando)");
+        Theme.PushPrimaryButton();
+        ImGui.Button("Stop", new Vector2(btnW, 0));
+        Theme.PopPrimaryButton();
+
+        ImGui.Spacing();
+        ImGuiUtils.DrawSectionHeader("Stopping (cancelando)");
+        Theme.PushPrimaryButton();
+        ImGui.BeginDisabled(true);
+        ImGui.Button("Stopping", new Vector2(btnW, 0));
+        ImGui.EndDisabled();
+        Theme.PopPrimaryButton();
+
+        ImGui.Spacing();
+        ImGuiUtils.DrawSectionHeader("Botões secundários");
+        ImGui.Button("Open in Macro Editor", new Vector2(btnW, 0));
+        ImGui.Button("View Saved Macros",    new Vector2(btnW, 0));
+    }
 
     // ── Helpers compartilhados ────────────────────────────────────────────────
 
