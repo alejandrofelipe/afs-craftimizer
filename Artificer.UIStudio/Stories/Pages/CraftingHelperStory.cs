@@ -293,11 +293,11 @@ internal sealed class CraftingHelperStory : IStory
             ImGui.SetClipboardText("System.Exception: Mock error");
     }
 
-    private static void DrawSaved_Ready()        => DrawMockMacroCard("Iron Will", 87, hashMismatch: false);
-    private static void DrawSaved_HashMismatch() => DrawMockMacroCard("Iron Will", 87, hashMismatch: true);
+    private static void DrawSaved_Ready()        => DrawMockMacroCard("ready", "Iron Will", 87, hashMismatch: false);
+    private static void DrawSaved_HashMismatch() => DrawMockMacroCard("mismatch", "Iron Will", 87, hashMismatch: true);
 
     // Renders the macro card without PluginImGuiUtils (replaces arcs with colored grid).
-    private static void DrawMockMacroCard(string name, int hqPct, bool hashMismatch)
+    private static void DrawMockMacroCard(string id, string name, int hqPct, bool hashMismatch)
     {
         var spacing   = ImGui.GetStyle().ItemSpacing;
         var miniRowH  = (CardH - spacing.Y) / 2f;
@@ -305,7 +305,7 @@ internal sealed class CraftingHelperStory : IStory
         var botRowH   = ImGui.GetFrameHeight();
         var rightColW = Math.Max(1f, PanelW - arcColW - 1f);
 
-        if (!ImGui.BeginTable("mcard##sv", 2, ImGuiTableFlags.None, new Vector2(PanelW, 0))) return;
+        if (!ImGui.BeginTable($"mcard##{id}", 2, ImGuiTableFlags.None, new Vector2(PanelW, 0))) return;
         ImGui.TableSetupColumn("left",  ImGuiTableColumnFlags.WidthFixed, arcColW);
         ImGui.TableSetupColumn("right", ImGuiTableColumnFlags.WidthFixed, rightColW);
 
