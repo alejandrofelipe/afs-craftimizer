@@ -1,6 +1,6 @@
 using Artificer.Utils;
 using ImGuiNET;
-using System.Collections.Generic;
+using System;
 using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
@@ -10,142 +10,172 @@ internal sealed class CraftingHelperStory : IStory
     public string Category => "Pages";
     public string Name     => "CraftingHelper";
 
-    private static readonly string[] Estados =
+    private static readonly string[] Sections =
     [
-        "Sem receita", "Macro pronto", "Carregando macro",
+        "0 · CraftableStatus", "1 · Recipe Header", "2 · Gear Condition",
+        "3 · Saved Macro",     "4 · Suggested Macro", "5 · Community Macro",
+        "6 · Main Button",
     ];
 
-    private static readonly string[] TiposReceita =
-    [
-        "Normal", "Expert", "Collectible", "Splendorous", "Specialist", "Cosmic",
-    ];
+    private int _section;
 
-    private static readonly string[] CraftableStatuses =
-    [
-        "OK", "WrongClassJob", "CraftsmanshipTooLow", "SpecialistRequired",
-    ];
+    // ── Mock constants ────────────────────────────────────────────────────────
+    private const float PanelW = 300f;
 
-    private int _estado;
-    private int _tipo;
-    private int _craftableStatus;
-
-    // Mock stats da receita selecionada.
-    private const float ProgressMax   = 4100f;
-    private const float QualityMax     = 7800f;
-    private const float DurabilityMax  = 70f;
-    private const float CpMax          = 590f;
+    private const int MockCraftsmanship  = 3700;
+    private const int MockControl        = 3800;
+    private const int MockCP             = 590;
+    private const int MockLevel          = 90;
+    private const int MockRequiredCrafts = 3900;
+    private const int MockRequiredCtrl   = 3950;
 
     public void Draw()
     {
-        DrawControls();
+        ImGui.SetNextItemWidth(240f);
+        ImGui.Combo("Seção##ch", ref _section, Sections, Sections.Length);
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
 
-        DrawOverlay();
-    }
+        var width = ImGui.GetContentRegionAvail().X;
 
-    // ── Controles de estado ───────────────────────────────────────────────────
-    private void DrawControls()
-    {
-        ImGui.SetNextItemWidth(160);
-        ImGui.Combo("Estado", ref _estado, Estados, Estados.Length);
-        ImGui.SameLine(0, 16);
-        ImGui.SetNextItemWidth(160);
-        ImGui.Combo("Tipo", ref _tipo, TiposReceita, TiposReceita.Length);
-        ImGui.SameLine(0, 16);
-        ImGui.SetNextItemWidth(200);
-        ImGui.Combo("CraftableStatus", ref _craftableStatus, CraftableStatuses, CraftableStatuses.Length);
-    }
-
-    // ── Overlay principal ─────────────────────────────────────────────────────
-    private void DrawOverlay()
-    {
-        using (ImRaii2.GroupPanel("Crafting Helper", 360f, out var inner))
+        switch (_section)
         {
-            if (_estado == 0) // Sem receita
-            {
-                ImGuiUtils.DrawEmptyState(
-                    FontAwesomeIcon.Book,
-                    "Nenhuma receita aberta",
-                    "Selecione uma receita no Crafting Log para ver sugestões.");
-                return;
-            }
-
-            // Nome da receita + badge de tipo.
-            ImGui.TextWrapped(RecipeName(_tipo));
-            if (_tipo != 0)
-            {
-                ImGui.Spacing();
-                ImGuiUtils.DrawBadgePill(TiposReceita[_tipo], TipoColor(_tipo));
-            }
-
-            ImGui.Spacing();
-            ImGui.Separator();
-            ImGui.Spacing();
-
-            // Validação de craftabilidade.
-            if (_craftableStatus != 0)
-            {
-                ImGui.TextColored(Colors.Bad, CraftableStatusText(_craftableStatus));
-                return;
-            }
-
-            // Barras de stats da receita.
-            ImGuiUtils.DrawBarRow(new List<ImGuiUtils.BarData>
-            {
-                new("Progress",   Colors.Progress,   ProgressMax,   ProgressMax),
-                new("Quality",    Colors.Quality,    QualityMax,    QualityMax),
-                new("Durability", Colors.Durability, DurabilityMax, DurabilityMax),
-                new("CP",         Colors.CP,         CpMax,         CpMax),
-            }, inner);
-
-            ImGui.Spacing();
-            ImGui.Separator();
-            ImGui.Spacing();
-
-            if (_estado == 2) // Carregando macro
-            {
-                ImGui.TextDisabled("Calculando macro sugerido...");
-            }
-            else // Macro pronto
-            {
-                ImGui.TextUnformatted("Macro salvo: 8 ações (87% HQ)");
-                ImGui.Spacing();
-                Theme.PushPrimaryButton();
-                ImGui.Button("Abrir no Editor", new Vector2(-1, 0));
-                Theme.PopPrimaryButton();
-            }
+            case 0: DrawSection_CraftableStatus(width); break;
+            case 1: DrawSection_RecipeHeader(width);    break;
+            case 2: DrawSection_GearCondition(width);   break;
+            case 3: DrawSection_SavedMacro(width);      break;
+            case 4: DrawSection_SuggestedMacro(width);  break;
+            case 5: DrawSection_CommunityMacro(width);  break;
+            case 6: DrawSection_MainButton(width);      break;
         }
     }
 
-    // ── Mock helpers ──────────────────────────────────────────────────────────
-    private static string RecipeName(int tipo) => tipo switch
-    {
-        0 => "Espada de Aço Ametista",
-        1 => "Lâmina Expert de Cobalto",
-        2 => "Engrenagem Coletável de Titânio",
-        3 => "Anel Splendorous de Ouro",
-        4 => "Manto de Especialista de Linho",
-        5 => "Ferramenta Cósmica de Adamantita",
-        _ => "Receita Desconhecida",
-    };
+    // ── Seção 0: CraftableStatus ──────────────────────────────────────────────
 
-    private static Vector4 TipoColor(int tipo) => tipo switch
+    private static void DrawSection_CraftableStatus(float totalW)
     {
-        1 => Colors.Durability,        // Expert
-        2 => Colors.Collectability,    // Collectible
-        3 => Colors.Quality,           // Splendorous
-        4 => Colors.SpecialistGold,    // Specialist
-        5 => Colors.CosmicActive,      // Cosmic
-        _ => Colors.ActionBuff,        // Normal
-    };
+        // 8 sub-estados side by side, wrapping automático
+        var states = new (string Label, Action Draw)[]
+        {
+            ("OK",                  DrawCraftStatus_OK),
+            ("LockedClassJob",      DrawCraftStatus_Locked),
+            ("WrongClassJob",       DrawCraftStatus_WrongJob),
+            ("SpecialistRequired",  DrawCraftStatus_Specialist),
+            ("RequiredItem",        DrawCraftStatus_RequiredItem),
+            ("RequiredStatus",      DrawCraftStatus_RequiredStatus),
+            ("CraftsmanshipTooLow", DrawCraftStatus_CraftsmanshipLow),
+            ("ControlTooLow",       DrawCraftStatus_ControlLow),
+        };
 
-    private static string CraftableStatusText(int status) => status switch
+        DrawGallery(states, PanelW);
+    }
+
+    private static void DrawCraftStatus_OK()
     {
-        1 => "Classe incorreta — troque para a classe da receita.",
-        2 => "Craftsmanship insuficiente para esta receita.",
-        3 => "Esta receita exige um Especialista (Soul of the Crafter).",
-        _ => string.Empty,
-    };
+        if (!ImGui.BeginTable("ok##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 110f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        DrawStatRow2("Craftsmanship", MockCraftsmanship.ToString());
+        DrawStatRow2("Control",       MockControl.ToString());
+        DrawStatRow2("CP",            MockCP.ToString());
+        ImGui.EndTable();
+    }
+
+    private static void DrawCraftStatus_Locked()
+    {
+        ImGuiUtils.TextCentered("You do not have Weaver unlocked.");
+        ImGui.Separator();
+        ImGuiUtils.TextCentered("Unlock it from Guildmaster Maronne");
+        ImGuiUtils.TextCentered("Ul'dah - Steps of Thal (12.5, 8.6)");
+    }
+
+    private static void DrawCraftStatus_WrongJob()
+    {
+        ImGuiUtils.TextCentered("You are not a Weaver.");
+        if (ImGuiUtils.ButtonCentered("Switch Job"))
+            _ = 0; // no-op in story
+        ImGuiUtils.HoveredTooltip("Swap to gearset 4");
+    }
+
+    private static void DrawCraftStatus_Specialist()
+    {
+        ImGuiUtils.TextCentered("You need to be a specialist to craft this recipe.");
+        ImGui.Separator();
+        ImGuiUtils.TextCentered("Trade a Soul of the Crafter to Zuzuvano");
+        ImGuiUtils.TextCentered("Ul'dah - Steps of Thal (14.2, 10.8)");
+    }
+
+    private static void DrawCraftStatus_RequiredItem()
+    {
+        ImGuiUtils.TextCentered("You are missing the required equipment.");
+        ImGuiUtils.TextCentered("[★] Diadochos Needle");
+    }
+
+    private static void DrawCraftStatus_RequiredStatus()
+    {
+        ImGuiUtils.TextCentered("You are missing the required status effect.");
+        ImGuiUtils.TextCentered("[✦] Well Fed");
+    }
+
+    private static void DrawCraftStatus_CraftsmanshipLow()
+    {
+        ImGuiUtils.TextCentered("Your Craftsmanship is too low.");
+        if (!ImGui.BeginTable("craftslow##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("Current");
+        ImGui.TableNextColumn(); ImGui.TextColored(Colors.Good,  MockCraftsmanship.ToString());
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("Required");
+        ImGui.TableNextColumn(); ImGui.TextColored(Colors.Bad,   MockRequiredCrafts.ToString());
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("You need");
+        ImGui.TableNextColumn(); ImGui.TextUnformatted((MockRequiredCrafts - MockCraftsmanship).ToString());
+        ImGui.EndTable();
+    }
+
+    private static void DrawCraftStatus_ControlLow()
+    {
+        ImGuiUtils.TextCentered("Your Control is too low.");
+        if (!ImGui.BeginTable("ctrllow##stats", 2)) return;
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f);
+        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("Current");
+        ImGui.TableNextColumn(); ImGui.TextColored(Colors.Good, MockControl.ToString());
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("Required");
+        ImGui.TableNextColumn(); ImGui.TextColored(Colors.Bad,  MockRequiredCtrl.ToString());
+        ImGui.TableNextColumn(); ImGui.TextUnformatted("You need");
+        ImGui.TableNextColumn(); ImGui.TextUnformatted((MockRequiredCtrl - MockControl).ToString());
+        ImGui.EndTable();
+    }
+
+    // ── Seções 1–6: stubs temporários ────────────────────────────────────────
+
+    private static void DrawSection_RecipeHeader(float _)   => ImGui.TextDisabled("(Task 2)");
+    private static void DrawSection_GearCondition(float _)  => ImGui.TextDisabled("(Task 2)");
+    private static void DrawSection_SavedMacro(float _)     => ImGui.TextDisabled("(Task 3)");
+    private static void DrawSection_SuggestedMacro(float _) => ImGui.TextDisabled("(Task 4)");
+    private static void DrawSection_CommunityMacro(float _) => ImGui.TextDisabled("(Task 5)");
+    private static void DrawSection_MainButton(float _)     => ImGui.TextDisabled("(Task 5)");
+
+    // ── Helpers compartilhados ────────────────────────────────────────────────
+
+    // Desenha uma galeria side-by-side de sub-estados, cada um dentro de um GroupPanel.
+    private static void DrawGallery((string Label, Action Draw)[] states, float panelW)
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var i = 0;
+        foreach (var (label, draw) in states)
+        {
+            if (i > 0) ImGui.SameLine(0, spacing);
+            using (var panel = ImRaii2.GroupPanel(label, panelW, out _))
+                if (panel) draw();
+            i++;
+        }
+    }
+
+    private static void DrawStatRow2(string label, string value)
+    {
+        ImGui.TableNextColumn(); ImGui.TextUnformatted(label);
+        ImGui.TableNextColumn(); ImGuiUtils.TextRight(value);
+    }
 }
