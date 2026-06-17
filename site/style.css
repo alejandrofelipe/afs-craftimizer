@@ -1,0 +1,186 @@
+/* site/style.css — Tema compartilhado do Artificer Reference Site */
+
+:root {
+  /* Cores do plugin (mapeadas de Colors.cs) */
+  --color-progress:      #4fc3f7;
+  --color-quality:       #aed581;
+  --color-bad:           #ef5350;
+  --color-warning:       #ffa726;
+  --color-good:          #66bb6a;
+  --color-muted:         #757575;
+  --color-specialist:    #ffd54f;
+  --color-cosmic:        #ce93d8;
+  --color-collectible:   #80cbc4;
+  --color-action-buff:   #ffcc02;
+
+  /* UI */
+  --bg:        #0d1117;
+  --bg-card:   #161b22;
+  --bg-panel:  #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --text-dim:  #8b949e;
+  --radius:    6px;
+  --font:      'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+a { color: var(--color-progress); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+.site-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.site-header .breadcrumb { color: var(--text-dim); font-size: 13px; }
+.site-header h1 { font-size: 18px; font-weight: 600; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-dim); font-size: 13px; padding: 8px 14px;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover  { color: var(--text); }
+.tab-btn.active { color: var(--color-progress); border-bottom-color: var(--color-progress); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Galeria de estados ───────────────────────────────────────────── */
+.state-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.state-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 280px;
+  flex-shrink: 0;
+}
+.state-card .state-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-dim);
+  padding: 8px 12px 0;
+  font-family: var(--font-mono);
+}
+.state-card .state-body {
+  padding: 10px 12px 12px;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.badge-ok      { background: #0a2e1a; color: var(--color-good); }
+.badge-error   { background: #2e0a0a; color: var(--color-bad); }
+.badge-warning { background: #2e1e0a; color: var(--color-warning); }
+.badge-loading { background: #0a1a2e; color: var(--color-progress); }
+.badge-empty   { background: #1a1a1a; color: var(--text-dim); }
+.badge-opt     { background: #1a1a2e; color: var(--color-cosmic); }
+
+/* ── Mock components ─────────────────────────────────────────────── */
+.mock-stat-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+.mock-stat-table td { padding: 2px 4px; }
+.mock-stat-table td:last-child { text-align: right; color: var(--text-dim); }
+
+.mock-progress-bar {
+  height: 8px; border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+  margin: 4px 0;
+}
+.mock-progress-bar .fill { height: 100%; border-radius: 4px; }
+
+.mock-alert {
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12px;
+  border-left: 3px solid;
+  margin-top: 4px;
+}
+.mock-alert.info    { background: #0a1a2e; border-color: var(--color-progress); }
+.mock-alert.warning { background: #2e1e0a; border-color: var(--color-warning); }
+.mock-alert.danger  { background: #2e0a0a; border-color: var(--color-bad); }
+.mock-alert .alert-title { font-weight: 600; margin-bottom: 2px; }
+
+.mock-macro-card {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  grid-template-rows: 44px 22px;
+  gap: 4px;
+  margin-top: 4px;
+}
+.mock-arc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+  grid-row: 1;
+}
+.mock-arc-cell {
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+}
+.mock-action-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-content: flex-start;
+}
+.mock-action-slot {
+  width: 20px; height: 20px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.mock-hq-pct { font-size: 13px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; }
+.mock-macro-name { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; }
+
+/* ── Index cards ─────────────────────────────────────────────────── */
+.window-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.window-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: border-color .15s;
+}
+.window-card:hover { border-color: var(--color-progress); }
+.window-card h3 { margin-bottom: 6px; font-size: 15px; }
+.window-card .meta { font-size: 12px; color: var(--text-dim); }
