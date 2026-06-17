@@ -212,6 +212,7 @@ public sealed class CraftingSession : IDisposable
         {
             existing.SavedScore = newScore;
             existing.Actions = actions;
+            existing.CharacterStatsHash = CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : null;
             _plugin.MacroRepository.Update(existing);
             global::Artificer.Plugin.Plugin.DisplayNotification(new()
             {
