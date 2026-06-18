@@ -23,7 +23,7 @@ public static partial class ImGuiUtils
 
         var dl     = ImGui.GetWindowDrawList();
         var pos    = ImGui.GetCursorScreenPos();
-        var availW = width > 0 ? width : ImGui.GetContentRegionAvail().X;
+        var availW = width > 0 ? width : global::System.Math.Max(1f, ImGui.GetContentRegionAvail().X);
         var padX   = ImGui.GetStyle().WindowPadding.X;
         var padY   = ImGui.GetStyle().FramePadding.Y;
         var lineH  = ImGui.GetTextLineHeightWithSpacing();
