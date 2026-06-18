@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Solver", "Artific
 		{172EE849-AC7E-4F2A-ACAB-EF9D065523B3} = {172EE849-AC7E-4F2A-ACAB-EF9D065523B3}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Test", "Test\Artificer.Test.csproj", "{C3AEA981-9DA8-405C-995B-86528493891B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Test", "Artificer.Test\Artificer.Test.csproj", "{C3AEA981-9DA8-405C-995B-86528493891B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Artificer.UI", "Artificer.UI\Artificer.UI.csproj", "{9821AA93-B6E0-47BB-9A6C-63D00BF02442}"
 EndProject
