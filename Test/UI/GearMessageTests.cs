@@ -12,17 +12,17 @@ namespace Artificer.Test.UI;
 public class GearMessageTests
 {
     [TestMethod]
-    public void FormatGearRepairMessage_TrackingDisabled_ReturnsRepairMessage()
+    public void FormatGearRepairMessage_ReturnsPercentWithRepairText()
     {
         var result = ImGuiUtils.FormatGearRepairMessage(27f);
         Assert.AreEqual("27% — Repair gear before continuing!", result);
     }
 
     [TestMethod]
-    public void FormatGearRepairMessage_RecipeDataNull_ReturnsRepairMessage()
+    public void FormatGearRepairMessage_FullDurability_ReturnsRepairMessage()
     {
-        var result = ImGuiUtils.FormatGearRepairMessage(95f);
-        Assert.AreEqual("95% — Repair gear before continuing!", result);
+        var result = ImGuiUtils.FormatGearRepairMessage(100f);
+        Assert.AreEqual("100% — Repair gear before continuing!", result);
     }
 
     [TestMethod]
@@ -37,6 +37,6 @@ public class GearMessageTests
     {
         // 27.6 should round to 28, not truncate to 27
         var result = ImGuiUtils.FormatGearRepairMessage(27.6f);
-        StringAssert.StartsWith(result, "28%");
+        Assert.AreEqual("28% — Repair gear before continuing!", result);
     }
 }
