@@ -1,5 +1,6 @@
 using Artificer.Utils;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Numerics;
@@ -45,7 +46,7 @@ internal static class DrawGuard
                 if (ImGui.IsWindowHovered())
                 {
                     using var tt   = ImRaii.Tooltip();
-                    using var wrap = ImRaii.TextWrapPos(600);
+                    using var wrap = ImRaii.TextWrapPos(600 * ImGuiHelpers.GlobalScale);
                     ImGui.TextUnformatted(ex.ToString());
                 }
             }

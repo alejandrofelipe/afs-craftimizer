@@ -1030,7 +1030,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.GetWindowDrawList().AddRectFilled(
                     screenMin,
                     screenMin + new Vector2(panelWidth, overlayH),
-                    ImGui.GetColorU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
+                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
                     3f);
 
                 PluginImGuiUtils.DrawSolverProgressArea(
