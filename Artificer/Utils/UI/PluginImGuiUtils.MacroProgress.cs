@@ -26,6 +26,9 @@ internal static partial class PluginImGuiUtils
                 => ImGuiUtils.SolverState.Failed,
             _ => ImGuiUtils.SolverState.Solving,
         };
+        // Origem da linha = borda-esquerda do conteúdo do painel (a função entra com o
+        // cursor aqui nos 3 call sites: Suggested, overlay de Regenerating e Macro Editor).
+        var rowStartX = ImGui.GetCursorPosX();
         ImGuiUtils.DrawStateChip(chipState);
 
         ImGui.SameLine(0, ImGui.GetStyle().ItemSpacing.X);
@@ -34,7 +37,10 @@ internal static partial class PluginImGuiUtils
         var algoName = snapshot.Name;
         var algoWidth = ImGui.CalcTextSize(algoName).X;
         ImGui.SameLine(0, 0);
-        ImGuiUtils.AlignRight(algoWidth);
+        // Alinha à borda-direita do PAINEL (rowStartX + availWidth), não à borda da janela.
+        // MathF.Max evita sobrepor os dots quando o painel é estreito demais.
+        var targetX = rowStartX + availWidth - algoWidth;
+        ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), targetX));
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
             ImGui.TextUnformatted(algoName);
 
