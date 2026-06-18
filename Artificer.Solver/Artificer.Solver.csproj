@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Simulator\Artificer.Simulator.csproj" />
+    <ProjectReference Include="..\Artificer.Simulator\Artificer.Simulator.csproj" />
   </ItemGroup>
 
   <ItemGroup>

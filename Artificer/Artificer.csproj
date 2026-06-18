@@ -43,8 +43,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <ProjectReference Include="..\Simulator\Artificer.Simulator.csproj" />
-    <ProjectReference Include="..\Solver\Artificer.Solver.csproj" />
+    <ProjectReference Include="..\Artificer.Simulator\Artificer.Simulator.csproj" />
+    <ProjectReference Include="..\Artificer.Solver\Artificer.Solver.csproj" />
     <ProjectReference Include="..\Artificer.UI\Artificer.UI.csproj" />
   </ItemGroup>
 

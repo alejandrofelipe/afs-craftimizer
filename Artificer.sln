@@ -8,11 +8,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer", "Artificer\Arti
 		{2B0EA452-6DFC-48DB-9049-EA782E600C21} = {2B0EA452-6DFC-48DB-9049-EA782E600C21}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Benchmark", "Benchmark\Artificer.Benchmark.csproj", "{057C4B64-4D99-4847-9BCF-966571CAE57C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Benchmark", "Artificer.Benchmark\Artificer.Benchmark.csproj", "{057C4B64-4D99-4847-9BCF-966571CAE57C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Simulator", "Simulator\Artificer.Simulator.csproj", "{172EE849-AC7E-4F2A-ACAB-EF9D065523B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Simulator", "Artificer.Simulator\Artificer.Simulator.csproj", "{172EE849-AC7E-4F2A-ACAB-EF9D065523B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Solver", "Solver\Artificer.Solver.csproj", "{2B0EA452-6DFC-48DB-9049-EA782E600C21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Artificer.Solver", "Artificer.Solver\Artificer.Solver.csproj", "{2B0EA452-6DFC-48DB-9049-EA782E600C21}"
 	ProjectSection(ProjectDependencies) = postProject
 		{172EE849-AC7E-4F2A-ACAB-EF9D065523B3} = {172EE849-AC7E-4F2A-ACAB-EF9D065523B3}
 	EndProjectSection
