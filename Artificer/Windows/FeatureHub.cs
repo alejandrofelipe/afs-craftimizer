@@ -91,8 +91,8 @@ public sealed class FeatureHub : Window, IDisposable
         // ⚓ Anchor toggle
         var isAnchored = _plugin.Configuration.FeatureHubAnchored;
         var anchorColor = isAnchored
-            ? new Vector4(0.23f, 0.62f, 0.91f, 1f)   // blue — anchored
-            : new Vector4(0.35f, 0.35f, 0.35f, 1f);   // grey  — free
+            ? Colors.FeatureHubAnchored
+            : Colors.FeatureHubFree;
         using (ImRaii.PushColor(ImGuiCol.Text, anchorColor))
         {
             if (ImGuiUtils.IconButtonSquare((int)DalamudIcon.Anchor, btnSize))
@@ -106,7 +106,7 @@ public sealed class FeatureHub : Window, IDisposable
         ImGui.SameLine(0, 4 * scale);
 
         // ⚒️ Minimize button (plugin icon)
-        using (ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.78f, 0.66f, 0.43f, 1f)))
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.FeatureHubGold))
         {
             if (ImGuiUtils.IconButtonSquare((int)DalamudIcon.Hammer, btnSize))
             {

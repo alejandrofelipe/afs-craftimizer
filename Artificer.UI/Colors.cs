@@ -60,6 +60,14 @@ public static class Colors
     /// <summary>Muted text color for secondary labels and subordinate values.</summary>
     public static readonly Vector4 TextMuted = new(0.314f, 0.376f, 0.478f, 1f); // #50607A
 
+    // ── Feature Hub ───────────────────────────────────────────────────────────
+    /// <summary>Cor do ícone anchor quando o hub está ancorado.</summary>
+    public static readonly Vector4 FeatureHubAnchored = new(0.23f, 0.62f, 0.91f, 1f); // #3B9EE8 blue
+    /// <summary>Cor do ícone anchor quando o hub está livre (não ancorado).</summary>
+    public static readonly Vector4 FeatureHubFree     = new(0.35f, 0.35f, 0.35f, 1f); // #595959 grey
+    /// <summary>Cor do ícone hammer (minimize) no hub.</summary>
+    public static readonly Vector4 FeatureHubGold     = new(0.78f, 0.66f, 0.43f, 1f); // #C7A86E gold
+
     private static Vector4 SolverProgressBg => ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.TableBorderLight));
     private static Vector4 SolverProgressFgBland => new(0.78f, 0.78f, 0.78f, 1f);
 
