@@ -9,7 +9,7 @@ internal static partial class PluginImGuiUtils
         GearWearTracker tracker)
     {
         if (!enableTracking || recipeData == null)
-            return $"{pct:0}% — Repair gear before continuing!";
+            return ImGuiUtils.FormatGearRepairMessage(pct);
 
         var recipe      = recipeData.Recipe;
         var recipeLevel = (ushort)recipeData.Table.RowId;
