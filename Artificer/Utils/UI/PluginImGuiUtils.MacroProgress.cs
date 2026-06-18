@@ -12,6 +12,12 @@ internal static partial class PluginImGuiUtils
     /// Two-line progress area: chip + stage dots + algo name (line 1), progress bar (line 2).
     /// Mirrors the MacroEditor progress component.
     /// </summary>
+    /// <remarks>
+    /// Precondição: deve ser chamado com o cursor na borda-esquerda do conteúdo do painel,
+    /// e <paramref name="availWidth"/> = largura interna do painel. O label do algoritmo é
+    /// ancorado em rowStartX + availWidth; se um futuro call site entrar com offset em X
+    /// (ex.: dentro de uma célula de tabela), o alinhamento ficará incorreto.
+    /// </remarks>
     public static void DrawSolverProgressArea(
         float availWidth,
         ProgressBarComponent.ProgressSnapshot[] snapshots,
