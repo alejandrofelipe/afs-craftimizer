@@ -137,6 +137,13 @@ public static class ImRaii
         public void Dispose() { if (!_disposed) { ImGui.EndChild(); _disposed = true; } }
     }
 
+    public struct DisabledDisposable : IDisposable
+    {
+        private bool _disposed;
+        public static implicit operator bool(DisabledDisposable _) => true;
+        public void Dispose() { if (!_disposed) { ImGui.EndDisabled(); _disposed = true; } }
+    }
+
     public static PopupDisposable Popup(string id, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
     {
         var success = ImGui.BeginPopup(id, flags);
@@ -147,5 +154,12 @@ public static class ImRaii
     {
         ImGui.BeginChild(id, size, border ? ImGuiChildFlags.Border : ImGuiChildFlags.None, flags);
         return new ChildDisposable();
+    }
+
+    public static DisabledDisposable Disabled(bool disabled = true)
+    {
+        if (disabled)
+            ImGui.BeginDisabled(true);
+        return new DisabledDisposable();
     }
 }

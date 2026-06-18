@@ -17,7 +17,10 @@ StudioApp.Run(
     new SinglePanelStory(),
     new IconButtonsStory(),
     new LayoutHelpersStory(),
+    new TooltipsStory(),
     new AlertStory(),
+    new BadgesStory(),
+    new SearchableComboStory(),
     // Pages
     new MacroEditorStory(),
     new SynthesisHelperStory(),
