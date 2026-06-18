@@ -305,6 +305,7 @@ public static partial class ImGuiUtils
     {
         if (availSize == default)
         {
+            // Só o X é limitado à largura do painel; o Y vem do content region (painéis não restringem altura).
             var avail = ImGui.GetContentRegionAvail();
             availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
         }
@@ -331,6 +332,7 @@ public static partial class ImGuiUtils
     {
         if (availSize == default)
         {
+            // Só o X é limitado à largura do painel; o Y vem do content region (painéis não restringem altura).
             var avail = ImGui.GetContentRegionAvail();
             availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
         }
