@@ -429,26 +429,6 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     ImGui.TableNextColumn();
                     DrawRecipeStats();
                 }
-
-                if (CraftStatus == CraftableStatus.OK && _plugin.Configuration.ShowGearCondition)
-                {
-                    var gearCondition = Gearsets.GetMinimumGearCondition();
-                    if (gearCondition.HasValue)
-                    {
-                        var pct     = gearCondition.Value;
-                        var variant = pct < 25f ? AlertVariant.Danger
-                                    : pct < 50f ? AlertVariant.Warning
-                                    :             AlertVariant.Info;
-                        var message = PluginImGuiUtils.BuildGearMessage(
-                            pct,
-                            _plugin.Configuration.EnableGearWearTracking,
-                            RecipeData,
-                            _plugin.GearWearTracker);
-
-                        ImGuiHelpers.ScaledDummy(2);
-                        ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale, tableW);
-                    }
-                }
             }
         }
         var gpWidth = ImGui.GetItemRectSize().X;
@@ -461,6 +441,25 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
         var availWidth = gpWidth;
         var panelWidth = availWidth - ImGui.GetStyle().ItemSpacing.X * 2;
+
+        if (_plugin.Configuration.ShowGearCondition)
+        {
+            var gearCondition = Gearsets.GetMinimumGearCondition();
+            if (gearCondition.HasValue)
+            {
+                var pct     = gearCondition.Value;
+                var variant = pct < 25f ? AlertVariant.Danger
+                            : pct < 50f ? AlertVariant.Warning
+                            :             AlertVariant.Info;
+                var message = PluginImGuiUtils.BuildGearMessage(
+                    pct,
+                    _plugin.Configuration.EnableGearWearTracking,
+                    RecipeData,
+                    _plugin.GearWearTracker);
+                ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale, availWidth);
+                ImGui.Spacing();
+            }
+        }
 
         {
             var savedResult = SavedMacroTask?.Result;
