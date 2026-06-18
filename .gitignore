@@ -23,6 +23,9 @@ coverage/
 backlog/
 design/
 
+# Local scripts (build helpers, not for repo)
+scripts/
+
 # Internal documentation (not for repo)
 *.Examples.md
 *.README.md
