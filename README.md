@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.23.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.23.0.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -12,13 +12,13 @@ Plugin Dalamud para FFXIV que otimiza macros de crafting usando simulação e bu
 ## Estrutura do Projeto
 
 ```
-Artificer/            ← Plugin Dalamud (entry point, janelas, hooks, serviços)
-Artificer.UI/         ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NET direto)
-Artificer.UIStudio/   ← App desktop standalone para testar UI sem o FFXIV rodando
-Simulator/              ← Lógica de simulação de crafting (puro C#, sem dependências externas)
-Solver/                 ← Algoritmos MCTS, genético e Raphael
-Test/                   ← 194 testes cobrindo Simulator e Solver
-Benchmark/              ← Benchmarks de performance do solver
+Artificer/             ← Plugin Dalamud (entry point, janelas, hooks, serviços)
+Artificer.UI/          ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NET direto)
+Artificer.UIStudio/    ← App desktop standalone para testar UI sem o FFXIV rodando
+Artificer.Simulator/   ← Lógica de simulação de crafting (puro C#, sem dependências externas)
+Artificer.Solver/      ← Algoritmos MCTS, genético e Raphael
+Artificer.Test/        ← 215 testes cobrindo Simulator, Solver e UI
+Artificer.Benchmark/   ← Benchmarks de performance do solver
 ```
 
 ### Artificer.UI
@@ -165,17 +165,17 @@ Para a versão estável sem customizações, instale o [Craftimizer original](ht
 
 Plugin:
 ```powershell
-dotnet build Artificer/Artificer.csproj -c Release
+.\scripts\build.ps1 -Configuration Release
 ```
 
 UI Studio:
 ```powershell
-dotnet run --project Artificer.UIStudio
+"C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" run --project Artificer.UIStudio
 ```
 
-Testes (211 testes cobrindo Simulator e Solver):
+Testes (215 testes cobrindo Simulator, Solver e UI):
 ```powershell
-dotnet test
+"C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
 
 ---

@@ -1,18 +1,32 @@
 # Guia Rápido de Contribuição
 
-Buscamos garantir que o plugin fique polido, seguro para uso geral sem bans pela Square, e extremamente perfomático.
+Buscamos manter o plugin polido, seguro para uso geral sem bans pela Square Enix, e extremamente performático.
 
 ## Onde começar
-1. **O Backlog:** Cheque a raiz em `backlog/*.md`. Todos os bugs recentes da expansão, refatorações da UI, issues da versão 7.X ou novos calculos de exploração cósmica ficam ali descritos.
-2. Leia a pasta `docs/` recém criada para entender as barreiras e regras dos componentes isolados.
+
+1. **O Backlog:** Cheque `backlog/*.md` (pasta local, gitignored). Bugs conhecidos, feature requests, e itens pendentes da Cosmic Tool e Lista de Coleta estão documentados ali.
+2. **A pasta `docs/`** para entender as barreiras e regras de cada componente isolado.
+3. **`docs/plugin-health.md`** para incompatibilidades conhecidas com Dalamud/ImGui e gotchas de crash.
 
 ## Fluxo ideal (Fork e PR)
+
 1. Fork e pull na sua máquina.
-2. Crie a branch sob convenções (ex: `fix/crash-recipe-hud` ou `feat/new-solver-parameter`).
-3. Compile, e use o Dalamud Settings "DevPlugins" para testar sua branch no jogo em *Debug*.
-4. **Mandatório:**
-   - Execute o `.editorconfig` lint / formatador da IDE para padronização.
-   - Execute o Test suite e confirme 0 testes quebrados.
-   - Adicione novos testes (em `Artificer.Test`) caso mude um script nas sub-pastas `/Actions/`.
-5. Faça seus Commits.
-6. Submeta o PR. Aprovamos ou indicamos otimizações baseadas no *hotpath* de memórias alocadas.
+2. Crie a branch seguindo convenções: `fix/crash-recipe-hud`, `feat/new-solver-parameter`.
+3. Compile com `.\scripts\build.ps1` e use "DevPlugins" do Dalamud para testar em Debug no jogo.
+4. **Obrigatório:**
+   - Zero warnings de build (`dotnet build` não deve gerar nenhum warning novo).
+   - Execute o test suite e confirme 0 testes quebrados (215 esperados).
+   - Se mudou algum arquivo em `Artificer.Simulator/Actions/`, adicione ou atualize o teste correspondente em `Artificer.Test/Simulator/`.
+   - Para componentes em `Artificer.UI/`: teste visualmente no UIStudio antes do jogo.
+5. Faça commits seguindo Conventional Commits em português (`feat(ui):`, `fix(solver):`, `refactor(simulator):`).
+6. Submeta o PR. Aprovações focam em performance do hot path, compatibilidade com Dalamud e ausência de regressões.
+
+## Regras rápidas
+
+| Área | Regra |
+|---|---|
+| `Artificer.UI` | Nunca importar `Dalamud.*`. Usar `ImRaii.PushStyle` (não `ImGui.PushStyleVar` direto). |
+| Janelas novas | `Theme.Push()` em `PreDraw()`, `Theme.Pop()` em `PostDraw()`. Registrar no `WindowSystem`. |
+| Cores | Sempre `Colors.*`. Nunca `new Vector4(r, g, b, 1f)` inline. |
+| RAII | Sempre `using var _ = ImRaii.PushColor(...)`. Nunca Push sem Pop correspondente. |
+| Testes | MSTest — não NUnit. Framework: `Microsoft.Testing.Platform`. |

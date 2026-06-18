@@ -1,25 +1,39 @@
 # Qualidade de Código (Testes & Benchmarks)
 
-A estabilidade do Artificer recai sobre seus dois projetos paralelos focados em QA estrutural. Testar localmente é mandatório antes de qualquer "Push".
+A estabilidade do Artificer recai sobre dois projetos de QA. Rodar os testes localmente é obrigatório antes de qualquer push.
 
-## 1. O Projeto `Test` (MSTest)
-Usamos MSTest V3 injetado via framework `Microsoft.Testing.Platform`.
-Para executar todo o pacote base, vá ao root ou navegue na pasta:
-```sh
-dotnet test
+## 1. Artificer.Test (MSTest)
+
+Usa MSTest V3 via `Microsoft.Testing.Platform`. 215 testes no total.
+
+```powershell
+"C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
 
-A estrutura lógica aborda os dois pontos soltos da aplicação:
-- **Simulator Tests**: Mocka um `SimulationState` inicial (incluindo buffs passados como *Great Strides*), joga uma Action e valida asserts específicos das mecânicas in-game, como se multiplicou perfeitamente ou se esgotou a durabilidade no ciclo finalizado. Evita regressões da Square Enix em updates menores.
-- **Solver Tests**: Focado no `MCTSSolverTests.cs`, atesta a integridade do retorno nativo do Rust (via bibliotecas precompiladas para múltiplos runtimes que estão em `Test/bin/.../runtimes`). A validação inclui atestar que o Monte Carlo gerará a árvore e passará com sucesso sem estourar referências de ponteiro do heap.
+Esperado: `Passed! - Failed: 0, Passed: 215, Skipped: 0`
 
-## 2. O Projeto `Benchmark`
-Testes de tempo real de simulação, especialmente criados pra manter os limites sob controle do Solver MCTS. Utiliza *BenchmarkDotNet*.
+### Estrutura
 
-Para rodar (Obrigatoriamente no modo `Release` para inibir JIT overhead):
-```sh
-dotnet run -c Release --project Benchmark/Artificer.Benchmark.csproj
+- **`Artificer.Test/Simulator/`**: Instancia um `SimulationState` com buffs iniciais (ex: Great Strides ativo), executa uma Action e valida o resultado matemático. Previne regressões quando a Square Enix altera fórmulas em patches menores.
+- **`Artificer.Test/Solver/`**: `MCTSSolverTests.cs` valida a integridade do retorno nativo do Rust via `Raphael.Net`. Confirma que o MCTS gera a árvore e devolve um resultado sem estourar ponteiros de heap.
+- **`Artificer.Test/UI/`**: Testes de componentes de UI como `ImRaiiShim`, `GearMessage` e serviços de UI.
+
+### Quando adicionar testes
+
+Sempre que modificar um arquivo em `Artificer.Simulator/Actions/`, adicionar ou atualizar o teste correspondente em `Artificer.Test/Simulator/`.
+
+---
+
+## 2. Artificer.Benchmark (BenchmarkDotNet)
+
+Benchmarks de tempo real para manter o Simulator e Solver dentro dos limites de performance aceitáveis.
+
+**Obrigatoriamente em modo Release** para eliminar overhead do JIT:
+
+```powershell
+"C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" run -c Release --project Artificer.Benchmark
 ```
 
-**Por que focar nisso?**
-Se um desenvolvedor altera como uma habilidade processa matemática da Qualidade e isso adicina um `if/else` caro no *hotpath*, o tempo do simulador passa de 300 nanosegundos para 2 microsegundos. O Benchmark sinalizará isso instantaneamente e barrará a implementação se o decréscimo travar a UI (Main Thread) do jogo.
+### Por que importa
+
+Se uma alteração em uma skill adiciona um `if/else` no *hot path* e o tempo do Simulator sobe de ~300ns para ~2µs, o Benchmark sinaliza isso imediatamente. Em 300ms de craft com 40 ações, cada microssegundo extra importa para não travar a main thread do Dalamud.

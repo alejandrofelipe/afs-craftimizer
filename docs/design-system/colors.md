@@ -1,6 +1,6 @@
 # Cores — Design System
 
-Fonte de verdade: `Artificer/Utils/UI/Colors.cs`
+Fonte de verdade: `Artificer.UI/Colors.cs`
 
 Todos os tokens são `public static readonly Vector4` (RGBA, valores 0.0–1.0).
 Para converter para hex: `Math.Round(component * 255)` → hex de 2 dígitos.
@@ -207,6 +207,18 @@ Cores dos 3 thresholds de Collectability. Usadas no overlay de collectability.
 | Token C# | Hex | Uso |
 |---|---|---|
 | `Colors.SpecialistGold` | `#FCFA9E` | Badge "Specialist" em receitas que exigem especialista |
+
+---
+
+## Feature Hub
+
+Cores do ícone de âncora e do launcher do FeatureHub.
+
+| Token C# | Hex | Uso |
+|---|---|---|
+| `Colors.FeatureHubAnchored` | `#3B9EE8` | Ícone âncora quando o hub está fixado ao NaviMap |
+| `Colors.FeatureHubFree`     | `#595959` | Ícone âncora quando o hub está flutuante (livre) |
+| `Colors.FeatureHubGold`     | `#C7A86E` | Ícone hammer (minimizar) do hub |
 
 ---
 

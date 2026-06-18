@@ -1,6 +1,6 @@
 # Artificer Plugin — Diagnóstico de Saúde e Guia de Testes
 
-> Última atualização: 2026-06-11 (v2.20.8.0)  
+> Última atualização: 2026-06-18 (v2.23.0.0)  
 > Baseado em: Dalamud.NET.Sdk 15.0.0 · Dalamud local em `C:\Users\aleja\DEV\dalamud` · ImGuiNET 1.90.9.1
 
 ---
@@ -162,12 +162,12 @@ C:\Users\aleja\.nuget\packages\imgui.net\1.90.9.1\lib\net6.0\ImGuiNET.xml
 ### 5.2 Camadas de Teste Recomendadas
 
 #### Camada 1 — Lógica pura (já implementado ✓)
-`Test/` cobre Simulator + Solver com NUnit. Nenhuma dependência Dalamud. Continuar expandindo aqui.
+`Artificer.Test/` cobre Simulator + Solver com MSTest. Nenhuma dependência Dalamud. 215 testes. Continuar expandindo aqui.
 
 #### Camada 2 — Serviços com mocks (a implementar)
 
 ```xml
-<!-- Adicionar ao Test/Artificer.Test.csproj -->
+<!-- Adicionar ao Artificer.Test/Artificer.Test.csproj -->
 <PackageReference Include="NSubstitute" Version="5.*" />
 ```
 
@@ -221,7 +221,7 @@ Para detectar crashes de carregamento **antes** de abrir o FFXIV:
 
 2. **Deploy + checar log do Dalamud na próxima abertura:**
    ```powershell
-   .\scripts\build.ps1 -Deploy -NoBuild
+   .\scripts\build.ps1 -Deploy
    # Depois abrir o jogo e verificar em /xllog ou:
    # %APPDATA%\XIVLauncher\dalamud.log
    ```

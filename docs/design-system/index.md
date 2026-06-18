@@ -10,10 +10,10 @@ Um conjunto de **tokens, componentes e padrões** derivados diretamente do códi
 Não é uma especificação aspiracional — é uma descrição do que já existe.
 
 Fonte de verdade canônica (código):
-- `Artificer/Utils/UI/Colors.cs` — todos os tokens de cor
-- `Artificer/Utils/UI/Theme.cs` — backgrounds, borders, radii aplicados ao ImGui
-- `Artificer/Utils/UI/ImGuiUtils.cs` — componentes reutilizáveis
-- `Artificer/Utils/UI/ImGuiUtils.Cosmic.cs` — componentes do Cosmic Tracker
+- `Artificer.UI/Colors.cs` — todos os tokens de cor
+- `Artificer.UI/Theme.cs` — backgrounds, borders, radii aplicados ao ImGui
+- `Artificer.UI/ImGuiUtils.cs` — componentes reutilizáveis
+- `Artificer.UI/ImGuiUtils.Cosmic.cs` — componentes do Cosmic Tracker
 
 Preview visual interativo:
 - `mockup/design-system.html` — abre no browser, mostra todos os tokens e componentes
