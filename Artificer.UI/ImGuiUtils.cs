@@ -65,6 +65,10 @@ public static partial class ImGuiUtils
             ImGui.BeginGroup();
         }
 
+        // Disponibiliza a largura interna para os helpers de alinhamento (ImGuiUtils.ContentWidth.cs).
+        // DEVE ser a última ação antes do return: se BeginGroupPanel lançasse antes, nada seria
+        // empilhado e o RAII de EndGroupPanel não rodaria — mantendo o stack balanceado.
+        PushContentWidth(width);
         return width;
     }
 
@@ -127,6 +131,8 @@ public static partial class ImGuiUtils
         ImGui.EndGroup();
 
         ImGui.PopID();
+
+        PopContentWidth();
     }
 
     // ── Text / Layout helpers ─────────────────────────────────────────────────
@@ -283,16 +289,14 @@ public static partial class ImGuiUtils
 
     public static void AlignCentered(float width, float availWidth = default)
     {
-        if (availWidth == default)
-            availWidth = ImGui.GetContentRegionAvail().X;
+        availWidth = ResolveAvailWidth(availWidth);
         if (availWidth > width)
             ImGui.SetCursorPosX(ImGui.GetCursorPos().X + (availWidth - width) / 2);
     }
 
     public static void AlignRight(float width, float availWidth = default)
     {
-        if (availWidth == default)
-            availWidth = ImGui.GetContentRegionAvail().X;
+        availWidth = ResolveAvailWidth(availWidth);
         if (availWidth > width)
             ImGui.SetCursorPosX(ImGui.GetCursorPos().X + availWidth - width);
     }
@@ -300,7 +304,10 @@ public static partial class ImGuiUtils
     public static void AlignMiddle(Vector2 size, Vector2 availSize = default)
     {
         if (availSize == default)
-            availSize = ImGui.GetContentRegionAvail();
+        {
+            var avail = ImGui.GetContentRegionAvail();
+            availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
+        }
         if (availSize.X > size.X)
             ImGui.SetCursorPosX(ImGui.GetCursorPos().X + (availSize.X - size.X) / 2);
         if (availSize.Y > size.Y)
@@ -323,7 +330,10 @@ public static partial class ImGuiUtils
     public static void TextMiddleNewLine(string text, Vector2 availSize)
     {
         if (availSize == default)
-            availSize = ImGui.GetContentRegionAvail();
+        {
+            var avail = ImGui.GetContentRegionAvail();
+            availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
+        }
         var c = ImGui.GetCursorPos();
         AlignMiddle(ImGui.CalcTextSize(text), availSize);
         ImGui.TextUnformatted(text);
