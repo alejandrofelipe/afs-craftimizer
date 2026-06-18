@@ -135,12 +135,14 @@ public sealed class CraftingListWindow : Window, IDisposable
             using (ImRaii.Disabled(_page <= 0))
                 if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.ChevronLeft))
                     _page--;
+            ImGuiUtils.HoveredTooltip("Página anterior", (int)ImGuiHoveredFlags.AllowWhenDisabled);
             ImGui.SameLine();
             ImGui.TextUnformatted($"Página {_page + 1} / {totalPages}");
             ImGui.SameLine();
             using (ImRaii.Disabled(_page >= totalPages - 1))
                 if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.ChevronRight))
                     _page++;
+            ImGuiUtils.HoveredTooltip("Próxima página", (int)ImGuiHoveredFlags.AllowWhenDisabled);
         }
 
         DrawDeleteModal();

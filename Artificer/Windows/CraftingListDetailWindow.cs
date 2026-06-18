@@ -379,6 +379,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight() - btnPad));
                     if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Times))
                         _pendingRemoveId = recipe.Id;
+                    ImGuiUtils.HoveredTooltip("Remover da lista");
                 }
             }
 
@@ -652,8 +653,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     _prices.Clear();
                     _ = LoadPricesAsync();
                 }
+                ImGuiUtils.HoveredTooltip("Atualizar preços", (int)ImGuiHoveredFlags.AllowWhenDisabled);
             }
-            ImGuiUtils.HoveredTooltip("Atualizar preços");
         }
     }
 
