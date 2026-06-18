@@ -249,9 +249,9 @@ public sealed partial class MacroEditor
         }
 
         var pos = ImGui.GetCursorScreenPos();
-        ImGui.Dummy(default);
+        ImGui.Dummy(Vector2.Zero);
         ImGui.GetWindowDrawList().AddLine(pos, pos + new Vector2(availSpace, 0), ImGui.GetColorU32(ImGuiCol.Border));
-        ImGui.Dummy(default);
+        ImGui.Dummy(Vector2.Zero);
 
         if (solverSnapshots.Length > 0)
             DrawProgressArea(availSpace, solverSnapshots);

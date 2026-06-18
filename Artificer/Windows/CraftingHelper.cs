@@ -668,7 +668,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     }
                     else
                         ImGuiUtils.TextCentered($"You do not have any {RecipeData.ClassJob.GetName()} gearsets.");
-                    ImGui.Dummy(default);
+                    ImGui.Dummy(Vector2.Zero);
                 }
                 break;
             case CraftableStatus.SpecialistRequired:

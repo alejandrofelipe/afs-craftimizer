@@ -204,13 +204,13 @@ public sealed partial class MacroEditor
                     submittedUrl = ImGui.Button("Import", new(availWidth, 0)) || submittedUrl;
             }
 
-            ImGui.Dummy(default);
+            ImGui.Dummy(Vector2.Zero);
 
             if (!string.IsNullOrWhiteSpace(popupImportError))
             {
                 using (var c = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed))
                     ImGui.TextWrapped(popupImportError);
-                ImGui.Dummy(default);
+                ImGui.Dummy(Vector2.Zero);
             }
 
             if (ImGuiUtils.ButtonCentered("Nevermind", new(ImGui.GetContentRegionAvail().X / 2f, 0)))
