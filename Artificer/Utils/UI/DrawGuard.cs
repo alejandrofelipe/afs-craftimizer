@@ -34,8 +34,8 @@ internal static class DrawGuard
 
     private static void RenderError(string ctx, Exception ex)
     {
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.5f, 0.05f, 0.05f, 0.85f));
-        ImGui.PushStyleColor(ImGuiCol.Text,    new Vector4(1f,   0.85f, 0.85f, 1f));
+        using var bg   = ImRaii.PushColor(ImGuiCol.ChildBg, new Vector4(0.5f, 0.05f, 0.05f, 0.85f));
+        using var text = ImRaii.PushColor(ImGuiCol.Text,    new Vector4(1f,   0.85f, 0.85f, 1f));
         using (var child = ImRaii.Child("##draw_error", new Vector2(-1, 52), true))
         {
             if (child)
@@ -44,14 +44,11 @@ internal static class DrawGuard
                 ImGui.TextUnformatted($"  {ex.GetType().Name}: {ex.Message}");
                 if (ImGui.IsWindowHovered())
                 {
-                    ImGui.BeginTooltip();
-                    ImGui.PushTextWrapPos(600);
+                    using var tt   = ImRaii.Tooltip();
+                    using var wrap = ImRaii.TextWrapPos(600);
                     ImGui.TextUnformatted(ex.ToString());
-                    ImGui.PopTextWrapPos();
-                    ImGui.EndTooltip();
                 }
             }
         }
-        ImGui.PopStyleColor(2);
     }
 }
