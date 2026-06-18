@@ -70,6 +70,9 @@ internal sealed class CosmicTrackerStory : IStory
                 return;
             }
 
+            ImGuiUtils.DrawCosmicStageBadge(stage: 3, complete: false, maxStage: 4);
+            ImGui.Spacing();
+
             var barWidth = 280f * UiServices.Current.GlobalScale;
             var mode = _minimized
                 ? ImGuiUtils.ResearchTypeRowMode.Minimized

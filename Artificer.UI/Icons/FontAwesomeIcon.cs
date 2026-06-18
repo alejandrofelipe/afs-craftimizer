@@ -46,6 +46,7 @@ public enum FontAwesomeIcon : ushort
     Sync                = 0xf021,
     Times               = 0xf00d,
     Tools               = 0xf7d9,
+    Thumbtack           = 0xf08d,
     Trash               = 0xf1f8,
     Undo                = 0xf0e2,
     Upload              = 0xf093,

@@ -40,6 +40,25 @@ internal sealed class IconButtonsStory : IStory
         ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Edit, 32f);
         ImGui.SameLine(0, 8);
         ImGuiUtils.IconButtonSquare(FontAwesomeIcon.Edit, 48f);
+
+        ImGui.Spacing();
+        Section("With Tooltip (habilitado)");
+        ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon.Flag,  "Abrir no mapa");
+        ImGui.SameLine(0, 8);
+        ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon.Edit,  "Editar");
+        ImGui.SameLine(0, 8);
+        ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon.Trash, "Excluir");
+
+        ImGui.Spacing();
+        Section("With Tooltip (desabilitado — tooltip ainda aparece)");
+        using (ImRaii.Disabled(true))
+        {
+            ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon.Flag,  "Abrir no mapa",
+                flags: (int)ImGuiHoveredFlags.AllowWhenDisabled);
+            ImGui.SameLine(0, 8);
+            ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon.Edit,  "Editar",
+                flags: (int)ImGuiHoveredFlags.AllowWhenDisabled);
+        }
     }
 
     private static void Section(string title)

@@ -40,6 +40,13 @@ internal sealed class LayoutHelpersStory : IStory
         ImGui.Spacing();
         ImGui.TextDisabled("VALOR LONGO:");
         ImGuiUtils.DrawStatRow("Research Type III", "12.345 / 20.000");
+
+        Section("Hyperlink");
+        ImGuiUtils.Hyperlink("Craftimizer no GitHub", "https://github.com/", underline: true);
+        ImGui.SameLine(0, 16);
+        ImGuiUtils.Hyperlink("Sem underline", "https://example.com", underline: false);
+        ImGui.Spacing();
+        ImGui.TextDisabled("(StubUiServices.OpenLink é no-op — clique não abre nada)");
     }
 
     private static void Section(string title)
