@@ -41,6 +41,7 @@ public sealed class CosmicTracker : Window, IDisposable
         IsOpen = _progress != null && plugin.Configuration.EnableCosmicToolTracking
                                    && !plugin.Configuration.CosmicTrackerHidden;
         RespectCloseHotkey = false;
+        SizeConstraints    = new WindowSizeConstraints { MinimumSize = new(-1), MaximumSize = new(10000, 10000) };
 
         _eyeButton = new TitleBarButton
         {
