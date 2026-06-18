@@ -650,9 +650,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     ImGui.AlignTextToFramePadding();
                     ImGui.TextUnformatted(unlockText);
                     ImGui.SameLine(0, 5);
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Flag))
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Flag, "Open in map"))
                         Service.GameGui.OpenMapWithMapLink(mapPayload);
-                    ImGuiUtils.HoveredTooltip("Open in map");
 
                     ImGuiUtils.TextCentered($"{questTerritory} ({GetCoordinatesString(questLocation)})");
                 }
@@ -683,9 +682,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     ImGui.AlignTextToFramePadding();
                     ImGui.TextUnformatted(unlockText);
                     ImGui.SameLine(0, 5);
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Flag))
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.Flag, "Open in map"))
                         Service.GameGui.OpenMapWithMapLink(mapPayload);
-                    ImGuiUtils.HoveredTooltip("Open in map");
 
                     ImGuiUtils.TextCentered($"{vendorTerritory} ({GetCoordinatesString(vendorLoation)})");
                 }
@@ -1032,7 +1030,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.GetWindowDrawList().AddRectFilled(
                     screenMin,
                     screenMin + new Vector2(panelWidth, overlayH),
-                    ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
+                    ImGui.GetColorU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
                     3f);
 
                 PluginImGuiUtils.DrawSolverProgressArea(
