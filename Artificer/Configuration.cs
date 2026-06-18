@@ -109,7 +109,6 @@ public partial class Configuration
     public Dictionary<string, GearWearTracker.GearWearStats> GearWearData { get; set; } = new();
 
     /// <summary>
-    /// <summary>
     /// Enable Cosmic Tool progression tracking.
     /// Shows the CosmicTracker floating window in Sinus Ardorum / Auxesia.
     /// </summary>
