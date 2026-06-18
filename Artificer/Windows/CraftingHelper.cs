@@ -411,39 +411,55 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     {
         IsCollapsed = false;
 
-        var availWidth = ImGui.GetContentRegionAvail().X;
-        using (var crPanel = ImRaii2.GroupPanel("Crafter / Recipe", -1, out _))
+        var colW   = 160f * ImGuiHelpers.GlobalScale;
+        var tableW = colW * 2;
+
+        using (var crPanel = ImRaii2.GroupPanel("Crafter / Recipe", tableW, out _))
         {
             if (crPanel)
             {
                 using var table = ImRaii.Table("stats", 2, ImGuiTableFlags.SizingFixedSame | ImGuiTableFlags.NoSavedSettings);
                 if (table)
                 {
-                    if (StatsChanged)
-                    {
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
-                    }
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, colW);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, colW);
 
                     ImGui.TableNextColumn();
                     DrawCharacterStats();
                     ImGui.TableNextColumn();
                     DrawRecipeStats();
+                }
 
-                    // Ensure that we know the window should be the same size as this table. Any more and it'll grow slowly and won't shrink when it could
-                    ImGui.SameLine(0, 0);
-                    availWidth = ImGui.GetCursorPosX() - ImGui.GetStyle().WindowPadding.X + ImGui.GetStyle().CellPadding.X;
+                if (CraftStatus == CraftableStatus.OK && _plugin.Configuration.ShowGearCondition)
+                {
+                    var gearCondition = Gearsets.GetMinimumGearCondition();
+                    if (gearCondition.HasValue)
+                    {
+                        var pct     = gearCondition.Value;
+                        var variant = pct < 25f ? AlertVariant.Danger
+                                    : pct < 50f ? AlertVariant.Warning
+                                    :             AlertVariant.Info;
+                        var message = PluginImGuiUtils.BuildGearMessage(
+                            pct,
+                            _plugin.Configuration.EnableGearWearTracking,
+                            RecipeData,
+                            _plugin.GearWearTracker);
+
+                        ImGuiHelpers.ScaledDummy(2);
+                        ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale, tableW);
+                    }
                 }
             }
         }
-        availWidth += ImGui.GetStyle().ItemSpacing.X * 2;
-        _anchoredMaxWidth = availWidth + ImGui.GetStyle().WindowPadding.X * 2;
+        var gpWidth = ImGui.GetItemRectSize().X;
+        _anchoredMaxWidth = gpWidth + ImGui.GetStyle().WindowPadding.X * 2;
 
         if (CraftStatus != CraftableStatus.OK)
             return;
 
         ImGui.Spacing();
 
+        var availWidth = gpWidth;
         var panelWidth = availWidth - ImGui.GetStyle().ItemSpacing.X * 2;
 
         {
@@ -743,26 +759,6 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     }
                 }
                 break;
-        }
-
-        if (CraftStatus == CraftableStatus.OK && _plugin.Configuration.ShowGearCondition)
-        {
-            var gearCondition = Gearsets.GetMinimumGearCondition();
-            if (gearCondition.HasValue)
-            {
-                var pct     = gearCondition.Value;
-                var variant = pct < 25f ? AlertVariant.Danger
-                            : pct < 50f ? AlertVariant.Warning
-                            :             AlertVariant.Info;
-                var message = PluginImGuiUtils.BuildGearMessage(
-                    pct,
-                    _plugin.Configuration.EnableGearWearTracking,
-                    RecipeData,
-                    _plugin.GearWearTracker);
-
-                ImGuiHelpers.ScaledDummy(2);
-                ImGuiUtils.DrawAlert(variant, "Gear Condition", message, ImGuiHelpers.GlobalScale);
-            }
         }
 
         using var _spacing = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
