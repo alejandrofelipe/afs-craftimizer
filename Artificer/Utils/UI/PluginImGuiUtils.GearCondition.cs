@@ -21,7 +21,7 @@ internal static partial class PluginImGuiUtils
             { Confidence: > 0f } e => e.MinCrafts == e.MaxCrafts
                 ? $"{pct:0}% · ~{e.MinCrafts} crafts left"
                 : $"{pct:0}% · ~{e.MinCrafts}–{e.MaxCrafts} crafts left",
-            { } e                  => $"{pct:0}% · ~{e.MinCrafts} crafts left (no data)",
+            { } e                  => $"{pct:0}% · ~{e.MinCrafts} crafts left",
         };
     }
 }
