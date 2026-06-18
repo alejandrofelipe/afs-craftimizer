@@ -432,6 +432,12 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             }
         }
         var gpWidth = ImGui.GetItemRectSize().X;
+        // INVARIANTE ANTI-CRESCIMENTO: a largura da janela é fixada (min == max) em
+        // _anchoredMaxWidth no PreDraw. Ele deriva SÓ deste primeiro painel (largura
+        // interna fixa = tableW) e é medido ANTES dos painéis de macro. Os painéis de
+        // macro nunca realimentam _anchoredMaxWidth, então conteúdo que transborde um
+        // painel não pode fazer a janela crescer. Não dimensione nada sob AlwaysAutoResize
+        // a partir de GetContentRegionAvail() sem manter este pino.
         _anchoredMaxWidth = gpWidth + ImGui.GetStyle().WindowPadding.X * 2;
 
         if (CraftStatus != CraftableStatus.OK)
@@ -917,7 +923,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             ImGuiUtils.HoveredTooltip("Pre-filled from saved macro — solver still comparing");
         } : null;
 
-        using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out _, titleSuffix: titleSuffix);
+        using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out var contentW, titleSuffix: titleSuffix);
         if (!panel)
             return;
 
@@ -961,7 +967,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var spacing    = ImGui.GetStyle().ItemSpacing;
             var miniRowH   = (windowHeight - spacing.Y) / 2f;
             var arcColW    = miniRowH * 2 + spacing.X;
-            var innerW     = panelWidth;
+            var innerW     = contentW;
             var rightColW  = MathF.Max(1f, innerW - arcColW - 1f);
             var botRowH    = ImGui.GetFrameHeight();
 
@@ -1137,7 +1143,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 var miniRowH  = (windowHeight - spacing.Y) / 2f;
                 var arcColW   = miniRowH * 2 + spacing.X;
                 var botRowH   = ImGui.GetFrameHeight();
-                var innerW    = panelWidth;
+                var innerW    = contentW;
                 var rightColW = MathF.Max(1f, innerW - arcColW - 1f);
 
                 using var table = ImRaii.Table("macroCard", 2,
