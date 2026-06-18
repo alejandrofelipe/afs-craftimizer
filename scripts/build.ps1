@@ -4,7 +4,7 @@
     Build, deploy, and package Artificer.
 
 .PARAMETER Configuration
-    Build configuration. Default: Debug. When -Deploy or -Package is set, also builds Release.
+    Build configuration. Default: Release. Use -Configuration Debug to build debug binaries.
 
 .PARAMETER Deploy
     Copy Release build output to XIVLauncher installedPlugins after building.

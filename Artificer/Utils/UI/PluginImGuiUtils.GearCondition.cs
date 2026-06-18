@@ -17,7 +17,7 @@ internal static partial class PluginImGuiUtils
 
         return estimate switch
         {
-            null                   => $"{pct:0}% — Repair gear before continuing!",
+            null                   => ImGuiUtils.FormatGearRepairMessage(pct),
             { Confidence: > 0f } e => e.MinCrafts == e.MaxCrafts
                 ? $"{pct:0}% · ~{e.MinCrafts} crafts left"
                 : $"{pct:0}% · ~{e.MinCrafts}–{e.MaxCrafts} crafts left",
