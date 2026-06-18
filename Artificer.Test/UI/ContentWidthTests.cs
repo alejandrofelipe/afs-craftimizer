@@ -6,15 +6,9 @@ namespace Artificer.Test.UI;
 [TestClass]
 public class ContentWidthTests
 {
-    // Garante stack limpo entre testes (estado estático).
+    // Garante stack limpo entre testes (estado estático compartilhado).
     [TestInitialize]
-    public void SetUp()
-    {
-        while (ImGuiUtils.CurrentContentWidth != null)
-            ImGuiUtils.PopContentWidth();
-        // Drena também valores não-positivos eventualmente empilhados.
-        ImGuiUtils.DrainContentWidthForTests();
-    }
+    public void SetUp() => ImGuiUtils.DrainContentWidthForTests();
 
     [TestMethod]
     public void CurrentContentWidth_IsNull_WhenNoPanelActive()
@@ -53,8 +47,12 @@ public class ContentWidthTests
     [TestMethod]
     public void NonPositiveWidth_ReadsAsNull()
     {
-        // Painel "size-to-content" (width == 0) não impõe largura: trata como sem constraint.
+        // width == 0 (size-to-content) e width negativa não impõem largura: sem constraint.
         ImGuiUtils.PushContentWidth(0f);
+        Assert.IsNull(ImGuiUtils.CurrentContentWidth);
+        ImGuiUtils.PopContentWidth();
+
+        ImGuiUtils.PushContentWidth(-1f);
         Assert.IsNull(ImGuiUtils.CurrentContentWidth);
         ImGuiUtils.PopContentWidth();
     }

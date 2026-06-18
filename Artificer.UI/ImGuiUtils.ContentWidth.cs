@@ -29,6 +29,8 @@ public static partial class ImGuiUtils
     /// <summary>
     /// Resolução pura (testável sem contexto ImGui): largura explícita vence; senão a
     /// largura do painel ativo; senão o <paramref name="fallback"/> fornecido pelo chamador.
+    /// Convenção do projeto: <paramref name="explicitWidth"/> == 0f (default) significa
+    /// "sem override explícito" — passar 0f como largura intencional não é suportado.
     /// </summary>
     internal static float ResolveAvailWidth(float explicitWidth, float fallback) =>
         explicitWidth != default ? explicitWidth : (CurrentContentWidth ?? fallback);
