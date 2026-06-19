@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.23.0.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.23.1.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -140,6 +140,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix: macro salva continuava marcada como "incompatível com os stats atuais" no CraftingHelper mesmo após ser atualizada com os stats correntes — `CharacterStatsHash` agora atualizado junto com actions e score no auto-save
 - Revamp visual do progress component no MacroEditor (sugestão de macro): chip de estado + stage dots animados por DrawList (wave animation no estado indeterminate, pulse no estágio atual, cores por estágio) + nome do algoritmo right-aligned na mesma linha
 - Gear condition no CraftingHelper redesenhado com componente `DrawAlert` consistente com o SynthesisHelper; lógica de mensagem compartilhada entre ambas as janelas via `PluginImGuiUtils.BuildGearMessage`
+- 🐛 Fix: componentes vazando a borda de GroupPanels — `BeginGroupPanel` injeta sua largura interna como "largura ambiente" e os helpers de alinhamento clampam a `min(painel, célula)` em vez de `GetContentRegionAvail()` (que escapa até a borda da janela); label do algoritmo no progresso do solver ancorado à borda do painel
 
 ---
 
