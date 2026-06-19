@@ -51,8 +51,6 @@ internal sealed class ColorsStory : IStory
         ("Disabled",  Colors.Disabled),
         ("TextMuted", Colors.TextMuted),
         ("SpecialistGold", Colors.SpecialistGold),
-
-        // Feature Hub
     ];
 
     public void Draw()
