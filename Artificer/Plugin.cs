@@ -32,7 +32,6 @@ public sealed class Plugin : IDalamudPlugin
     public MacroEditor? EditorWindow { get; private set; }
     public MacroClipboard? ClipboardWindow { get; private set; }
     public CosmicTracker CosmicTrackerWindow { get; }
-    public FeatureHub FeatureHub { get; }
     public CraftingListWindow CraftingListWindow { get; }
     public CraftingListAddWindow CraftingListAddWindow { get; }
     public CraftingListDetailWindow CraftingListDetailWindow { get; }
@@ -104,7 +103,6 @@ public sealed class Plugin : IDalamudPlugin
         CraftingListAddWindow = new(this);
         CraftingListDetailWindow = new(this);
         CraftingListMergeWindow = new(this);
-        FeatureHub = new(this);
 
         // Trigger static constructors so a hitch doesn't occur on first RecipeNote frame.
         FoodStatus.Initialize();
@@ -247,7 +245,6 @@ public sealed class Plugin : IDalamudPlugin
         GearWearTracker.Dispose();
         CosmicToolTracker.Dispose();
         CosmicTrackerWindow.Dispose();
-        FeatureHub.Dispose();
         CraftingListWindow.Dispose();
         CraftingListAddWindow.Dispose();
         CraftingListDetailWindow.Dispose();

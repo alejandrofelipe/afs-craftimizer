@@ -53,9 +53,6 @@ internal sealed class ColorsStory : IStory
         ("SpecialistGold", Colors.SpecialistGold),
 
         // Feature Hub
-        ("FeatureHubAnchored", Colors.FeatureHubAnchored),
-        ("FeatureHubFree",     Colors.FeatureHubFree),
-        ("FeatureHubGold",     Colors.FeatureHubGold),
     ];
 
     public void Draw()
