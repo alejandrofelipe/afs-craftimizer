@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.23.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.24.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -118,10 +118,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 0 build warnings
 - Corrigido `ObjectDisposedException` em `RecipeNote` ao reabrir o Crafting Log
 - CosmicTracker atualiza instantaneamente ao trocar de job
-- 🐛 Fix: crash `C0000005` em `FeatureHubWindow.PostDraw()` — `ImGuiWindowFlags.NoBackground` causa Dalamud SDK 15 chamar `igCustom_WindowSetInheritNoInputs` com ponteiro inválido; `SetNextWindowPos` movido para `PreDraw()` (estava em `Draw()`, afetando janela seguinte)
 - 🐛 Fix: crash `C0000005` em `Theme.Push()` — plugin não deve shipar `cimgui.dll` pois o Dalamud fornece o contexto nativo; DLL duplicada causava `GImGui == NULL`
 - 🐛 Fix: crash ao abrir Settings — `ImRaii.PushStyle` e `BeginGroupPanel` usavam valores ImGuiNET para `ImGuiStyleVar` (Dalamud moveu `DisabledAlpha` do índice 1 para 24, deslocando todos os outros -1); `ImRaiiShim` agora remapeia automaticamente via `ConfigureForDalamud()`
-- FeatureHubWindow só aparece enquanto um personagem está em jogo (`IsLoggedIn`); posição inicial no canto inferior direito preservada entre sessões via `ImGuiCond.FirstUseEver`
 - 🐛 Fix: plugin não carregava com Dalamud SDK 15+ — `ImGui.NET.dll` foi removida do runtime do Dalamud; agora shipada com o plugin (wrapper gerenciado que P/Invoca no `cimgui.dll` nativo do Dalamud)
 - Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade
 - Novo solver **Next Action Forked**
@@ -130,10 +128,9 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Confirmação inline para ações destrutivas (remover receita, limpar Gear Wear)
 - Reorganização de conteúdo das Settings por contexto de uso
 - Empty states nas janelas que ficavam em branco
-- **Lista de Coleta completa** (P0–P2): dados (SQLite, InventoryScanner, IngredientResolver), helpers (busca, restrições, coleta, mercado, exportação) e UI completa (FeatureHub, List, Add, Detail, Merge windows)
+- **Lista de Coleta completa** (P0–P2): dados (SQLite, InventoryScanner, IngredientResolver), helpers (busca, restrições, coleta, mercado, exportação) e UI completa (List, Add, Detail, Merge windows)
 - 🐛 Fix: "Suggested Macro" exibia card confuso com arcos de estatística e botão Copy inutilizável quando o solver retornava 0 ações; agora exibe estado de erro claro com botão "Suggest Again"
 - 🐛 Fix: `MCTS.Solution()` retornava lista vazia porque `AvailableActions.PopRandom` (chamado durante a busca) esgotava o `ActionSet` do nó raiz, fazendo `IsComplete` ser `true` por `NoMoreActions`; corrigido usando `SimulationCompletionState` diretamente
-- **FeatureHubWindow** redesenhada com tiles clicáveis (ícone + label + badge de contagem), âncora dinâmica (atualiza entre frames em vez de exigir arrastar) e botão de minimizar para mostrar só os ícones
 - 🐛 Fix: indicator de carregamento ausente no MacroEditor ao regenerar macro com resultado anterior salvo (Caso A — primeira geração da sessão); snapshot `Indeterminate` agora emitido imediatamente ao iniciar o solver
 - 🐛 Fix: layout shift no MacroEditor ao iniciar sugestão de macro com lista vazia — altura da área de progresso agora é reservada com 2 frames fixos independentemente de o solver estar rodando
 - 🐛 Fix: barra de progresso do solver no SynthesisHelper ficava presa em "Solving..." após o solver encontrar steps suficientes — snapshot agora marcado como Completed antes do cancelamento automático
@@ -142,6 +139,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Gear condition no CraftingHelper redesenhado com componente `DrawAlert` consistente com o SynthesisHelper; lógica de mensagem compartilhada entre ambas as janelas via `PluginImGuiUtils.BuildGearMessage`
 - 🐛 Fix: componentes vazando a borda de GroupPanels — `BeginGroupPanel` injeta sua largura interna como "largura ambiente" e os helpers de alinhamento clampam a `min(painel, célula)` em vez de `GetContentRegionAvail()` (que escapa até a borda da janela); label do algoritmo no progresso do solver ancorado à borda do painel
 - 🐛 Fix: crash ao adicionar receita na Lista de Coleta (`EntryPointNotFoundException: igIsKeyPressed_Bool`) — `ImGui.IsKeyPressed` do ImGuiNET não existe no cimgui do Dalamud; a chamada agora roteia pelo shim `IUiServices` (`Dalamud.Bindings.ImGui` in-game, `ImGuiNET` no UIStudio), mesmo padrão do `PushStyleVar`
+- **Entrada da Lista de Coleta repensada:** comando `/craftlist` (+ `/craftinglist`, `/coleta`) e botão em Configurações → Experimental abrem a janela; o FeatureHub flutuante (e o helper `DrawGuard`) foram removidos
 
 ---
 

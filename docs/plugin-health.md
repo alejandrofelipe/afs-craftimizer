@@ -82,7 +82,7 @@ WindowHost.DrawInternal()
 
 **Implicações:**
 - `Theme.Push()` em `PreDraw()` empilha **17 cores + 3 vars**. `Theme.Pop()` em `PostDraw()` deve desempilhar exatamente esses 20. Qualquer assimetria → assertions do ImGui.
-- O `DrawGuard.Try()` em `Draw()` captura exceções gerenciadas (C# exceptions) mas **não captura C0000005** (access violation nativo). Se o crash ocorre em `Draw()`, o DrawGuard previne crashes repetidos; se ocorre em `PreDraw()`/`PostDraw()`, o crash propaga normalmente.
+- Um `try/catch` em `Draw()` captura exceções gerenciadas (C# exceptions) mas **não captura C0000005** (access violation nativo). Se o crash ocorre em `Draw()`, o try/catch previne crashes repetidos; se ocorre em `PreDraw()`/`PostDraw()`, o crash propaga normalmente.
 - `internalAlpha` é para janelas semi-transparentes configuradas pelo Dalamud (ex: clique-através). Alpha = 0 é o mesmo em ambos os enums → safe.
 
 ---
@@ -106,7 +106,7 @@ public unsafe bool IsLoggedIn
 `IsLoggedIn` verifica o agente de lobby — retorna `true` quando o personagem está carregado e ativo no mundo.  
 `LocalPlayer != null` pode ser `true` momentaneamente durante transições de zona enquanto o agente de lobby ainda reporta `false`.
 
-**Uso no Artificer:** `FeatureHubWindow.Update()` usa `IsLoggedIn` — correto para garantir que a janela só aparece quando o personagem está plenamente em jogo.
+**Uso no Artificer:** janelas que só fazem sentido com personagem em jogo usam `IsLoggedIn` no `Update()` — correto para garantir que só aparecem quando o personagem está plenamente em jogo.
 
 ### 3.2 Serviços via `[Service]` Attribute
 
@@ -245,7 +245,7 @@ Ao adicionar uma nova janela ao plugin:
 
 - [ ] A janela está no projeto `Artificer` (não em `Artificer.UI`)? → pode usar `Dalamud.Bindings.ImGui` diretamente
 - [ ] A janela usa `Theme.Push()` em `PreDraw()` e `Theme.Pop()` em `PostDraw()`?
-- [ ] Se usa `DrawGuard.Try()` em `Draw()`, as exceções gerenciadas estão protegidas
+- [ ] Se usa `try/catch` em `Draw()`, as exceções gerenciadas estão protegidas
 - [ ] A janela tem `IDisposable` com remoção do `WindowSystem`?
 
 Ao adicionar um novo componente em `Artificer.UI`:

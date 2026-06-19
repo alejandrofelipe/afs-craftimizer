@@ -210,18 +210,6 @@ Cores dos 3 thresholds de Collectability. Usadas no overlay de collectability.
 
 ---
 
-## Feature Hub
-
-Cores do ícone de âncora e do launcher do FeatureHub.
-
-| Token C# | Hex | Uso |
-|---|---|---|
-| `Colors.FeatureHubAnchored` | `#3B9EE8` | Ícone âncora quando o hub está fixado ao NaviMap |
-| `Colors.FeatureHubFree`     | `#595959` | Ícone âncora quando o hub está flutuante (livre) |
-| `Colors.FeatureHubGold`     | `#C7A86E` | Ícone hammer (minimizar) do hub |
-
----
-
 ## Regras gerais
 
 1. **Nunca hardcode hex** — sempre usar `Colors.*`

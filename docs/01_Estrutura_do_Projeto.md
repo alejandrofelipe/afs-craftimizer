@@ -8,7 +8,7 @@ Este documento detalha onde as coisas estão na pasta base do projeto e suas fun
 * **`backlog/`**: Documentação e acompanhamento de bugs conhecidos e *feature requests*. Pasta gitignored — local only.
 * **`scripts/`**: Scripts PowerShell para build local, bump de versão e deploy. Pasta gitignored — local only.
 * **`Artificer/`**: C# Project do plugin Dalamud (entry point, janelas, hooks, serviços).
-  * `Windows/`: Controllers das janelas ImGui (`MacroEditor.cs`, `RecipeNote.cs`, `Settings.cs`, `FeatureHub.cs`, `CosmicTracker.cs`, etc.).
+  * `Windows/`: Controllers das janelas ImGui (`MacroEditor.cs`, `RecipeNote.cs`, `Settings.cs`, `CosmicTracker.cs`, etc.).
   * `Utils/`: Hooks de jogo (`ActionUsed`), leitura de memória, IPC, e utilitários de UI específicos do plugin (`PluginImGuiUtils.*.cs`).
   * `Application/`: Regras de negócio restritas ao plugin (copy/paste de macros, `MacroRepository`, `CosmicToolTracker`).
 * **`Artificer.UI/`**: Biblioteca de UI compartilhada, sem dependência do Dalamud SDK. Usa somente ImGui.NET.

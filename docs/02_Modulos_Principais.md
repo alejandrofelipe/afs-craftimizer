@@ -10,7 +10,7 @@ Responsabilidades técnicas:
 - **Hooking & Memória:** `Hooks.cs` intercepta chamadas nativas do FFXIV (`UseAction`, `IsActionHighlighted`) via delegates `Hook<T>`, permitindo que o plugin sugira ações brilhando botões na hotbar.
 - **Render de Interface:** Todas as janelas em `Windows/*.cs` usam ImGui via Dalamud WindowSystem. A inicialização de tema ocorre via `Theme.ConfigureForDalamud()` em `PreDraw()`.
 - **DB e Configuração:** Persistência via API Dalamud com SQLite (`MacroRepository`) e JSON de configuração. Migrações gerenciadas manualmente.
-- **FeatureHub + CosmicTracker:** Janelas flutuantes que sobrepõem a tela do jogo durante craft e Stellar Missions respectivamente.
+- **CosmicTracker:** Janela flutuante que sobrepõe a tela do jogo durante Stellar Missions.
 
 ## 2. Artificer.UI (Biblioteca de UI Compartilhada)
 
