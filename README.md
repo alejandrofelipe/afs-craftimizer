@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.23.1.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.23.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -141,6 +141,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - Revamp visual do progress component no MacroEditor (sugestão de macro): chip de estado + stage dots animados por DrawList (wave animation no estado indeterminate, pulse no estágio atual, cores por estágio) + nome do algoritmo right-aligned na mesma linha
 - Gear condition no CraftingHelper redesenhado com componente `DrawAlert` consistente com o SynthesisHelper; lógica de mensagem compartilhada entre ambas as janelas via `PluginImGuiUtils.BuildGearMessage`
 - 🐛 Fix: componentes vazando a borda de GroupPanels — `BeginGroupPanel` injeta sua largura interna como "largura ambiente" e os helpers de alinhamento clampam a `min(painel, célula)` em vez de `GetContentRegionAvail()` (que escapa até a borda da janela); label do algoritmo no progresso do solver ancorado à borda do painel
+- 🐛 Fix: crash ao adicionar receita na Lista de Coleta (`EntryPointNotFoundException: igIsKeyPressed_Bool`) — `ImGui.IsKeyPressed` do ImGuiNET não existe no cimgui do Dalamud; a chamada agora roteia pelo shim `IUiServices` (`Dalamud.Bindings.ImGui` in-game, `ImGuiNET` no UIStudio), mesmo padrão do `PushStyleVar`
 
 ---
 
