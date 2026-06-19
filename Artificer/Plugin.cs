@@ -190,6 +190,23 @@ public sealed class Plugin : IDalamudPlugin
         ListWindow.BringToFront();
     }
 
+    [Command("/craftlist", "Open the crafting list window.", false, "/craftinglist", "/coleta")]
+    public void OpenCraftingListWindow()
+    {
+        if (!Configuration.EnableCraftingLists)
+        {
+            DisplayNotification(new()
+            {
+                Content = "Ative as Listas de Coleta em Configurações → Experimental.",
+                Title = "Listas de Coleta",
+                Type = NotificationType.Warning
+            });
+            OpenSettingsTab("Experimental");
+            return;
+        }
+        CraftingListWindow.Toggle();
+    }
+
     public static void OpenCraftingLog()
     {
         Chat.SendMessage("/craftinglog");
