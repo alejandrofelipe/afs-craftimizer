@@ -433,11 +433,12 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         }
         var gpWidth = ImGui.GetItemRectSize().X;
         // INVARIANTE ANTI-CRESCIMENTO: a largura da janela é fixada (min == max) em
-        // _anchoredMaxWidth no PreDraw. Ele deriva SÓ deste primeiro painel (largura
-        // interna fixa = tableW) e é medido ANTES dos painéis de macro. Os painéis de
-        // macro nunca realimentam _anchoredMaxWidth, então conteúdo que transborde um
-        // painel não pode fazer a janela crescer. Não dimensione nada sob AlwaysAutoResize
-        // a partir de GetContentRegionAvail() sem manter este pino.
+        // _anchoredMaxWidth no PreDraw. Ele deriva SÓ deste primeiro painel (gpWidth = a
+        // caixa renderizada do painel Crafter/Recipe, de largura interna fixa tableW) e é
+        // medido ANTES dos painéis de macro. Os painéis de macro nunca realimentam
+        // _anchoredMaxWidth, então conteúdo que transborde um painel não pode fazer a
+        // janela crescer. Não dimensione nada sob AlwaysAutoResize a partir de
+        // GetContentRegionAvail() sem manter este pino.
         _anchoredMaxWidth = gpWidth + ImGui.GetStyle().WindowPadding.X * 2;
 
         if (CraftStatus != CraftableStatus.OK)
@@ -1035,12 +1036,12 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 var screenMin = ImGui.GetCursorScreenPos();
                 ImGui.GetWindowDrawList().AddRectFilled(
                     screenMin,
-                    screenMin + new Vector2(panelWidth, overlayH),
+                    screenMin + new Vector2(contentW, overlayH),
                     ImGui.ColorConvertFloat4ToU32(new Vector4(0.08f, 0.08f, 0.14f, 0.85f)),
                     3f);
 
                 PluginImGuiUtils.DrawSolverProgressArea(
-                    panelWidth, [snapshot], _plugin.Configuration.ProgressType);
+                    contentW, [snapshot], _plugin.Configuration.ProgressType);
                 ImGui.SetCursorPos(afterCardPos);
             }
         }
@@ -1058,7 +1059,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
                         var snapshot = SolverProgressBar.FromSolver(solver, "Solver");
                         PluginImGuiUtils.DrawSolverProgressArea(
-                            panelWidth, [snapshot], _plugin.Configuration.ProgressType);
+                            contentW, [snapshot], _plugin.Configuration.ProgressType);
                         break;
                     }
                 case MacroTaskType.Community:
