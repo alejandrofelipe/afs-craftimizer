@@ -132,7 +132,7 @@ public static partial class ImGuiUtils
                 if (ImGui.InputText("##input_popup", ref data.input, 256))
                     data.Filter();
                 var isActive = ImGui.IsItemActive();
-                if (!isActive && data.wasTextActive && ImGui.IsKeyPressed(ImGuiKey.Enter))
+                if (!isActive && data.wasTextActive && UiServices.Current.IsKeyPressed(ImGuiKeyId.Enter))
                     isInputTextEnterPressed = true;
                 data.wasTextActive = isActive;
 
@@ -164,7 +164,7 @@ public static partial class ImGuiUtils
                     }
                 }
 
-                if (isInputTextEnterPressed || ImGui.IsKeyPressed(ImGuiKey.Escape))
+                if (isInputTextEnterPressed || UiServices.Current.IsKeyPressed(ImGuiKeyId.Escape))
                 {
                     if (isInputTextEnterPressed && data.filteredItems.Count > 0)
                     {

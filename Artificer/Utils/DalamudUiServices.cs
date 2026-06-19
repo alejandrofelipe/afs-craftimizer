@@ -7,6 +7,7 @@ using System;
 using System.Numerics;
 using DalamudImGui = Dalamud.Bindings.ImGui.ImGui;
 using DalamudStyleVar = Dalamud.Bindings.ImGui.ImGuiStyleVar;
+using DalamudKey = Dalamud.Bindings.ImGui.ImGuiKey;
 using ImGuiNET;
 
 namespace Artificer.Plugin;
@@ -49,4 +50,15 @@ internal sealed class DalamudUiServices : IUiServices
 
     public void PushStyleVar(ImGuiStyleVarId id, Vector2 val) =>
         DalamudImGui.PushStyleVar(ToDalamud(id), val);
+
+    // Maps Artificer.UI's neutral ImGuiKeyId to Dalamud's named enum constants.
+    private static DalamudKey ToDalamud(ImGuiKeyId id) => id switch
+    {
+        ImGuiKeyId.Enter  => DalamudKey.Enter,
+        ImGuiKeyId.Escape => DalamudKey.Escape,
+        _ => throw new ArgumentOutOfRangeException(nameof(id), id, "Add entry to DalamudUiServices.ToDalamud(ImGuiKeyId)")
+    };
+
+    public bool IsKeyPressed(ImGuiKeyId key) =>
+        DalamudImGui.IsKeyPressed(ToDalamud(key));
 }

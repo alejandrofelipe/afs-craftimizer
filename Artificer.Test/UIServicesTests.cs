@@ -51,12 +51,37 @@ public class UIServicesTests
         Assert.AreEqual(ImGuiStyleVarId.WindowPadding, fake.LastVarId);
     }
 
+    [TestMethod]
+    public void IsKeyPressed_RoutesToFakeWithKey()
+    {
+        var fake = new FakeUiServices();
+        UiServices.Current = fake;
+
+        var result = UiServices.Current.IsKeyPressed(ImGuiKeyId.Escape);
+
+        Assert.IsFalse(result);
+        Assert.AreEqual(ImGuiKeyId.Escape, fake.LastKey);
+    }
+
+    [TestMethod]
+    public void ImGuiKeyId_HasExpectedValues()
+    {
+        // If this fails, a value was added/removed from the enum without updating
+        // DalamudUiServices.ToDalamud(ImGuiKeyId) and StubUiServices.ToImGuiNET(ImGuiKeyId).
+        var values = System.Enum.GetNames<ImGuiKeyId>();
+        Assert.AreEqual(2, values.Length,
+            "ImGuiKeyId must have exactly 2 values. If you added one, also update both ToDalamud/ToImGuiNET mappers.");
+        CollectionAssert.Contains(values, nameof(ImGuiKeyId.Enter));
+        CollectionAssert.Contains(values, nameof(ImGuiKeyId.Escape));
+    }
+
     // Shared fake used across test files via internal visibility.
     // PushStyleVar is a no-op (does NOT call ImGui.PushStyleVar) so tests run without ImGui context.
     internal sealed class FakeUiServices : IUiServices
     {
         public int PushCount { get; private set; }
         public ImGuiStyleVarId? LastVarId { get; private set; }
+        public ImGuiKeyId? LastKey { get; private set; }
 
         public float GlobalScale => 1.0f;
         public ImFontPtr IconFont => default;
@@ -73,6 +98,13 @@ public class UIServicesTests
         {
             PushCount++;
             LastVarId = var;
+        }
+
+        // No-op: does NOT call ImGui.IsKeyPressed, so tests run without an ImGui context.
+        public bool IsKeyPressed(ImGuiKeyId key)
+        {
+            LastKey = key;
+            return false;
         }
     }
 }

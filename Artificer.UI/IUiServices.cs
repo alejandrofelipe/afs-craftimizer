@@ -16,6 +16,15 @@ public enum ImGuiStyleVarId
     ItemSpacing,    // Vector2
 }
 
+// Neutral key enum — only the keys actually used by Artificer.UI.
+// Each IUiServices impl maps these to the correct platform-specific ImGuiKey value.
+// Add a new entry here only if you need IsKeyPressed in Artificer.UI.
+public enum ImGuiKeyId
+{
+    Enter,
+    Escape,
+}
+
 public interface IUiServices
 {
     float GlobalScale { get; }
@@ -27,6 +36,10 @@ public interface IUiServices
     // Never call ImGui.PushStyleVar directly in Artificer.UI — use this instead.
     void PushStyleVar(ImGuiStyleVarId var, float val);
     void PushStyleVar(ImGuiStyleVarId var, Vector2 val);
+
+    // IsKeyPressed routes through here: ImGuiNET's igIsKeyPressed_Bool P/Invoke export is
+    // missing from Dalamud's cimgui. Never call ImGui.IsKeyPressed directly in Artificer.UI.
+    bool IsKeyPressed(ImGuiKeyId key);
 }
 
 public static class UiServices

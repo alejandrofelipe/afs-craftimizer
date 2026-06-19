@@ -30,4 +30,15 @@ internal sealed class StubUiServices : IUiServices
 
     public void PushStyleVar(ImGuiStyleVarId id, Vector2 val) =>
         ImGui.PushStyleVar(ToImGuiNET(id), val);
+
+    // Maps Artificer.UI's neutral ImGuiKeyId to ImGuiNET's named enum constants.
+    private static ImGuiKey ToImGuiNET(ImGuiKeyId id) => id switch
+    {
+        ImGuiKeyId.Enter  => ImGuiKey.Enter,
+        ImGuiKeyId.Escape => ImGuiKey.Escape,
+        _ => throw new ArgumentOutOfRangeException(nameof(id), id, "Add entry to StubUiServices.ToImGuiNET(ImGuiKeyId)")
+    };
+
+    public bool IsKeyPressed(ImGuiKeyId key) =>
+        ImGui.IsKeyPressed(ToImGuiNET(key));
 }
