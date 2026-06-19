@@ -305,9 +305,11 @@ public static partial class ImGuiUtils
     {
         if (availSize == default)
         {
-            // Só o X é limitado à largura do painel; o Y vem do content region (painéis não restringem altura).
+            // Só o X é limitado à largura do painel (o MENOR entre painel e content region, para
+            // respeitar células de tabela mais estreitas); o Y vem do content region.
             var avail = ImGui.GetContentRegionAvail();
-            availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
+            var x = CurrentContentWidth is { } cw ? MathF.Min(cw, avail.X) : avail.X;
+            availSize = new Vector2(x, avail.Y);
         }
         if (availSize.X > size.X)
             ImGui.SetCursorPosX(ImGui.GetCursorPos().X + (availSize.X - size.X) / 2);
@@ -332,9 +334,11 @@ public static partial class ImGuiUtils
     {
         if (availSize == default)
         {
-            // Só o X é limitado à largura do painel; o Y vem do content region (painéis não restringem altura).
+            // Só o X é limitado à largura do painel (o MENOR entre painel e content region, para
+            // respeitar células de tabela mais estreitas); o Y vem do content region.
             var avail = ImGui.GetContentRegionAvail();
-            availSize = new Vector2(CurrentContentWidth ?? avail.X, avail.Y);
+            var x = CurrentContentWidth is { } cw ? MathF.Min(cw, avail.X) : avail.X;
+            availSize = new Vector2(x, avail.Y);
         }
         var c = ImGui.GetCursorPos();
         AlignMiddle(ImGui.CalcTextSize(text), availSize);

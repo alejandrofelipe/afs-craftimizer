@@ -77,6 +77,17 @@ public class ContentWidthTests
     }
 
     [TestMethod]
+    public void ResolveAvailWidth_InsidePanel_PrefersNarrowerFallback()
+    {
+        // Dentro de uma célula de tabela/child mais estreita que o painel, o fallback
+        // (content region da célula) vence — o helper não deve estourar a célula com a
+        // largura do painel. ResolveAvailWidth = min(largura do painel, fallback).
+        ImGuiUtils.PushContentWidth(320f);
+        Assert.AreEqual(160f, ImGuiUtils.ResolveAvailWidth(default, fallback: 160f));
+        ImGuiUtils.PopContentWidth();
+    }
+
+    [TestMethod]
     public void ResolveAvailWidth_OutsidePanel_UsesFallback()
     {
         Assert.AreEqual(9999f, ImGuiUtils.ResolveAvailWidth(default, fallback: 9999f));

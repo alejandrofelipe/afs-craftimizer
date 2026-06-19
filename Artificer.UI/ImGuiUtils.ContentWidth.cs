@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Artificer.Utils;
@@ -27,19 +28,23 @@ public static partial class ImGuiUtils
     internal static void DrainContentWidthForTests() => ContentWidthStack.Clear();
 
     /// <summary>
-    /// Resolução pura (testável sem contexto ImGui): largura explícita vence; senão a
-    /// largura do painel ativo; senão o <paramref name="fallback"/> fornecido pelo chamador.
+    /// Resolução pura (testável sem contexto ImGui): largura explícita vence; senão, dentro
+    /// de um painel, o MENOR entre a largura do painel e o <paramref name="fallback"/> (o
+    /// content region atual) — assim o conteúdo não estoura nem o painel nem uma célula de
+    /// tabela/child mais estreita; fora de painel, o <paramref name="fallback"/>.
     /// Convenção do projeto: <paramref name="explicitWidth"/> == 0f (default) significa
     /// "sem override explícito" — passar 0f como largura intencional não é suportado.
     /// </summary>
     internal static float ResolveAvailWidth(float explicitWidth, float fallback) =>
-        explicitWidth != default ? explicitWidth : (CurrentContentWidth ?? fallback);
+        explicitWidth != default ? explicitWidth
+        : (CurrentContentWidth is { } w ? MathF.Min(w, fallback) : fallback);
 
     /// <summary>Versão de produção: lê o content region preguiçosamente só quando necessário.</summary>
     private static float ResolveAvailWidth(float explicitWidth)
     {
         if (explicitWidth != default)
             return explicitWidth;
-        return CurrentContentWidth ?? ImGui.GetContentRegionAvail().X;
+        var avail = ImGui.GetContentRegionAvail().X;
+        return CurrentContentWidth is { } w ? MathF.Min(w, avail) : avail;
     }
 }
