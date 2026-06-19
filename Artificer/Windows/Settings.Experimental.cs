@@ -61,7 +61,7 @@ public sealed partial class Settings
             {
                 ImGuiHelpers.ScaledDummy(4);
                 if (ImGui.Button("Abrir Lista de Coleta"))
-                    _plugin.CraftingListWindow.Toggle();
+                    _plugin.CraftingListWindow.OpenAndFocus();
 
                 ImGuiHelpers.ScaledDummy(4);
                 DrawSectionTitle("INVENTÁRIO");

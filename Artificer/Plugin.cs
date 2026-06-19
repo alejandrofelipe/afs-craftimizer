@@ -204,7 +204,7 @@ public sealed class Plugin : IDalamudPlugin
             OpenSettingsTab("Experimental");
             return;
         }
-        CraftingListWindow.Toggle();
+        CraftingListWindow.OpenAndFocus();
     }
 
     public static void OpenCraftingLog()
