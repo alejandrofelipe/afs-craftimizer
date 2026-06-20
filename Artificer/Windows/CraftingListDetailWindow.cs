@@ -202,9 +202,14 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     private void DrawHeader(CraftingList list)
     {
+        var scale = ImGuiHelpers.GlobalScale;
+        var rowLeft = ImGui.GetCursorPosX();
+        var fullW = ImGui.GetContentRegionAvail().X;
+
+        // ── Linha 1: nome (2× clique renomeia) + toggle de visão + kebab ──
         if (_isRenaming)
         {
-            ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(240 * scale);
             var enter = ImGui.InputText("##renameDetail", ref _renameBuffer, 128,
                 ImGuiInputTextFlags.EnterReturnsTrue);
             if (enter && !string.IsNullOrWhiteSpace(_renameBuffer))
@@ -216,6 +221,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         }
         else
         {
+            ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(list.Name);
             if (ImGui.IsItemHovered())
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -226,45 +232,72 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             }
         }
 
-        ImGui.SameLine();
-        var overall = ComputeOverallFraction();
-        using (ImRaii.PushColor(ImGuiCol.Text, overall >= 1f ? Colors.Progress : Colors.TextMuted))
-            ImGui.TextUnformatted($"{(int)(overall * 100)}%");
-
-        // View toggle
-        ImGui.SameLine();
+        // toggle segmentado [Detalhada | Simples] + kebab, right-aligned na borda do conteúdo.
+        // rowLeft + fullW = X absoluto da borda direita do conteúdo (capturado no topo, antes do nome).
         var detailed = _plugin.Configuration.CraftingListViewMode == 0;
-        if (ImGui.RadioButton("Detalhada", detailed))
-        {
-            _plugin.Configuration.CraftingListViewMode = 0;
-            _plugin.Configuration.Save();
-        }
+        var style = ImGui.GetStyle();
+        var toggleW = ImGui.CalcTextSize("Detalhada").X + ImGui.CalcTextSize("Simples").X
+                      + style.FramePadding.X * 4 + style.ItemSpacing.X;
+        var kebabW = ImGui.GetFrameHeight();
+        var rightW = toggleW + style.ItemSpacing.X + kebabW;
         ImGui.SameLine();
-        if (ImGui.RadioButton("Simples", !detailed))
-        {
-            _plugin.Configuration.CraftingListViewMode = 1;
-            _plugin.Configuration.Save();
-        }
+        ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + fullW - rightW));
 
-        // Export dropdown
+        DrawViewToggleButton("Detalhada", detailed, 0);
+        ImGui.SameLine(0, style.ItemSpacing.X);
+        DrawViewToggleButton("Simples", !detailed, 1);
+
         ImGui.SameLine();
-        if (ImGui.Button("📋 Exportar"))
-            ImGui.OpenPopup("##exportPopup");
-        using (var popup = ImRaii.Popup("##exportPopup"))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.EllipsisV))
+            ImGui.OpenPopup("##clMore");
+        ImGuiUtils.HoveredTooltip("Mais opções");
+        using (var more = ImRaii.Popup("##clMore"))
         {
-            if (popup)
+            if (more)
             {
-                var mats = AllMaterials();
-                if (ImGui.MenuItem("Lista completa"))
-                    ExportHelper.CopyToClipboard(ExportHelper.ToFullList(list, mats, _progress));
-                if (ImGui.MenuItem("Apenas faltantes"))
-                    ExportHelper.CopyToClipboard(ExportHelper.ToMissingOnly(list, mats, _progress));
+                if (ImGui.BeginMenu("Exportar"))
+                {
+                    var mats = AllMaterials();
+                    if (ImGui.MenuItem("Lista completa"))
+                        ExportHelper.CopyToClipboard(ExportHelper.ToFullList(list, mats, _progress));
+                    if (ImGui.MenuItem("Apenas faltantes"))
+                        ExportHelper.CopyToClipboard(ExportHelper.ToMissingOnly(list, mats, _progress));
+                    ImGui.EndMenu();
+                }
+                if (ImGui.MenuItem("Sincronizar inventário"))
+                    _ = SyncInventoryAsync();
+                if (_plugin.Configuration.ShowMarketPrices && ImGui.MenuItem("Atualizar preços"))
+                {
+                    _prices.Clear();
+                    _ = LoadPricesAsync();
+                }
+                if (ImGui.MenuItem("Renomear"))
+                {
+                    _isRenaming = true;
+                    _renameBuffer = list.Name;
+                }
+                if (ImGui.MenuItem("Duplicar"))
+                    _ = _plugin.CraftingListManager.DuplicateListAsync(list.Id);
             }
         }
 
-        ImGui.SameLine();
-        if (ImGui.Button("✕ Fechar"))
-            IsOpen = false;
+        // ── Linha 2: barra de progresso + % ──
+        var overall = ComputeOverallFraction();
+        using (ImRaii.PushColor(ImGuiCol.PlotHistogram, overall >= 1f ? Colors.Progress : Colors.Quality))
+            ImGuiUtils.ProgressBar(overall, new Vector2(-1, 8 * scale));
+        using (ImRaii.PushColor(ImGuiCol.Text, overall >= 1f ? Colors.Progress : Colors.TextMuted))
+            ImGui.TextUnformatted($"{(int)(overall * 100)}%");
+    }
+
+    private void DrawViewToggleButton(string label, bool active, int mode)
+    {
+        if (active) Theme.PushPrimaryButton();
+        if (ImGui.Button(label) && !active)
+        {
+            _plugin.Configuration.CraftingListViewMode = mode;
+            _plugin.Configuration.Save();
+        }
+        if (active) Theme.PopPrimaryButton();
     }
 
     // ── Detailed view ──────────────────────────────────────────────────────────
