@@ -54,6 +54,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         _plugin = plugin;
         _plugin.WindowSystem.AddWindow(this);
+        _plugin.CraftingListManager.ListsChanged += OnListsChanged;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -85,6 +86,19 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         var progressList = _plugin.CraftingListRepository.GetProgressForList(id);
         _progress = progressList.ToDictionary(p => p.ItemId);
         _ = RefreshTreeAsync();
+    }
+
+    private void OnListsChanged()
+    {
+        if (_listId is not { } id)
+            return;
+        // Lista deletada externamente → fechar; senão, recarregar (conserta "não atualiza após add").
+        if (_plugin.CraftingListManager.Lists.All(l => l.Id != id))
+        {
+            IsOpen = false;
+            return;
+        }
+        RefreshData();
     }
 
     private async Task RefreshTreeAsync()
@@ -315,6 +329,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             foreach (var recipe in _recipes)
             {
                 using var id = ImRaii.PushId(recipe.Id.ToString());
+                var rowLeft = ImGui.GetCursorPosX();
 
                 if (_selectionMode)
                 {
@@ -337,7 +352,10 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     _quantityEdits[recipe.Id] = (qty, ImGui.GetTime());
                 }
 
-                ImGui.SameLine();
+                ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+                PluginImGuiUtils.DrawItemIcon(recipe.ItemId, ImGui.GetFrameHeight());
+                ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+                ImGui.AlignTextToFramePadding();
                 ImGui.TextUnformatted(LookupItemName(recipe.ItemId));
 
                 var restrictions = _plugin.RecipeRestrictionChecker.GetRestrictions(recipe.RecipeId);
@@ -350,17 +368,16 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     ImGuiUtils.HoveredTooltip(string.Join('\n', restrictions.Select(r => r.Title)), wrapWidth: 300);
                 }
 
-                ImGui.SameLine();
-                var availX = ImGui.GetContentRegionAvail().X;
-                var btnPad  = ImGui.GetStyle().ItemSpacing.X;
+                // Right-align à prova de overflow: âncora explícita na borda interna do painel.
+                var innerW = ImGuiUtils.CurrentContentWidth ?? ImGui.GetContentRegionAvail().X;
                 if (_pendingRemoveId == recipe.Id)
                 {
                     var confirmW = ImGui.CalcTextSize("Remover?").X
-                        + ImGui.CalcTextSize("Sim").X
-                        + ImGui.CalcTextSize("Não").X
+                        + ImGui.CalcTextSize("Sim").X + ImGui.CalcTextSize("Não").X
                         + ImGui.GetStyle().FramePadding.X * 4
-                        + btnPad * 2;
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - confirmW - btnPad));
+                        + ImGui.GetStyle().ItemSpacing.X * 2;
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + innerW - confirmW));
                     using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
                         ImGui.TextUnformatted("Remover?");
                     ImGui.SameLine();
@@ -376,7 +393,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 }
                 else
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight() - btnPad));
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + innerW - ImGui.GetFrameHeight()));
                     if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Times))
                         _pendingRemoveId = recipe.Id;
                     ImGuiUtils.HoveredTooltip("Remover da lista");
@@ -720,6 +738,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     public void Dispose()
     {
+        _plugin.CraftingListManager.ListsChanged -= OnListsChanged;
         _plugin.WindowSystem.RemoveWindow(this);
     }
 }
