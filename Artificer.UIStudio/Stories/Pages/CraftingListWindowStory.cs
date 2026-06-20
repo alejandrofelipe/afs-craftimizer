@@ -124,9 +124,13 @@ internal sealed class CraftingListWindowStory : IStory
                 var namePos = new Vector2(min.X + pad, min.Y + 4f);
                 dl.AddText(namePos, ImGui.GetColorU32(ImGuiCol.Text), name);
 
-                // Data (linha de baixo).
+                // Data + contagem de receitas (linha de baixo).
                 var datePos = new Vector2(min.X + pad, max.Y - ImGui.GetTextLineHeight() - 4f);
                 dl.AddText(datePos, ImGui.GetColorU32(Colors.CosmicActive), date);
+                var metaText = $"  ·  {3 + i} receitas";
+                var dateW = ImGui.CalcTextSize(date).X;
+                dl.AddText(new Vector2(datePos.X + dateW, datePos.Y),
+                    ImGui.GetColorU32(Colors.TextMuted), metaText);
 
                 // % completo alinhado à direita.
                 var pctText = $"{percent}%";

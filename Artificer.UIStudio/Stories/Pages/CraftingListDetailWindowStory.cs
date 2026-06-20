@@ -61,10 +61,25 @@ internal sealed class CraftingListDetailWindowStory : IStory
     // ── Cabeçalho ─────────────────────────────────────────────────────────────
     private static void DrawHeader()
     {
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted("Equipamento Dawntrail");
+
+        // toggle segmentado mock, à direita
+        var toggleW = ImGui.CalcTextSize("Detalhada").X + ImGui.CalcTextSize("Simples").X
+                      + ImGui.GetStyle().FramePadding.X * 4 + ImGui.GetStyle().ItemSpacing.X;
         ImGui.SameLine();
+        ImGuiUtils.AlignRight(toggleW);
+        Theme.PushPrimaryButton();
+        ImGui.Button("Detalhada");
+        Theme.PopPrimaryButton();
+        ImGui.SameLine(0, ImGui.GetStyle().ItemSpacing.X);
+        ImGui.Button("Simples");
+
+        // linha 2: barra de progresso + %
+        using (ImRaii.PushColor(ImGuiCol.PlotHistogram, Colors.Quality))
+            ImGui.ProgressBar(0.72f, new Vector2(-1, 8f), string.Empty);
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted("(72% concluída)");
+            ImGui.TextUnformatted("72%");
     }
 
     // ── Estado carregando ─────────────────────────────────────────────────────
@@ -79,34 +94,47 @@ internal sealed class CraftingListDetailWindowStory : IStory
     // ── Lista de ingredientes ─────────────────────────────────────────────────
     private static void DrawIngredientList(bool allCollected)
     {
-        ImGui.BeginChild("##ingredients", new Vector2(0, 220), ImGuiChildFlags.Border);
+        ImGui.BeginChild("##ingredients", new Vector2(0, 260), ImGuiChildFlags.Border);
 
         for (var i = 0; i < Ingredients.Length; i++)
         {
             var (name, need, have, collected) = Ingredients[i];
             var isComplete = allCollected || collected;
+            var collectedQty = isComplete ? need : have;
+            var missing = System.Math.Max(0, need - collectedQty);
+            var fraction = need > 0 ? System.Math.Clamp((float)collectedQty / need, 0f, 1f) : 1f;
 
             using (ImRaii.PushId(i))
+            using (ImRaii.Group())
             {
-                // Ícone de status (check / times).
-                var icon  = isComplete ? FontAwesomeIcon.Check : FontAwesomeIcon.Times;
-                var color = isComplete ? Colors.Progress : Colors.Bad;
+                // placeholder de ícone (no plugin real: PluginImGuiUtils.DrawItemIcon)
+                var iconSize = ImGui.GetFrameHeight();
+                var p = ImGui.GetCursorScreenPos();
+                ImGui.GetWindowDrawList().AddRectFilled(
+                    p, new Vector2(p.X + iconSize, p.Y + iconSize),
+                    ImGui.GetColorU32(Colors.TextMuted), 4f);
+                ImGui.Dummy(new Vector2(iconSize));
 
-                using (ImRaii.PushFont(UiServices.Current.IconFont))
-                using (ImRaii.PushColor(ImGuiCol.Text, color))
-                    ImGui.TextUnformatted(icon.ToIconString());
-
-                ImGui.SameLine();
+                ImGui.SameLine(0, 6f);
+                ImGui.AlignTextToFramePadding();
                 ImGui.TextUnformatted(name);
+                ImGui.SameLine(0, 8f);
+                if (missing > 0)
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Text, collectedQty == 0 ? Colors.Bad : Colors.TextMuted))
+                        ImGui.TextUnformatted($"{collectedQty}/{need}");
+                    ImGui.SameLine(0, 6f);
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                        ImGui.TextUnformatted($"faltam {missing}");
+                }
+                else
+                {
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.Progress))
+                        ImGui.TextUnformatted($"{collectedQty}/{need} ✓");
+                }
 
-                // Contagem possuído / necessário, alinhada à direita.
-                var displayHave = isComplete ? need : have;
-                var countText   = $"{displayHave} / {need}";
-
-                ImGui.SameLine();
-                ImGuiUtils.AlignRight(ImGui.CalcTextSize(countText).X);
-                using (ImRaii.PushColor(ImGuiCol.Text, isComplete ? Colors.HQ : Colors.TextMuted))
-                    ImGui.TextUnformatted(countText);
+                using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction >= 1f ? Colors.Progress : Colors.Quality))
+                    ImGui.ProgressBar(fraction, new Vector2(-1, 6f), string.Empty);
             }
         }
 
