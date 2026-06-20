@@ -472,23 +472,45 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         _progress.TryGetValue(mat.ItemId, out var prog);
         var collected = prog?.QuantityCollected ?? 0;
         var needed = mat.Quantity;
+        var missing = Math.Max(0, needed - collected);
         var fraction = needed > 0 ? Math.Clamp((float)collected / needed, 0f, 1f) : 1f;
         var scale = ImGuiHelpers.GlobalScale;
+        var iconSize = ImGui.GetFrameHeight();
 
         using (ImRaii.Group())
         {
-            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction > 0f ? Colors.Progress : Colors.Bad))
-                ImGuiUtils.ProgressBar(fraction > 0f ? fraction : 0f, new Vector2(-1, 6 * scale));
-
+            // ── Linha 1: ícone + nome + tem/precisa/faltam ──
+            PluginImGuiUtils.DrawItemIcon(mat.ItemId, iconSize);
+            ImGui.SameLine(0, 6 * scale);
+            ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(mat.ItemName);
-            ImGui.SameLine();
-            using (ImRaii.PushColor(ImGuiCol.Text, collected == 0 ? Colors.Bad : Colors.TextMuted))
-                ImGui.TextUnformatted($"{collected}/{needed}");
+            ImGui.SameLine(0, 8 * scale);
+            if (missing > 0)
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, collected == 0 ? Colors.Bad : Colors.TextMuted))
+                    ImGui.TextUnformatted($"{collected}/{needed}");
+                ImGui.SameLine(0, 6 * scale);
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                    ImGui.TextUnformatted($"faltam {missing}");
+            }
+            else
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.Progress))
+                    ImGui.TextUnformatted($"{collected}/{needed} ✓");
+            }
 
-            if (mat.GatheringLocations.Count > 0)
+            // ── Linha 2: barra de progresso (largura cheia) ──
+            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction > 0f ? Colors.Progress : Colors.Bad))
+                ImGuiUtils.ProgressBar(fraction, new Vector2(-1, 6 * scale));
+
+            // ── Linha-meta: [teleporte] zona · preço (fluxo à esquerda → sem overflow) ──
+            var hasZone = mat.GatheringLocations.Count > 0;
+            var hasPrice = _plugin.Configuration.ShowMarketPrices
+                && _prices.TryGetValue(mat.ItemId, out var pr) && pr != null;
+
+            if (hasZone)
             {
                 var loc = mat.GatheringLocations[0];
-                ImGui.SameLine();
                 var inCombat = Service.Condition[ConditionFlag.InCombat];
                 using (ImRaii.Disabled(!_plugin.TeleportHelper.IsAvailable || inCombat))
                 {
@@ -502,39 +524,34 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                         : $"Teleportar para {loc.NearestAetheryteName}";
                     ImGuiUtils.Tooltip(reason);
                 }
-                ImGui.SameLine();
+                ImGui.SameLine(0, 6 * scale);
+                ImGui.AlignTextToFramePadding();
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                     ImGui.TextUnformatted(loc.ZoneName);
             }
 
-            if (_plugin.Configuration.ShowMarketPrices)
+            if (hasPrice)
             {
                 _prices.TryGetValue(mat.ItemId, out var price);
-                if (price != null)
+                if (hasZone) ImGui.SameLine(0, 6 * scale); else ImGui.AlignTextToFramePadding();
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                    ImGui.TextUnformatted($"· {price!.PriceCurrentServer:N0}g");
+                if (price.PriceCheapestServer < price.PriceCurrentServer)
                 {
-                    ImGui.SameLine();
-                    ImGui.TextUnformatted($"{price.PriceCurrentServer:N0}g");
-                    if (price.PriceCheapestServer < price.PriceCurrentServer)
-                    {
-                        var saving = price.PriceCurrentServer > 0
-                            ? (float)(price.PriceCurrentServer - price.PriceCheapestServer) / price.PriceCurrentServer
-                            : 0f;
-                        var dcColor = saving > 0.25f ? Colors.Progress
-                            : saving > 0.10f ? Colors.Durability
-                            : Colors.TextMuted;
-                        ImGui.SameLine();
-                        using (ImRaii.PushColor(ImGuiCol.Text, dcColor))
-                            ImGui.TextUnformatted($"{price.PriceCheapestServer:N0}g ({price.CheapestServerName})");
-                    }
-                }
-                else if (_pricesLoading)
-                {
-                    ImGui.SameLine();
-                    ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Buscando...");
+                    var saving = price.PriceCurrentServer > 0
+                        ? (float)(price.PriceCurrentServer - price.PriceCheapestServer) / price.PriceCurrentServer : 0f;
+                    var dcColor = saving > 0.25f ? Colors.Progress : saving > 0.10f ? Colors.Durability : Colors.TextMuted;
+                    ImGui.SameLine(0, 6 * scale);
+                    using (ImRaii.PushColor(ImGuiCol.Text, dcColor))
+                        ImGui.TextUnformatted($"{price.PriceCheapestServer:N0}g ({price.CheapestServerName})");
                 }
             }
+            else if (_plugin.Configuration.ShowMarketPrices && _pricesLoading)
+            {
+                if (hasZone) ImGui.SameLine(0, 6 * scale);
+                ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Buscando...");
+            }
         }
-
         ImGuiUtils.HoveredTooltip($"{collected}/{needed} coletado");
     }
 
@@ -546,6 +563,9 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
         using var id = ImRaii.PushId((int)preCraft.ItemId);
 
+        PluginImGuiUtils.DrawItemIcon(preCraft.ItemId, ImGui.GetFrameHeight());
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(preCraft.ItemName);
         ImGui.SameLine();
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
@@ -616,7 +636,10 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     ? FontAwesomeIcon.CheckCircle.ToIconString()
                     : FontAwesomeIcon.Circle.ToIconString());
         }
-        ImGui.SameLine();
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        PluginImGuiUtils.DrawItemIcon(mat.ItemId, ImGui.GetTextLineHeight());
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(mat.ItemName);
         ImGui.SameLine();
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
