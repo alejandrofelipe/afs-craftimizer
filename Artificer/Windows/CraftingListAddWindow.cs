@@ -113,6 +113,8 @@ public sealed class CraftingListAddWindow : Window, IDisposable
             r => r.RecipeId.ToString(),
             r =>
             {
+                PluginImGuiUtils.DrawItemIcon(r.ItemId, ImGui.GetTextLineHeight());
+                ImGui.SameLine(0, 6 * scale);
                 ImGui.TextUnformatted(r.ItemName);
                 ImGui.SameLine();
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
