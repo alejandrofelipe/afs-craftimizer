@@ -155,7 +155,7 @@ public sealed class CraftingListWindow : Window, IDisposable
     {
         var pct = ComputeListProgress(list);
         var pctText = $"{(int)(pct * 100)}%";
-        var recipeCount = _plugin.CraftingListRepository.GetRecipesForList(list.Id).Count;
+        var recipeCount = _plugin.CraftingListRepository.CountRecipesForList(list.Id);
         var scale = ImGuiHelpers.GlobalScale;
 
         using var id = ImRaii.PushId(list.Id.ToString());
