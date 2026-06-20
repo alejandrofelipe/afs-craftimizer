@@ -505,8 +505,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
             // ── Linha-meta: [teleporte] zona · preço (fluxo à esquerda → sem overflow) ──
             var hasZone = mat.GatheringLocations.Count > 0;
-            var hasPrice = _plugin.Configuration.ShowMarketPrices
-                && _prices.TryGetValue(mat.ItemId, out var pr) && pr != null;
+            _prices.TryGetValue(mat.ItemId, out var price);
+            var hasPrice = _plugin.Configuration.ShowMarketPrices && price != null;
 
             if (hasZone)
             {
@@ -532,8 +532,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
             if (hasPrice)
             {
-                _prices.TryGetValue(mat.ItemId, out var price);
-                if (hasZone) ImGui.SameLine(0, 6 * scale); else ImGui.AlignTextToFramePadding();
+                if (hasZone) ImGui.SameLine(0, 6 * scale);
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                     ImGui.TextUnformatted($"· {price!.PriceCurrentServer:N0}g");
                 if (price.PriceCheapestServer < price.PriceCurrentServer)
@@ -639,7 +638,6 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
         PluginImGuiUtils.DrawItemIcon(mat.ItemId, ImGui.GetTextLineHeight());
         ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
-        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(mat.ItemName);
         ImGui.SameLine();
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
