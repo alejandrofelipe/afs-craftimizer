@@ -155,29 +155,15 @@ public sealed class CraftingListWindow : Window, IDisposable
     {
         var pct = ComputeListProgress(list);
         var pctText = $"{(int)(pct * 100)}%";
+        var recipeCount = _plugin.CraftingListRepository.GetRecipesForList(list.Id).Count;
+        var scale = ImGuiHelpers.GlobalScale;
 
         using var id = ImRaii.PushId(list.Id.ToString());
 
-        var label = $"{list.Name}";
-        if (ImGui.Selectable($"{label}##sel", false, ImGuiSelectableFlags.None,
+        // ── Linha 1: nome (abre detalhe) + menu de contexto + tempo (right) ──
+        if (ImGui.Selectable($"{list.Name}##sel", false, ImGuiSelectableFlags.None,
                 new Vector2(0, ImGui.GetFrameHeight())))
             _plugin.CraftingListDetailWindow.OpenList(list.Id);
-
-        // Right-side metadata (timestamp + pct), drawn on the same line.
-        ImGui.SameLine();
-        var avail = ImGui.GetContentRegionAvail().X;
-        var pctSize = ImGui.CalcTextSize(pctText).X;
-        var timeText = RelativeTime(list.UpdatedAt);
-        var timeSize = ImGui.CalcTextSize(timeText).X;
-        var spacing = ImGui.GetStyle().ItemSpacing.X;
-
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, avail - pctSize - timeSize - spacing * 2));
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted(timeText);
-        ImGui.SameLine();
-        using (ImRaii.PushColor(ImGuiCol.Text,
-            list.CompletedAt.HasValue ? Colors.Progress : pct > 0 ? Vector4.One : Colors.TextMuted))
-            ImGui.TextUnformatted(pctText);
 
         if (ImGui.BeginPopupContextItem($"##ctx_{list.Id}"))
         {
@@ -203,6 +189,26 @@ public sealed class CraftingListWindow : Window, IDisposable
                 }
             ImGui.EndPopup();
         }
+
+        // tempo relativo, right-aligned ao fim da linha (cursor-relativo: alinha na borda da janela)
+        var timeText = RelativeTime(list.UpdatedAt);
+        ImGui.SameLine();
+        var avail = ImGui.GetContentRegionAvail().X;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, avail - ImGui.CalcTextSize(timeText).X));
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted(timeText);
+
+        // ── Linha 2: barra de progresso + % + N receitas ──
+        using (ImRaii.PushColor(ImGuiCol.PlotHistogram, list.CompletedAt.HasValue ? Colors.Progress : Colors.Quality))
+            ImGuiUtils.ProgressBar(pct, new Vector2(-1, 5 * scale));
+        using (ImRaii.PushColor(ImGuiCol.Text,
+            list.CompletedAt.HasValue ? Colors.Progress : pct > 0 ? Vector4.One : Colors.TextMuted))
+            ImGui.TextUnformatted(pctText);
+        ImGui.SameLine(0, 6 * scale);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted($"· {recipeCount} receitas");
+
+        ImGui.Dummy(new Vector2(0, 3 * scale));
     }
 
     private void DrawDeleteModal()
