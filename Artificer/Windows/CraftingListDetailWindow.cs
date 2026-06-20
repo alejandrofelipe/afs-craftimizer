@@ -551,7 +551,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             }
 
             // ── Linha 2: barra de progresso (largura cheia) ──
-            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction > 0f ? Colors.Progress : Colors.Bad))
+            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction >= 1f ? Colors.Progress : Colors.Quality))
                 ImGuiUtils.ProgressBar(fraction, new Vector2(-1, 6 * scale));
 
             // ── Linha-meta: [teleporte] zona · preço (fluxo à esquerda → sem overflow) ──
