@@ -158,6 +158,14 @@ public sealed class CraftingListRepository : IDisposable
         return result;
     }
 
+    public int CountRecipesForList(Guid listId)
+    {
+        using var cmd = Command(
+            "SELECT COUNT(*) FROM crafting_list_recipes WHERE list_id=$id");
+        cmd.Parameters.AddWithValue("$id", listId.ToString());
+        return Convert.ToInt32(cmd.ExecuteScalar());
+    }
+
     public void InsertRecipe(CraftingListRecipe recipe)
     {
         using var cmd = Command(

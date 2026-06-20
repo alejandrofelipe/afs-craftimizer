@@ -54,6 +54,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         _plugin = plugin;
         _plugin.WindowSystem.AddWindow(this);
+        _plugin.CraftingListManager.ListsChanged += OnListsChanged;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -85,6 +86,19 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         var progressList = _plugin.CraftingListRepository.GetProgressForList(id);
         _progress = progressList.ToDictionary(p => p.ItemId);
         _ = RefreshTreeAsync();
+    }
+
+    private void OnListsChanged()
+    {
+        if (_listId is not { } id)
+            return;
+        // Lista deletada externamente → fechar; senão, recarregar (conserta "não atualiza após add").
+        if (_plugin.CraftingListManager.Lists.All(l => l.Id != id))
+        {
+            IsOpen = false;
+            return;
+        }
+        RefreshData();
     }
 
     private async Task RefreshTreeAsync()
@@ -188,9 +202,14 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     private void DrawHeader(CraftingList list)
     {
+        var scale = ImGuiHelpers.GlobalScale;
+        var rowLeft = ImGui.GetCursorPosX();
+        var fullW = ImGui.GetContentRegionAvail().X;
+
+        // ── Linha 1: nome (2× clique renomeia) + toggle de visão + kebab ──
         if (_isRenaming)
         {
-            ImGui.SetNextItemWidth(240 * ImGuiHelpers.GlobalScale);
+            ImGui.SetNextItemWidth(240 * scale);
             var enter = ImGui.InputText("##renameDetail", ref _renameBuffer, 128,
                 ImGuiInputTextFlags.EnterReturnsTrue);
             if (enter && !string.IsNullOrWhiteSpace(_renameBuffer))
@@ -202,6 +221,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         }
         else
         {
+            ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(list.Name);
             if (ImGui.IsItemHovered())
                 ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
@@ -212,45 +232,72 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             }
         }
 
-        ImGui.SameLine();
-        var overall = ComputeOverallFraction();
-        using (ImRaii.PushColor(ImGuiCol.Text, overall >= 1f ? Colors.Progress : Colors.TextMuted))
-            ImGui.TextUnformatted($"{(int)(overall * 100)}%");
-
-        // View toggle
-        ImGui.SameLine();
+        // toggle segmentado [Detalhada | Simples] + kebab, right-aligned na borda do conteúdo.
+        // rowLeft + fullW = X absoluto da borda direita do conteúdo (capturado no topo, antes do nome).
         var detailed = _plugin.Configuration.CraftingListViewMode == 0;
-        if (ImGui.RadioButton("Detalhada", detailed))
-        {
-            _plugin.Configuration.CraftingListViewMode = 0;
-            _plugin.Configuration.Save();
-        }
+        var style = ImGui.GetStyle();
+        var toggleW = ImGui.CalcTextSize("Detalhada").X + ImGui.CalcTextSize("Simples").X
+                      + style.FramePadding.X * 4 + style.ItemSpacing.X;
+        var kebabW = ImGui.GetFrameHeight();
+        var rightW = toggleW + style.ItemSpacing.X + kebabW;
         ImGui.SameLine();
-        if (ImGui.RadioButton("Simples", !detailed))
-        {
-            _plugin.Configuration.CraftingListViewMode = 1;
-            _plugin.Configuration.Save();
-        }
+        ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + fullW - rightW));
 
-        // Export dropdown
+        DrawViewToggleButton("Detalhada", detailed, 0);
+        ImGui.SameLine(0, style.ItemSpacing.X);
+        DrawViewToggleButton("Simples", !detailed, 1);
+
         ImGui.SameLine();
-        if (ImGui.Button("📋 Exportar"))
-            ImGui.OpenPopup("##exportPopup");
-        using (var popup = ImRaii.Popup("##exportPopup"))
+        if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.EllipsisV))
+            ImGui.OpenPopup("##clMore");
+        ImGuiUtils.HoveredTooltip("Mais opções");
+        using (var more = ImRaii.Popup("##clMore"))
         {
-            if (popup)
+            if (more)
             {
-                var mats = AllMaterials();
-                if (ImGui.MenuItem("Lista completa"))
-                    ExportHelper.CopyToClipboard(ExportHelper.ToFullList(list, mats, _progress));
-                if (ImGui.MenuItem("Apenas faltantes"))
-                    ExportHelper.CopyToClipboard(ExportHelper.ToMissingOnly(list, mats, _progress));
+                if (ImGui.BeginMenu("Exportar"))
+                {
+                    var mats = AllMaterials();
+                    if (ImGui.MenuItem("Lista completa"))
+                        ExportHelper.CopyToClipboard(ExportHelper.ToFullList(list, mats, _progress));
+                    if (ImGui.MenuItem("Apenas faltantes"))
+                        ExportHelper.CopyToClipboard(ExportHelper.ToMissingOnly(list, mats, _progress));
+                    ImGui.EndMenu();
+                }
+                if (ImGui.MenuItem("Sincronizar inventário"))
+                    _ = SyncInventoryAsync();
+                if (_plugin.Configuration.ShowMarketPrices && ImGui.MenuItem("Atualizar preços"))
+                {
+                    _prices.Clear();
+                    _ = LoadPricesAsync();
+                }
+                if (ImGui.MenuItem("Renomear"))
+                {
+                    _isRenaming = true;
+                    _renameBuffer = list.Name;
+                }
+                if (ImGui.MenuItem("Duplicar"))
+                    _ = _plugin.CraftingListManager.DuplicateListAsync(list.Id);
             }
         }
 
-        ImGui.SameLine();
-        if (ImGui.Button("✕ Fechar"))
-            IsOpen = false;
+        // ── Linha 2: barra de progresso + % ──
+        var overall = ComputeOverallFraction();
+        using (ImRaii.PushColor(ImGuiCol.PlotHistogram, overall >= 1f ? Colors.Progress : Colors.Quality))
+            ImGuiUtils.ProgressBar(overall, new Vector2(-1, 8 * scale));
+        using (ImRaii.PushColor(ImGuiCol.Text, overall >= 1f ? Colors.Progress : Colors.TextMuted))
+            ImGui.TextUnformatted($"{(int)(overall * 100)}%");
+    }
+
+    private void DrawViewToggleButton(string label, bool active, int mode)
+    {
+        if (active) Theme.PushPrimaryButton();
+        if (ImGui.Button(label) && !active)
+        {
+            _plugin.Configuration.CraftingListViewMode = mode;
+            _plugin.Configuration.Save();
+        }
+        if (active) Theme.PopPrimaryButton();
     }
 
     // ── Detailed view ──────────────────────────────────────────────────────────
@@ -315,6 +362,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             foreach (var recipe in _recipes)
             {
                 using var id = ImRaii.PushId(recipe.Id.ToString());
+                var rowLeft = ImGui.GetCursorPosX();
 
                 if (_selectionMode)
                 {
@@ -337,7 +385,10 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     _quantityEdits[recipe.Id] = (qty, ImGui.GetTime());
                 }
 
-                ImGui.SameLine();
+                ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+                PluginImGuiUtils.DrawItemIcon(recipe.ItemId, ImGui.GetFrameHeight());
+                ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+                ImGui.AlignTextToFramePadding();
                 ImGui.TextUnformatted(LookupItemName(recipe.ItemId));
 
                 var restrictions = _plugin.RecipeRestrictionChecker.GetRestrictions(recipe.RecipeId);
@@ -350,17 +401,16 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     ImGuiUtils.HoveredTooltip(string.Join('\n', restrictions.Select(r => r.Title)), wrapWidth: 300);
                 }
 
-                ImGui.SameLine();
-                var availX = ImGui.GetContentRegionAvail().X;
-                var btnPad  = ImGui.GetStyle().ItemSpacing.X;
+                // Right-align à prova de overflow: âncora explícita na borda interna do painel.
+                var innerW = ImGuiUtils.CurrentContentWidth ?? ImGui.GetContentRegionAvail().X;
                 if (_pendingRemoveId == recipe.Id)
                 {
                     var confirmW = ImGui.CalcTextSize("Remover?").X
-                        + ImGui.CalcTextSize("Sim").X
-                        + ImGui.CalcTextSize("Não").X
+                        + ImGui.CalcTextSize("Sim").X + ImGui.CalcTextSize("Não").X
                         + ImGui.GetStyle().FramePadding.X * 4
-                        + btnPad * 2;
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - confirmW - btnPad));
+                        + ImGui.GetStyle().ItemSpacing.X * 2;
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + innerW - confirmW));
                     using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
                         ImGui.TextUnformatted("Remover?");
                     ImGui.SameLine();
@@ -376,7 +426,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 }
                 else
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, availX - ImGui.GetFrameHeight() - btnPad));
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), rowLeft + innerW - ImGui.GetFrameHeight()));
                     if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Times))
                         _pendingRemoveId = recipe.Id;
                     ImGuiUtils.HoveredTooltip("Remover da lista");
@@ -472,23 +523,45 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         _progress.TryGetValue(mat.ItemId, out var prog);
         var collected = prog?.QuantityCollected ?? 0;
         var needed = mat.Quantity;
+        var missing = Math.Max(0, needed - collected);
         var fraction = needed > 0 ? Math.Clamp((float)collected / needed, 0f, 1f) : 1f;
         var scale = ImGuiHelpers.GlobalScale;
+        var iconSize = ImGui.GetFrameHeight();
 
         using (ImRaii.Group())
         {
-            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction > 0f ? Colors.Progress : Colors.Bad))
-                ImGuiUtils.ProgressBar(fraction > 0f ? fraction : 0f, new Vector2(-1, 6 * scale));
-
+            // ── Linha 1: ícone + nome + tem/precisa/faltam ──
+            PluginImGuiUtils.DrawItemIcon(mat.ItemId, iconSize);
+            ImGui.SameLine(0, 6 * scale);
+            ImGui.AlignTextToFramePadding();
             ImGui.TextUnformatted(mat.ItemName);
-            ImGui.SameLine();
-            using (ImRaii.PushColor(ImGuiCol.Text, collected == 0 ? Colors.Bad : Colors.TextMuted))
-                ImGui.TextUnformatted($"{collected}/{needed}");
+            ImGui.SameLine(0, 8 * scale);
+            if (missing > 0)
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, collected == 0 ? Colors.Bad : Colors.TextMuted))
+                    ImGui.TextUnformatted($"{collected}/{needed}");
+                ImGui.SameLine(0, 6 * scale);
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                    ImGui.TextUnformatted($"faltam {missing}");
+            }
+            else
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.Progress))
+                    ImGui.TextUnformatted($"{collected}/{needed} ✓");
+            }
 
-            if (mat.GatheringLocations.Count > 0)
+            // ── Linha 2: barra de progresso (largura cheia) ──
+            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, fraction >= 1f ? Colors.Progress : Colors.Quality))
+                ImGuiUtils.ProgressBar(fraction, new Vector2(-1, 6 * scale));
+
+            // ── Linha-meta: [teleporte] zona · preço (fluxo à esquerda → sem overflow) ──
+            var hasZone = mat.GatheringLocations.Count > 0;
+            _prices.TryGetValue(mat.ItemId, out var price);
+            var hasPrice = _plugin.Configuration.ShowMarketPrices && price != null;
+
+            if (hasZone)
             {
                 var loc = mat.GatheringLocations[0];
-                ImGui.SameLine();
                 var inCombat = Service.Condition[ConditionFlag.InCombat];
                 using (ImRaii.Disabled(!_plugin.TeleportHelper.IsAvailable || inCombat))
                 {
@@ -502,39 +575,33 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                         : $"Teleportar para {loc.NearestAetheryteName}";
                     ImGuiUtils.Tooltip(reason);
                 }
-                ImGui.SameLine();
+                ImGui.SameLine(0, 6 * scale);
+                ImGui.AlignTextToFramePadding();
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                     ImGui.TextUnformatted(loc.ZoneName);
             }
 
-            if (_plugin.Configuration.ShowMarketPrices)
+            if (hasPrice)
             {
-                _prices.TryGetValue(mat.ItemId, out var price);
-                if (price != null)
+                if (hasZone) ImGui.SameLine(0, 6 * scale);
+                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                    ImGui.TextUnformatted($"· {price!.PriceCurrentServer:N0}g");
+                if (price.PriceCheapestServer < price.PriceCurrentServer)
                 {
-                    ImGui.SameLine();
-                    ImGui.TextUnformatted($"{price.PriceCurrentServer:N0}g");
-                    if (price.PriceCheapestServer < price.PriceCurrentServer)
-                    {
-                        var saving = price.PriceCurrentServer > 0
-                            ? (float)(price.PriceCurrentServer - price.PriceCheapestServer) / price.PriceCurrentServer
-                            : 0f;
-                        var dcColor = saving > 0.25f ? Colors.Progress
-                            : saving > 0.10f ? Colors.Durability
-                            : Colors.TextMuted;
-                        ImGui.SameLine();
-                        using (ImRaii.PushColor(ImGuiCol.Text, dcColor))
-                            ImGui.TextUnformatted($"{price.PriceCheapestServer:N0}g ({price.CheapestServerName})");
-                    }
-                }
-                else if (_pricesLoading)
-                {
-                    ImGui.SameLine();
-                    ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Buscando...");
+                    var saving = price.PriceCurrentServer > 0
+                        ? (float)(price.PriceCurrentServer - price.PriceCheapestServer) / price.PriceCurrentServer : 0f;
+                    var dcColor = saving > 0.25f ? Colors.Progress : saving > 0.10f ? Colors.Durability : Colors.TextMuted;
+                    ImGui.SameLine(0, 6 * scale);
+                    using (ImRaii.PushColor(ImGuiCol.Text, dcColor))
+                        ImGui.TextUnformatted($"{price.PriceCheapestServer:N0}g ({price.CheapestServerName})");
                 }
             }
+            else if (_plugin.Configuration.ShowMarketPrices && _pricesLoading)
+            {
+                if (hasZone) ImGui.SameLine(0, 6 * scale);
+                ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Buscando...");
+            }
         }
-
         ImGuiUtils.HoveredTooltip($"{collected}/{needed} coletado");
     }
 
@@ -546,6 +613,9 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
         using var id = ImRaii.PushId((int)preCraft.ItemId);
 
+        PluginImGuiUtils.DrawItemIcon(preCraft.ItemId, ImGui.GetFrameHeight());
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(preCraft.ItemName);
         ImGui.SameLine();
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
@@ -616,7 +686,9 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                     ? FontAwesomeIcon.CheckCircle.ToIconString()
                     : FontAwesomeIcon.Circle.ToIconString());
         }
-        ImGui.SameLine();
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        PluginImGuiUtils.DrawItemIcon(mat.ItemId, ImGui.GetTextLineHeight());
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
         ImGui.TextUnformatted(mat.ItemName);
         ImGui.SameLine();
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
@@ -699,6 +771,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     public void Dispose()
     {
+        _plugin.CraftingListManager.ListsChanged -= OnListsChanged;
         _plugin.WindowSystem.RemoveWindow(this);
     }
 }
