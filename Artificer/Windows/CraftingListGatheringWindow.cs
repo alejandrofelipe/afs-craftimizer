@@ -92,7 +92,7 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
             _prices[itemId] = await _plugin.MarketboardHelper.GetPriceAsync(
                 itemId, worldId, string.Empty, _plugin.Configuration.MarketPriceCacheTtlMinutes)
                 .ConfigureAwait(false);
-                _route = null;
+            _route = null;
         }
     }
 
