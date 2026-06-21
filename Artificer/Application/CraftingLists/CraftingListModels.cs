@@ -49,6 +49,7 @@ public enum IngredientKind
 /// <summary>A gathering location for a base material (populated by GatheringLocator).</summary>
 public sealed record GatheringLocation(
     uint TerritoryTypeId,
+    uint MapId,
     string ZoneName,
     float MapX,
     float MapY,
