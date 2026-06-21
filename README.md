@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.24.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.25.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -140,6 +140,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix: componentes vazando a borda de GroupPanels — `BeginGroupPanel` injeta sua largura interna como "largura ambiente" e os helpers de alinhamento clampam a `min(painel, célula)` em vez de `GetContentRegionAvail()` (que escapa até a borda da janela); label do algoritmo no progresso do solver ancorado à borda do painel
 - 🐛 Fix: crash ao adicionar receita na Lista de Coleta (`EntryPointNotFoundException: igIsKeyPressed_Bool`) — `ImGui.IsKeyPressed` do ImGuiNET não existe no cimgui do Dalamud; a chamada agora roteia pelo shim `IUiServices` (`Dalamud.Bindings.ImGui` in-game, `ImGuiNET` no UIStudio), mesmo padrão do `PushStyleVar`
 - **Entrada da Lista de Coleta repensada:** comando `/craftlist` (+ `/craftinglist`, `/coleta`) e botão em Configurações → Experimental abrem a janela; o FeatureHub flutuante (e o helper `DrawGuard`) foram removidos
+- **Lista de Coleta — passe de intuitividade visual:** ícones de item em todas as superfícies (materiais, cristais, pré-crafts, receitas e busca via `PluginImGuiUtils.DrawItemIcon`); layout em 2 linhas (material com `tem/precisa/faltam` + barra + teleporte/zona/preço; header com toggle `[Detalhada|Simples]` + kebab "Mais opções" + barra de progresso; browser com barra + `N receitas`); 🐛 Fix: Detalhe atualiza ao adicionar receita de outra janela (assina `ListsChanged`) e o ✕ da receita não estoura mais a borda do painel
 
 ---
 
