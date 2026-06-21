@@ -93,4 +93,19 @@ public class GatheringRoutePlannerTests
         Assert.AreEqual(0, route.TotalBuyCost);
         Assert.AreEqual(0, route.MissingMaterialCount);
     }
+
+    [TestMethod]
+    public void ZonesWithEqualMaterialCount_OrderedByNameAsc()
+    {
+        var inputs = new List<RouteMaterialInput>
+        {
+            Mat(10, "z1", 5, 0, Loc(2, "Zeta"), null),
+            Mat(11, "a1", 5, 0, Loc(1, "Alpha"), null),
+        };
+
+        var route = GatheringRoutePlanner.Plan(inputs);
+
+        Assert.AreEqual("Alpha", route.Zones[0].ZoneName);
+        Assert.AreEqual("Zeta", route.Zones[1].ZoneName);
+    }
 }

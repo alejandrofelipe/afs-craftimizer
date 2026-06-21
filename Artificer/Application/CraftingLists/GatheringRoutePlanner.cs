@@ -19,7 +19,10 @@ public sealed record GatheringRouteZone(
     uint TerritoryId, string ZoneName, uint AetheryteId, string AetheryteName,
     IReadOnlyList<RouteMaterial> Materials);
 
-/// <summary>Plano de rota: zonas ordenadas + grupo "Outros" + custo total de compra.</summary>
+/// <summary>
+/// Plano de rota: zonas ordenadas + grupo "Outros" + custo total de compra.
+/// <see cref="MissingMaterialCount"/> conta TODOS os materiais faltantes (zonas + Outros).
+/// </summary>
 public sealed record GatheringRoute(
     IReadOnlyList<GatheringRouteZone> Zones,
     IReadOnlyList<RouteMaterial> Others,
@@ -32,10 +35,12 @@ public static class GatheringRoutePlanner
 {
     public static GatheringRoute Plan(IReadOnlyList<RouteMaterialInput> inputs)
     {
+        static bool HasZone(RouteMaterialInput m) => m.Location is { TerritoryTypeId: not 0 };
+
         var missing = inputs.Where(m => m.Needed - m.Collected > 0).ToList();
 
         var zones = missing
-            .Where(m => m.Location is { TerritoryTypeId: not 0 })
+            .Where(HasZone)
             .GroupBy(m => m.Location!.TerritoryTypeId)
             .Select(g =>
             {
@@ -50,7 +55,7 @@ public static class GatheringRoutePlanner
             .ToList();
 
         var others = missing
-            .Where(m => m.Location is not { TerritoryTypeId: not 0 })
+            .Where(m => !HasZone(m))
             .Select(ToRouteMaterial)
             .ToList();
 
