@@ -34,6 +34,7 @@ public static class LuminaSheets
     private static readonly System.Lazy<ExcelSheet<TerritoryType>> _territoryTypeSheet = new(() => Module.GetSheet<TerritoryType>());
     private static readonly System.Lazy<ExcelSheet<Aetheryte>> _aetheryteSheet = new(() => Module.GetSheet<Aetheryte>());
     private static readonly System.Lazy<ExcelSheet<Map>> _mapSheet = new(() => Module.GetSheet<Map>());
+    private static readonly System.Lazy<ExcelSheet<ExportedGatheringPoint>> _exportedGatheringPointSheet = new(() => Module.GetSheet<ExportedGatheringPoint>());
 
     public static ExcelSheet<Item> ItemSheetEnglish => _itemSheetEnglish.Value;
     public static ExcelSheet<Level> LevelSheet => _levelSheet.Value;
@@ -49,4 +50,5 @@ public static class LuminaSheets
     public static ExcelSheet<TerritoryType> TerritoryTypeSheet => _territoryTypeSheet.Value;
     public static ExcelSheet<Aetheryte> AetheryteSheet => _aetheryteSheet.Value;
     public static ExcelSheet<Map> MapSheet => _mapSheet.Value;
+    public static ExcelSheet<ExportedGatheringPoint> ExportedGatheringPointSheet => _exportedGatheringPointSheet.Value;
 }

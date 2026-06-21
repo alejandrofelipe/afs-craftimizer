@@ -266,6 +266,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 }
                 if (ImGui.MenuItem("Sincronizar inventário"))
                     _ = SyncInventoryAsync();
+                if (ImGui.MenuItem("🗺 Abrir Rota de Coleta"))
+                    _plugin.CraftingListGatheringWindow.OpenForList(list.Id);
                 if (_plugin.Configuration.ShowMarketPrices && ImGui.MenuItem("Atualizar preços"))
                 {
                     _prices.Clear();
@@ -574,6 +576,12 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                         : inCombat ? "Em combate"
                         : $"Teleportar para {loc.NearestAetheryteName}";
                     ImGuiUtils.Tooltip(reason);
+                }
+                if (loc is { MapX: > 0f })
+                {
+                    ImGui.SameLine(0, 4 * scale);
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.MapMarkerAlt, "Marcar no mapa"))
+                        MapFlagHelper.FlagOnMap(loc);
                 }
                 ImGui.SameLine(0, 6 * scale);
                 ImGui.AlignTextToFramePadding();

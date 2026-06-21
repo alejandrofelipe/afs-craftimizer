@@ -36,6 +36,7 @@ public sealed class Plugin : IDalamudPlugin
     public CraftingListAddWindow CraftingListAddWindow { get; }
     public CraftingListDetailWindow CraftingListDetailWindow { get; }
     public CraftingListMergeWindow CraftingListMergeWindow { get; }
+    public CraftingListGatheringWindow CraftingListGatheringWindow { get; }
 
     public Configuration Configuration { get; }
     public MacroRepository MacroRepository { get; }
@@ -103,6 +104,7 @@ public sealed class Plugin : IDalamudPlugin
         CraftingListAddWindow = new(this);
         CraftingListDetailWindow = new(this);
         CraftingListMergeWindow = new(this);
+        CraftingListGatheringWindow = new(this);
 
         // Trigger static constructors so a hitch doesn't occur on first RecipeNote frame.
         FoodStatus.Initialize();
@@ -249,6 +251,7 @@ public sealed class Plugin : IDalamudPlugin
         CraftingListAddWindow.Dispose();
         CraftingListDetailWindow.Dispose();
         CraftingListMergeWindow.Dispose();
+        CraftingListGatheringWindow.Dispose();
         Icon.Dispose();
         TeleportHelper.Dispose();
         MarketboardHelper.Dispose();

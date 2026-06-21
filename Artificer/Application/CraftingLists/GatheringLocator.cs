@@ -65,11 +65,13 @@ public sealed class GatheringLocator
                 continue;
 
             var aetheryte = territory.Aetheryte.ValueNullable;
+            var egp = LuminaSheets.ExportedGatheringPointSheet.GetRowOrDefault(gpb.RowId);
             results.Add(new GatheringLocation(
                 TerritoryTypeId: territory.RowId,
+                MapId: territory.Map.ValueNullable?.RowId ?? 0,
                 ZoneName: territory.PlaceName.ValueNullable?.Name.ExtractText() ?? "?",
-                MapX: 0f,
-                MapY: 0f,
+                MapX: egp?.X ?? 0f,
+                MapY: egp?.Y ?? 0f,
                 NearestAetheryteId: aetheryte?.RowId ?? 0,
                 NearestAetheryteName: aetheryte?.PlaceName.ValueNullable?.Name.ExtractText() ?? "?",
                 Kind: GetKind(gpb.GatheringType.RowId)
