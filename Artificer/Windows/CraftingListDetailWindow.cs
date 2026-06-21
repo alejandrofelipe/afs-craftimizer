@@ -577,6 +577,12 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                         : $"Teleportar para {loc.NearestAetheryteName}";
                     ImGuiUtils.Tooltip(reason);
                 }
+                if (loc is { MapX: > 0f })
+                {
+                    ImGui.SameLine(0, 4 * scale);
+                    if (ImGuiUtils.IconButtonWithTooltip((int)FontAwesomeIcon.MapMarkerAlt, "Marcar no mapa"))
+                        MapFlagHelper.FlagOnMap(loc);
+                }
                 ImGui.SameLine(0, 6 * scale);
                 ImGui.AlignTextToFramePadding();
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
