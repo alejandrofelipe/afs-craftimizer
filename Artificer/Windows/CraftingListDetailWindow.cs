@@ -266,6 +266,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 }
                 if (ImGui.MenuItem("Sincronizar inventário"))
                     _ = SyncInventoryAsync();
+                if (ImGui.MenuItem("🗺 Abrir Rota de Coleta"))
+                    _plugin.CraftingListGatheringWindow.OpenForList(list.Id);
                 if (_plugin.Configuration.ShowMarketPrices && ImGui.MenuItem("Atualizar preços"))
                 {
                     _prices.Clear();
