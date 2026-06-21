@@ -26,7 +26,7 @@ public sealed record GatheringRouteZone(
 public sealed record GatheringRoute(
     IReadOnlyList<GatheringRouteZone> Zones,
     IReadOnlyList<RouteMaterial> Others,
-    int TotalBuyCost,
+    long TotalBuyCost,
     int MissingMaterialCount,
     int ZoneCount);
 
@@ -61,7 +61,7 @@ public static class GatheringRoutePlanner
 
         var totalBuyCost = missing
             .Where(m => m.UnitPrice is > 0)
-            .Sum(m => (m.Needed - m.Collected) * m.UnitPrice!.Value);
+            .Sum(m => (long)(m.Needed - m.Collected) * m.UnitPrice!.Value);
 
         return new GatheringRoute(zones, others, totalBuyCost, missing.Count, zones.Count);
     }

@@ -29,6 +29,7 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
     private Dictionary<uint, MaterialProgress> _progress = new();
     private readonly Dictionary<uint, MarketPrice?> _prices = new();
     private bool _treeLoading;
+    private GatheringRoute? _route;
 
     public CraftingListGatheringWindow(PluginClass plugin) : base("Rota de Coleta###Artificer-cl-gather",
         ImGuiWindowFlags.NoScrollbar)
@@ -65,6 +66,7 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
         try
         {
             _tree = await _plugin.CraftingListManager.ResolveIngredientsAsync(id).ConfigureAwait(false);
+            _route = null;
             if (_plugin.Configuration.ShowMarketPrices)
                 _ = LoadPricesAsync();
         }
@@ -90,6 +92,7 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
             _prices[itemId] = await _plugin.MarketboardHelper.GetPriceAsync(
                 itemId, worldId, string.Empty, _plugin.Configuration.MarketPriceCacheTtlMinutes)
                 .ConfigureAwait(false);
+                _route = null;
         }
     }
 
@@ -112,7 +115,7 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
         if (_tree == null)
             return;
 
-        var route = BuildRoute();
+        var route = _route ??= BuildRoute();
 
         if (route.MissingMaterialCount == 0)
         {

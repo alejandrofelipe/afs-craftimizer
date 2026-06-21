@@ -64,7 +64,7 @@ public class GatheringRoutePlannerTests
 
         var route = GatheringRoutePlanner.Plan(inputs);
 
-        Assert.AreEqual(400, route.TotalBuyCost);
+        Assert.AreEqual(400L, route.TotalBuyCost);
     }
 
     [TestMethod]
