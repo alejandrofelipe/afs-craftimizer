@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Artificer\Artificer.csproj" />
     <ProjectReference Include="..\Artificer.Simulator\Artificer.Simulator.csproj" />
     <ProjectReference Include="..\Artificer.Solver\Artificer.Solver.csproj" />
     <ProjectReference Include="..\Artificer.UI\Artificer.UI.csproj" />
