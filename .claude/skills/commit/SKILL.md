@@ -94,8 +94,6 @@ Usar este template:
 
 Version: <VERSION>
 <Se fechar issue: Fixes #N / Closes #N>
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
 
 **Regras do título:**
@@ -121,8 +119,6 @@ um collectable em Stellar Missions, sem precisar reabrir a janela.
 - RecipeNote e MacroEditor assinam OnProgressChanged e redesenham ao receber dado novo
 
 Version: 2.10.3.0
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
 
 ### Passo 6 — Staging e commit
