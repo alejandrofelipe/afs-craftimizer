@@ -1,3 +1,8 @@
+---
+name: update-design-system
+description: Reescreve mockup/design-system.html a partir das fontes de verdade do código (Colors.cs, Theme.cs, ImGuiUtils*.cs). Usar quando cores, tokens ou componentes de design mudarem e o design system precisar sincronizar.
+---
+
 # /update-design-system
 
 Cria ou atualiza o design system visual do plugin Artificer em `mockup/design-system.html`,

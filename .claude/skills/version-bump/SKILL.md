@@ -1,3 +1,8 @@
+---
+name: version-bump
+description: Incrementa a versão do plugin Artificer (MAJOR.MINOR.PATCH.BUILD) via scripts/bump-version.ps1 seguindo conventional commits. Usar para bumpar a versão isoladamente, fora do fluxo de commit completo.
+---
+
 # /version-bump
 
 Incrementa a versão do plugin Artificer seguindo convenções semânticas MAJOR.MINOR.PATCH.BUILD.

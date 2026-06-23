@@ -1,3 +1,8 @@
+---
+name: commit
+description: Fluxo completo de commit do Artificer — atualiza README, faz version bump, monta mensagem estruturada em português, cria tag e faz push. Usar ao finalizar uma implementação para commitar, versionar, taggear e publicar a mudança.
+---
+
 # /commit
 
 Prepara e executa o commit completo de uma mudança no Artificer:

@@ -1,3 +1,8 @@
+---
+name: backlog
+description: Cria um novo item de backlog do Artificer (bug, rascunho ou feature completa) seguindo os templates e registra em backlog/PROGRESS.md. Usar quando o usuário pedir para registrar/anotar um item de backlog, abrir um bug, anotar uma ideia ou detalhar uma feature.
+---
+
 # /backlog
 
 Cria um novo item de backlog para o Artificer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md`.

@@ -1,3 +1,8 @@
+---
+name: offset-debug
+description: Diagnostica e corrige memory offsets quebrados em structs FFXIVClientStructs após atualização do FFXIV. Usar quando o plugin não detecta receita ativa, o overlay não aparece, ou há erros de leitura de offset após um patch.
+---
+
 # /offset-debug
 
 Diagnostica e corrige memory offsets quebrados em structs FFXIVClientStructs após atualização do FFXIV.

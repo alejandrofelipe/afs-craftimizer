@@ -1,3 +1,8 @@
+---
+name: deploy
+description: Compila o plugin Artificer em Release e deploya para o XIVLauncher local, pronto para teste in-game. Usar quando pedirem para deployar, instalar localmente ou testar o plugin no jogo.
+---
+
 # /deploy
 
 Compila o plugin Artificer em Release e deploya para o XIVLauncher local, pronto para teste in-game.
