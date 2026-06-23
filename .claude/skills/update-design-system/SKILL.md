@@ -3,14 +3,12 @@ name: update-design-system
 description: Reescreve mockup/design-system.html a partir das fontes de verdade do código (Colors.cs, Theme.cs, ImGuiUtils*.cs). Usar quando cores, tokens ou componentes de design mudarem e o design system precisar sincronizar.
 ---
 
-# /update-design-system
+# Update Design System
 
 Cria ou atualiza o design system visual do plugin Artificer em `mockup/design-system.html`,
 mantendo-o em sincronia com as fontes de verdade do código (`Colors.cs`, `Theme.cs`, `ImGuiUtils*.cs`).
 
-**Uso:** `/update-design-system`
-
-Sem argumentos — a skill lê o estado atual do código e **reescreve o HTML completo** com os valores extraídos.
+Sem entrada — lê o estado atual do código e **reescreve o HTML completo** com os valores extraídos.
 
 ---
 
@@ -149,4 +147,4 @@ Design system já em sincronia com Colors.cs. Nenhuma alteração feita.
 - Fontes de verdade: `Artificer.UI/Colors.cs`, `Artificer.UI/Theme.cs`, `Artificer.UI/ImGuiUtils*.cs`
 - Output: `mockup/design-system.html`
 - Documentação do DS: `docs/design-system/` (referência para agentes)
-- Mockups de telas: `mockup/` (não modificar em /update-design-system)
+- Mockups de telas: `mockup/` (não modificar nesta skill)

@@ -3,18 +3,15 @@ name: commit
 description: Fluxo completo de commit do Artificer — atualiza README, faz version bump, monta mensagem estruturada em português, cria tag e faz push. Usar ao finalizar uma implementação para commitar, versionar, taggear e publicar a mudança.
 ---
 
-# /commit
+# Commit
 
-Prepara e executa o commit completo de uma mudança no Artificer:
-atualiza README, faz version bump, cria commit com mensagem estruturada, cria tag e faz push.
+Prepara e executa o commit completo de uma mudança no Artificer: atualiza README, faz version bump, monta mensagem estruturada, cria tag e faz push.
 
-**Uso:**
-```
-/commit <descrição curta do que foi feito>
-/commit <nível> <descrição curta do que foi feito>
-```
+## Entrada
 
-**Níveis de bump disponíveis** (mesmo que `bump-version.ps1 -Type`):
+Uma descrição curta da mudança, opcionalmente prefixada por um nível de bump (`major` / `minor` / `patch` / `build`). Se a descrição for omitida, inspecionar o `git diff` para inferir.
+
+**Níveis de bump** (mesmos de `bump-version.ps1 -Type`):
 
 | Nível | Efeito | Quando usar |
 |---|---|---|
@@ -23,51 +20,29 @@ atualiza README, faz version bump, cria commit com mensagem estruturada, cria ta
 | `patch` | X.Y.Z+1.0 | Correção de bug relevante (`fix`) |
 | `build` | X.Y.Z.W+1 | Refactor, chore, polish, docs (padrão) |
 
-**Exemplos:**
-```
-/commit minor adicionar empty state reutilizável
-/commit patch corrigir crash no RecipeNote
-/commit build ajustar títulos das janelas
-/commit major rewrite do solver
-/commit remover prefixo das janelas   ← auto-detecta: chore → build
-```
-
-Se nenhum nível for fornecido como primeiro token, auto-detectar com base no diff:
+Se nenhum nível for informado, auto-detectar pelo diff/descrição:
 - `feat` → `minor`
 - `fix` → `patch`
 - `refactor` / `chore` / `docs` / `style` → `build`
-
-O argumento `$ARGUMENTS` descreve a mudança — se omitido, inspecionar o `git diff` para inferir.
 
 ---
 
 ## Instruções
 
-### Passo 1 — Parsear argumentos
+### Passo 1 — Parsear a entrada
 
-Verificar se o primeiro token de `$ARGUMENTS` é um dos níveis válidos: `major`, `minor`, `patch`, `build`.
+Verificar se o primeiro token da entrada é um dos níveis válidos: `major`, `minor`, `patch`, `build`.
 
 - **Se sim:** usar esse nível explicitamente; o restante do texto é a descrição.
 - **Se não:** a string completa é a descrição; o nível será determinado no Passo 2 via auto-detecção.
 
 ### Passo 2 — Atualizar o README
 
-Executar o fluxo do comando `/update-readme`:
-- Avaliar se a mudança merece nova entrada em "Diferenças deste Fork"
-  - Sim: adicionar o bullet
-  - Não: nenhuma alteração de conteúdo ainda (a versão será atualizada após o bump)
-
-> A linha de versão do README será atualizada **após** o bump, no Passo 3.
+Aplicar a skill `update-readme`: avaliar se a mudança merece nova entrada em "Diferenças deste Fork" e adicioná-la se sim. A linha de versão do README é atualizada **após** o bump, no Passo 3.
 
 ### Passo 3 — Fazer o version bump
 
-- Se nível foi fornecido explicitamente no Passo 1, usar diretamente.
-- Caso contrário, auto-detectar com base na descrição e/ou `git diff`:
-  - `feat` → `minor`
-  - `fix` → `patch`
-  - `refactor` / `chore` / `docs` → `build`
-
-Executar o script:
+Determinar o nível (do Passo 1, ou auto-detectado pela tabela da seção **Entrada**) e aplicar a skill `version-bump`:
 ```powershell
 .\scripts\bump-version.ps1 -Type <nível>
 ```
@@ -80,23 +55,24 @@ Após o bump, atualizar também a linha de versão no README:
 **Versão atual:** $VERSION · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 ```
 
-### Passo 3.5 — Atualizar backlog/PROGRESS.md
+### Passo 3.5 — Atualizar backlog/PROGRESS.md (local)
+
+> `backlog/` é gitignored — o `PROGRESS.md` é um arquivo de tracking **local**, não entra no commit nem no staging.
 
 Verificar se a mudança implementa um item rastreado em `backlog/PROGRESS.md`:
 
-1. Inspecionar a descrição do commit, os arquivos do diff e os nomes de arquivos `backlog/*.md` que sejam relevantes para identificar o item correspondente na tabela **Pendente**
+1. Inspecionar a descrição do commit, os arquivos do diff e os nomes de arquivos `backlog/*.md` relevantes para identificar o item correspondente na tabela **Pendente**
 2. Se um item correspondente existir em **Pendente**:
    - Adicionar uma linha na tabela **Histórico Completo** com o título curto do item e a versão `$VERSION`
    - Remover a linha correspondente da tabela **Pendente**
-   - Atualizar a data "Última revisão" para hoje
-   - Incluir `backlog/PROGRESS.md` no staging do Passo 6
+   - Atualizar a data "Última revisão" para hoje (edição local apenas — não fazer `git add`)
 3. Se nenhum item de backlog for identificado (ex: hotfix, chore, polish), pular este passo
 
 ---
 
 ### Passo 4 — Determinar tipo do commit e escopo
 
-Com base em `$ARGUMENTS` e/ou `git diff`:
+Com base na entrada e/ou `git diff`:
 
 | Mudança | Tipo | Escopo sugerido |
 |---|---|---|
@@ -152,15 +128,14 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ### Passo 6 — Staging e commit
 
 ```powershell
-# Staged o que foi modificado (código + README + .csproj + PROGRESS.md se atualizado)
+# Staged o que foi modificado (código + README + .csproj)
 git add <arquivos alterados>
 git add README.md
 git add Artificer/Artificer.csproj
-# Se o Passo 3.5 atualizou o PROGRESS.md:
-git add backlog/PROGRESS.md
+# Nota: backlog/PROGRESS.md é gitignored (tracking local) — não fazer git add.
 
 # Commit
-git commit -m "<mensagem montada no Passo 4>"
+git commit -m "<mensagem montada no Passo 5>"
 ```
 
 ### Passo 7 — Push do commit

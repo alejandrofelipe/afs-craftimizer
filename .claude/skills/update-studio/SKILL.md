@@ -3,7 +3,7 @@ name: update-studio
 description: Mantém as stories de Pages do UIStudio em sincronia com as janelas reais do plugin (cria, atualiza e avisa órfãs). Usar quando janelas forem adicionadas ou alteradas e o UIStudio precisar refletir as mudanças.
 ---
 
-# /update-studio
+# Update Studio
 
 Mantém as stories de Pages do UIStudio em sincronia com as janelas reais do plugin:
 - Cria stories para janelas que ainda não têm uma
@@ -11,9 +11,7 @@ Mantém as stories de Pages do UIStudio em sincronia com as janelas reais do plu
 - Avisa sobre stories sem janela correspondente (não deleta automaticamente)
 - Atualiza `Program.cs` com novos registros
 
-**Uso:** `/update-studio`
-
-Sem argumentos — a skill lê o estado atual do código e aplica o diff necessário.
+Sem entrada — lê o estado atual do código e aplica o diff necessário.
 
 ---
 

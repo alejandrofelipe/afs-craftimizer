@@ -3,7 +3,7 @@ name: offset-debug
 description: Diagnostica e corrige memory offsets quebrados em structs FFXIVClientStructs após atualização do FFXIV. Usar quando o plugin não detecta receita ativa, o overlay não aparece, ou há erros de leitura de offset após um patch.
 ---
 
-# /offset-debug
+# Offset Debug
 
 Diagnostica e corrige memory offsets quebrados em structs FFXIVClientStructs após atualização do FFXIV.
 
@@ -75,7 +75,7 @@ public ushort ActiveCraftRecipeId;
 ## Fase 3: Validar
 
 Após aplicar novo offset:
-1. Compilar e deployar (`/deploy`)
+1. Compilar e deployar (skill `deploy`)
 2. Iniciar FFXIV com Dalamud
 3. Abrir crafting log → selecionar receita → overlay deve aparecer
 4. Fechar crafting log → overlay deve desaparecer

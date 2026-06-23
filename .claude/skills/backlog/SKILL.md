@@ -3,17 +3,17 @@ name: backlog
 description: Cria um novo item de backlog do Artificer (bug, rascunho ou feature completa) seguindo os templates e registra em backlog/PROGRESS.md. Usar quando o usuário pedir para registrar/anotar um item de backlog, abrir um bug, anotar uma ideia ou detalhar uma feature.
 ---
 
-# /backlog
+# Backlog
 
-Cria um novo item de backlog para o Artificer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md`.
+Cria um novo item de backlog para o Artificer, seguindo os templates estabelecidos, e registra em `backlog/PROGRESS.md` (diretório local — gitignored).
 
-**Uso:** `/backlog <título ou descrição do item>`
+**Entrada:** título ou descrição do item.
 
 ---
 
 ## Instruções
 
-Receba o argumento `$ARGUMENTS` e siga os passos abaixo:
+Receba a descrição do item e siga os passos abaixo:
 
 ### 1. Determinar tipo e profundidade
 

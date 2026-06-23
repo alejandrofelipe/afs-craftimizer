@@ -3,11 +3,11 @@ name: update-readme
 description: Atualiza a versão no README.md e adiciona entrada em "Diferenças deste Fork" se a mudança for visível ao usuário. Usar após bump de versão ou ao documentar uma mudança no README. Também chamado pelo fluxo de commit.
 ---
 
-# /update-readme
+# Update README
 
 Atualiza o README.md com a versão atual do plugin e, se a mudança for relevante para usuários, adiciona uma entrada em "Diferenças deste Fork".
 
-Chamado automaticamente pelo `/commit`. Pode ser chamado isolado quando necessário.
+Parte do fluxo da skill `commit`; também roda isolada quando necessário.
 
 ---
 

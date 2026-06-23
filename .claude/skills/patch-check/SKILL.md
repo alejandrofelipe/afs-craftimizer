@@ -3,9 +3,11 @@ name: patch-check
 description: Analisa a compatibilidade do plugin Artificer com uma nova versão do FFXIV, produzindo documentação técnica e matriz de risco. Usar antes ou logo após um patch do FFXIV ou update do Dalamud SDK.
 ---
 
-# /patch-check
+# Patch Check
 
 Analisa a compatibilidade do plugin Artificer com uma nova versão do FFXIV. Produz documentação técnica e matriz de risco.
+
+> Para **corrigir** um offset confirmado como quebrado, usar a skill `offset-debug`.
 
 ## Quando Usar
 
