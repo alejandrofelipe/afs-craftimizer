@@ -59,6 +59,10 @@ internal static unsafe class RaphaelUtils
             Action.QuickInnovation => ActionType.QuickInnovation,
             Action.ImmaculateMend => ActionType.ImmaculateMend,
             Action.TrainedPerfection => ActionType.TrainedPerfection,
+            // Stellar/Cosmic actions (Raphael.Net 5.0.0)
+            Action.RapidSynthesis => ActionType.RapidSynthesis,
+            Action.HastyTouch => ActionType.HastyTouch,
+            Action.DaringTouch => ActionType.DaringTouch,
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, $"Invalid action value {action}"),
         };
     }
@@ -98,6 +102,10 @@ internal static unsafe class RaphaelUtils
             ActionType.QuickInnovation => Action.QuickInnovation,
             ActionType.ImmaculateMend => Action.ImmaculateMend,
             ActionType.TrainedPerfection => Action.TrainedPerfection,
+            // Stellar/Cosmic actions (Raphael.Net 5.0.0)
+            ActionType.RapidSynthesis => Action.RapidSynthesis,
+            ActionType.HastyTouch => Action.HastyTouch,
+            ActionType.DaringTouch => Action.DaringTouch,
             _ => null,
         };
     }

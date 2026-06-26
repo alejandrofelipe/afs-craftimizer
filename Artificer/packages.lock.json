@@ -114,8 +114,8 @@
       },
       "Raphael.Net": {
         "type": "Transitive",
-        "resolved": "4.1.0",
-        "contentHash": "KRkRUn5gdFwKMpZXtFC9W58lNnhSXQpvNmLaCn7f9Tbx92UhRfttC7/QqyWhjkD2u6L9YNIpNp3nxF6awEOntw=="
+        "resolved": "5.0.0",
+        "contentHash": "NSD9eUqKXLMKAjgMK6Ou0UxndYdmKV2S3Q52ndjxUIoO44OYwuQ72HOVqZUyTOxgBJfLPoPjGX2UyW71msM1uw=="
       },
       "SQLitePCLRaw.bundle_e_sqlite3": {
         "type": "Transitive",
@@ -157,7 +157,7 @@
         "dependencies": {
           "Artificer.Simulator": "[1.0.0, )",
           "DotNext": "[5.26.1, )",
-          "Raphael.Net": "[4.1.0, )"
+          "Raphael.Net": "[5.0.0, )"
         }
       },
       "artificer.ui": {
@@ -175,8 +175,8 @@
       },
       "Raphael.Net": {
         "type": "Transitive",
-        "resolved": "4.1.0",
-        "contentHash": "KRkRUn5gdFwKMpZXtFC9W58lNnhSXQpvNmLaCn7f9Tbx92UhRfttC7/QqyWhjkD2u6L9YNIpNp3nxF6awEOntw=="
+        "resolved": "5.0.0",
+        "contentHash": "NSD9eUqKXLMKAjgMK6Ou0UxndYdmKV2S3Q52ndjxUIoO44OYwuQ72HOVqZUyTOxgBJfLPoPjGX2UyW71msM1uw=="
       },
       "SQLitePCLRaw.lib.e_sqlite3": {
         "type": "Transitive",

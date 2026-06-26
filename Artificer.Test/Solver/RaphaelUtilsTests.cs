@@ -43,6 +43,10 @@ public class RaphaelUtilsTests
             (RaphaelAction.QuickInnovation,   ActionType.QuickInnovation),
             (RaphaelAction.ImmaculateMend,    ActionType.ImmaculateMend),
             (RaphaelAction.TrainedPerfection, ActionType.TrainedPerfection),
+            // Stellar/Cosmic actions added in Raphael.Net 5.0.0
+            (RaphaelAction.RapidSynthesis,    ActionType.RapidSynthesis),
+            (RaphaelAction.HastyTouch,        ActionType.HastyTouch),
+            (RaphaelAction.DaringTouch,       ActionType.DaringTouch),
         };
 
         foreach (var (raw, converted) in expected)
@@ -95,6 +99,10 @@ public class RaphaelUtilsTests
             (ActionType.QuickInnovation,   RaphaelAction.QuickInnovation),
             (ActionType.ImmaculateMend,    RaphaelAction.ImmaculateMend),
             (ActionType.TrainedPerfection, RaphaelAction.TrainedPerfection),
+            // Stellar/Cosmic actions added in Raphael.Net 5.0.0
+            (ActionType.RapidSynthesis,    RaphaelAction.RapidSynthesis),
+            (ActionType.HastyTouch,        RaphaelAction.HastyTouch),
+            (ActionType.DaringTouch,       RaphaelAction.DaringTouch),
         };
 
         foreach (var (converted, raw) in expected)
