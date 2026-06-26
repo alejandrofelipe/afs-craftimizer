@@ -66,6 +66,8 @@ public sealed record RecipeData
         };
 
         int[]? thresholds = null;
+        // false quando vale a pena EXCEDER o maior threshold (bônus/xp) — caso Cosmic Exploration.
+        var limitMaxThreshold = true;
         if (Recipe.CollectableMetadata.GetValueOrDefault<CollectablesShopRefine>() is { } row)
             thresholds = [row.LowCollectability, row.MidCollectability, row.HighCollectability];
         else if (Recipe.CollectableMetadata.GetValueOrDefault<HWDCrafterSupply>() is { } row2)
@@ -103,10 +105,11 @@ public sealed record RecipeData
         }
         else if (Recipe.CollectableMetadata.GetValueOrDefault<CollectablesRefine>() is { } row6)
             thresholds = [row6.CollectabilityLow, row6.CollectabilityMid, row6.CollectabilityHigh];
-        else if (Recipe.CollectableMetadataKey == 7 && LuminaSheets.WKSMissionToDoEvalutionRefinSheet.TryGetRow(Recipe.CollectableMetadata.RowId, out var row7))
+        else if (Recipe.CollectableMetadataKey == 7 && LuminaSheets.WKSMissionToDoEvalutionRefinSheet.TryGetRow(Recipe.CollectableMetadata.RowId, out var row7)) // Cosmic Exploration
         {
             thresholds = [row7.Unknown0, row7.Unknown1, row7.Unknown2];
             thresholds = [.. thresholds.Select(percentage => RecipeInfo.MaxQuality * percentage / 1000)];
+            limitMaxThreshold = false; // em Cosmic vale exceder o maior tier (XP/bônus) — sem cap
         }
 
         if (thresholds != null)
@@ -114,6 +117,11 @@ public sealed record RecipeData
             var t = thresholds.Where(t => t != 0).Cast<int?>();
             t = Enumerable.Concat(Enumerable.Repeat((int?)null, 3 - t.Count()), t);
             CollectableThresholds = t.ToArray();
+
+            // Cap de quality no maior tier de collectability (exceto Cosmic). CollectableThresholds está
+            // em unidades de collectability → × CollectabilityDivisor (=10) converte para quality.
+            if (limitMaxThreshold && CollectableThresholds.LastOrDefault(v => v.HasValue) is { } highestThreshold)
+                RecipeInfo = RecipeInfo with { CollectableTargetQuality = highestThreshold * SimulationState.CollectabilityDivisor };
         }
 
         Ingredients = Recipe.Ingredient.Zip(Recipe.AmountIngredient)

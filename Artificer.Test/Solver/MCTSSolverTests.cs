@@ -21,16 +21,11 @@ public class MCTSSolverTests
         FurcatedActionCount = 1,
         MaxThreadCount = 2,
         StrictActions = false,
-        ScoreProgress = 10,
-        ScoreQuality = 1,
-        ScoreDurability = 0,
-        ScoreCP = 0,
-        ScoreSteps = 1,
         Algorithm = algo,
         ActionPool = [ActionType.BasicSynthesis, ActionType.MuscleMemory],
     };
 
-    private static MCTSConfig FastMCTSConfig() => new MCTSConfig(FastConfig());
+    private static MCTSConfig FastMCTSConfig() => new MCTSConfig(FastConfig(), EasyInput().Recipe);
 
     // ---- MCTS ----
 
@@ -88,7 +83,7 @@ public class MCTSSolverTests
     public void MCTSConfig_MaxThreadCount_DefaultsToZero()
     {
         // MaxThreadCount is not copied from SolverConfig in MCTSConfig constructor
-        var config = new MCTSConfig(FastConfig());
+        var config = new MCTSConfig(FastConfig(), EasyInput().Recipe);
         Assert.AreEqual(0, config.MaxThreadCount);
     }
 

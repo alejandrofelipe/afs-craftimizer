@@ -193,8 +193,21 @@ public partial class Configuration
             using var stream = f.OpenRead();
 
             // System.InvalidOperationException: Setting init-only properties is not supported in source generation mode.
-            return JsonSerializer.Deserialize<Configuration>(stream, JsonContext.DeserializeOptions) ?? new();
+            var config = JsonSerializer.Deserialize<Configuration>(stream, JsonContext.DeserializeOptions) ?? new();
+            config.MigrateSolverConfigs();
+            return config;
         }
         return new();
+    }
+
+    // Configs salvas antes do scoring lexicográfico não têm "QualityTargetPct" (default 0). 0 não é um
+    // alvo válido (slider 1–100); normaliza para 100 (= antiga semântica "mirar 100% de quality").
+    private void MigrateSolverConfigs()
+    {
+        static SolverConfig Fix(SolverConfig c) =>
+            c.QualityTargetPercent <= 0 ? c with { QualityTargetPercent = 100 } : c;
+        RecipeNoteSolverConfig = Fix(RecipeNoteSolverConfig);
+        EditorSolverConfig = Fix(EditorSolverConfig);
+        SynthHelperSolverConfig = Fix(SynthHelperSolverConfig);
     }
 }

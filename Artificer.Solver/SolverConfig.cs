@@ -1,9 +1,11 @@
+using Artificer.Simulator;
 using Artificer.Simulator.Actions;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace Artificer.Solver;
 
@@ -34,23 +36,18 @@ public readonly record struct SolverConfig
     public int FurcatedActionCount { get; init; }
     public bool StrictActions { get; init; }
 
-    // MCTS score weights
-    public float ScoreProgress { get; init; }
-    public float ScoreQuality { get; init; }
-    public float ScoreDurability { get; init; }
-    public float ScoreCP { get; init; }
-    public float ScoreSteps { get; init; }
-
     // Raphael/A* configuration
     public bool Adversarial { get; init; }
     public bool BackloadProgress { get; init; }
 
     // Quality target settings
-    // 0.0 = aim for 100% quality (existing behavior)
-    // 0.01–1.0 = cap quality score at this fraction of MaxQuality
-    public float QualityTargetPercent { get; init; }
-    // When true, cap quality at the highest collectability tier instead of MaxQuality
-    // Resolved to QualityTargetPercent by plugin code (requires RecipeData)
+    // Percentual (1–100) da MaxQuality que o solver mira; ao atingir, para de gastar esforço em quality.
+    // JSON renomeado: configs antigas tinham este campo como float (0.0–1.0); o nome novo faz o valor
+    // antigo ser ignorado na desserialização (migrado em Configuration.MigrateSolverConfigs).
+    [JsonPropertyName("QualityTargetPct")]
+    public int QualityTargetPercent { get; init; }
+    // Se true, capa a quality no maior tier de collectability (via RecipeInfo.CollectableTargetQuality)
+    // em vez de MaxQuality. Sem efeito em Cosmic Exploration (CollectableTargetQuality = null).
     public bool QualityTargetToMaxCollectability { get; init; }
 
     // Wall-clock budget in milliseconds for NextActionForked algorithm.
@@ -76,11 +73,8 @@ public readonly record struct SolverConfig
         FurcatedActionCount = ForkCount / 2;
         StrictActions = true;
 
-        ScoreProgress = 10;
-        ScoreQuality = 80;
-        ScoreDurability = 2;
-        ScoreCP = 3;
-        ScoreSteps = 5;
+        QualityTargetPercent = 100;
+        QualityTargetToMaxCollectability = true;
 
         ActionPool = DeterministicActionPool;
         Algorithm = SolverAlgorithm.StepwiseGenetic;
@@ -93,33 +87,21 @@ public readonly record struct SolverConfig
         this with { ActionPool = ActionPool.Where(action => !SpecialistActions.Contains(action)).ToArray() };
 
     /// <summary>
-    /// Resolves <see cref="QualityTargetToMaxCollectability"/> into a concrete
-    /// <see cref="QualityTargetPercent"/> value using recipe-specific data.
-    /// Must be called from plugin code (which has access to RecipeData) before
-    /// passing the config to the solver.
+    /// Resolve o QualityTarget absoluto (em pontos de quality) a partir do percent + recipe.
+    /// Aplica o cap de collectability quando <see cref="QualityTargetToMaxCollectability"/> e
+    /// <see cref="RecipeInfo.CollectableTargetQuality"/> têm valor (null = sem cap, ex.: Cosmic).
     /// </summary>
-    /// <param name="maxQuality">RecipeInfo.MaxQuality</param>
-    /// <param name="collectableThresholds">RecipeData.CollectableThresholds (collectability units)</param>
-    public SolverConfig WithResolvedQualityTarget(int maxQuality, IReadOnlyList<int?>? collectableThresholds)
+    public int ResolveQualityTarget(in RecipeInfo recipe)
     {
-        if (!QualityTargetToMaxCollectability || maxQuality <= 0 || collectableThresholds == null)
-            return this;
+        var maxQuality = recipe.MaxQuality;
+        if (maxQuality <= 0)
+            return 0;
 
-        var maxCollectability = maxQuality / 10;
-        if (maxCollectability <= 0)
-            return this;
+        var target = maxQuality * QualityTargetPercent / 100;
+        if (QualityTargetToMaxCollectability && recipe.CollectableTargetQuality is { } maxCollectableQuality)
+            target = Math.Min(target, maxCollectableQuality);
 
-        var maxThreshold = collectableThresholds
-            .Where(t => t.HasValue)
-            .Select(t => t!.Value)
-            .DefaultIfEmpty(0)
-            .Max();
-
-        if (maxThreshold <= 0)
-            return this;
-
-        var resolvedPercent = Math.Clamp((float)maxThreshold / maxCollectability, 0.01f, 1.0f);
-        return this with { QualityTargetPercent = resolvedPercent, QualityTargetToMaxCollectability = false };
+        return Math.Min(target, maxQuality);
     }
 
     public static readonly ActionType[] DeterministicActionPool = OptimizeActionPool(new[]

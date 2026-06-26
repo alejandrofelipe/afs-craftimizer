@@ -56,9 +56,6 @@ public sealed partial class MacroEditor
         if (!canUseDelineations)
             config = config.FilterSpecialistActions();
 
-        if (config.QualityTargetToMaxCollectability && RecipeData.IsCollectable)
-            config = config.WithResolvedQualityTarget(RecipeData.RecipeInfo.MaxQuality, RecipeData.CollectableThresholds);
-
         token.ThrowIfCancellationRequested();
 
         var solver = new Solver.Solver(config, state) { Token = token };

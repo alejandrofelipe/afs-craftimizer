@@ -27,19 +27,15 @@ public class SolverNodeTests
             ProgressDivider = 130,
         });
 
-    private static MCTSConfig DefaultConfig()
+    private static MCTSConfig DefaultConfig(int maxQuality = 7200, int qualityTargetPercent = 100)
     {
         var solverConfig = new SolverConfig
         {
             MaxStepCount = 30,
-            ScoreProgress = 1,
-            ScoreQuality = 1,
-            ScoreDurability = 0.1f,
-            ScoreCP = 0.1f,
-            ScoreSteps = 0.1f,
+            QualityTargetPercent = qualityTargetPercent,
             ActionPool = [ActionType.BasicSynthesis],
         };
-        return new MCTSConfig(solverConfig);
+        return new MCTSConfig(solverConfig, MakeInput(maxQuality: maxQuality).Recipe);
     }
 
     // ---- SimulationNode.GetCompletionState ----
@@ -91,13 +87,12 @@ public class SolverNodeTests
         Assert.IsFalse(node.IsComplete);
     }
 
-    // ---- SimulationNode.CalculateScoreForState ----
+    // ---- SimulationNode.CalculateScoreForState (objetivo lexicográfico) ----
 
     [TestMethod]
     public void CalculateScore_NullWhenNotProgressComplete()
     {
-        var input = MakeInput();
-        var state = new SimulationState(input);
+        var state = new SimulationState(MakeInput());
         var score = SimulationNode.CalculateScoreForState(state, CompletionState.Incomplete, DefaultConfig());
         Assert.IsNull(score);
     }
@@ -105,8 +100,7 @@ public class SolverNodeTests
     [TestMethod]
     public void CalculateScore_NullWhenNoDurability()
     {
-        var input = MakeInput();
-        var state = new SimulationState(input);
+        var state = new SimulationState(MakeInput());
         var score = SimulationNode.CalculateScoreForState(state, CompletionState.NoMoreDurability, DefaultConfig());
         Assert.IsNull(score);
     }
@@ -116,7 +110,6 @@ public class SolverNodeTests
     {
         var input = MakeInput();
         var state = new SimulationState(input);
-        state.Progress = input.Recipe.MaxProgress;
         state.Quality = input.Recipe.MaxQuality;
         var score = SimulationNode.CalculateScoreForState(state, CompletionState.ProgressComplete, DefaultConfig());
         Assert.IsNotNull(score);
@@ -124,34 +117,111 @@ public class SolverNodeTests
     }
 
     [TestMethod]
-    public void CalculateScore_ZeroQualityRecipeIgnoresQuality()
+    public void CalculateScore_ZeroQualityRecipe_OnlyScoresSteps()
     {
+        // Sem quality (target 0): o único objetivo é menos passos.
         var input = MakeInput(maxQuality: 0);
-        var state = new SimulationState(input);
-        var score = SimulationNode.CalculateScoreForState(state, CompletionState.ProgressComplete, DefaultConfig());
-        Assert.IsNotNull(score);
+        var config = DefaultConfig(maxQuality: 0);
+
+        var few = new SimulationState(input); // ActionCount = 0
+        var many = new SimulationState(input);
+        many.ActionCount = 10;
+
+        var fewScore = SimulationNode.CalculateScoreForState(few, CompletionState.ProgressComplete, config);
+        var manyScore = SimulationNode.CalculateScoreForState(many, CompletionState.ProgressComplete, config);
+
+        Assert.IsNotNull(fewScore);
+        Assert.IsNotNull(manyScore);
+        Assert.IsTrue(fewScore.Value > manyScore.Value, "menos passos deve pontuar mais");
     }
 
-    // ---- MCTSConfig normalization ----
+    [TestMethod]
+    public void CalculateScore_QualityStrictlyDominatesSteps()
+    {
+        // Um ponto a mais de quality vale mais que qualquer ganho de passos: um craft com +quality e
+        // MAIS passos deve pontuar acima de um com -quality e MENOS passos.
+        var input = MakeInput();
+        var config = DefaultConfig();
+
+        var moreQualityMoreSteps = new SimulationState(input);
+        moreQualityMoreSteps.Quality = input.Recipe.MaxQuality;
+        moreQualityMoreSteps.ActionCount = 20;
+
+        var lessQualityFewerSteps = new SimulationState(input);
+        lessQualityFewerSteps.Quality = input.Recipe.MaxQuality - 1;
+        lessQualityFewerSteps.ActionCount = 0;
+
+        var a = SimulationNode.CalculateScoreForState(moreQualityMoreSteps, CompletionState.ProgressComplete, config);
+        var b = SimulationNode.CalculateScoreForState(lessQualityFewerSteps, CompletionState.ProgressComplete, config);
+
+        Assert.IsTrue(a!.Value > b!.Value, "quality deve dominar estritamente o número de passos");
+    }
 
     [TestMethod]
-    public void MCTSConfig_NormalizesScoreWeights()
+    public void CalculateScore_QualityClampsAtTarget()
     {
-        var config = new SolverConfig
-        {
-            MaxStepCount = 30,
-            ScoreProgress = 2,
-            ScoreQuality = 2,
-            ScoreDurability = 0,
-            ScoreCP = 0,
-            ScoreSteps = 0,
-            ActionPool = [ActionType.BasicSynthesis],
-        };
-        var mcts = new MCTSConfig(config);
-        // Each should be 0.5
-        Assert.AreEqual(0.5f, mcts.ScoreProgress, 0.0001f);
-        Assert.AreEqual(0.5f, mcts.ScoreQuality, 0.0001f);
-        Assert.AreEqual(0f, mcts.ScoreDurability);
+        // Quality além do target não aumenta o score (qualityFrac satura em 1).
+        var input = MakeInput();
+        var config = DefaultConfig(qualityTargetPercent: 50); // target = 50% de MaxQuality
+
+        var atTarget = new SimulationState(input);
+        atTarget.Quality = input.Recipe.MaxQuality / 2;
+        var beyondTarget = new SimulationState(input);
+        beyondTarget.Quality = input.Recipe.MaxQuality; // bem acima do target de 50%
+
+        var atScore = SimulationNode.CalculateScoreForState(atTarget, CompletionState.ProgressComplete, config);
+        var beyondScore = SimulationNode.CalculateScoreForState(beyondTarget, CompletionState.ProgressComplete, config);
+
+        Assert.AreEqual(atScore!.Value, beyondScore!.Value, 0.0001f, "quality acima do target não deve aumentar o score");
+    }
+
+    [TestMethod]
+    public void CalculateScore_DurabilityAndCpDoNotAffectScore()
+    {
+        // Durabilidade e CP foram removidos do objetivo: estados idênticos exceto dur/CP pontuam igual.
+        var input = MakeInput();
+        var config = DefaultConfig();
+
+        var lowDurCp = new SimulationState(input);
+        lowDurCp.Quality = input.Recipe.MaxQuality;
+        lowDurCp.Durability = 1;
+        lowDurCp.CP = 0;
+
+        var highDurCp = new SimulationState(input);
+        highDurCp.Quality = input.Recipe.MaxQuality;
+        highDurCp.Durability = input.Recipe.MaxDurability;
+        highDurCp.CP = input.Stats.CP;
+
+        var lowScore = SimulationNode.CalculateScoreForState(lowDurCp, CompletionState.ProgressComplete, config);
+        var highScore = SimulationNode.CalculateScoreForState(highDurCp, CompletionState.ProgressComplete, config);
+
+        Assert.AreEqual(lowScore!.Value, highScore!.Value, 0.0001f, "durabilidade/CP não devem influenciar o score");
+    }
+
+    // ---- SolverConfig.ResolveQualityTarget ----
+
+    [TestMethod]
+    public void ResolveQualityTarget_PercentOfMaxQuality()
+    {
+        var config = new SolverConfig { QualityTargetPercent = 50, QualityTargetToMaxCollectability = false };
+        var recipe = MakeInput(maxQuality: 1000).Recipe;
+        Assert.AreEqual(500, config.ResolveQualityTarget(recipe));
+    }
+
+    [TestMethod]
+    public void ResolveQualityTarget_ZeroQualityRecipe_ReturnsZero()
+    {
+        var config = new SolverConfig { QualityTargetPercent = 100 };
+        var recipe = MakeInput(maxQuality: 0).Recipe;
+        Assert.AreEqual(0, config.ResolveQualityTarget(recipe));
+    }
+
+    [TestMethod]
+    public void ResolveQualityTarget_CapsToCollectableTarget()
+    {
+        var config = new SolverConfig { QualityTargetPercent = 100, QualityTargetToMaxCollectability = true };
+        var recipe = MakeInput(maxQuality: 1000).Recipe with { CollectableTargetQuality = 300 };
+        Assert.AreEqual(300, config.ResolveQualityTarget(recipe));
     }
 
     // ---- SolverSolution ----

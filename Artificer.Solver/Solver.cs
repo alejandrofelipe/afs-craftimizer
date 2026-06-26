@@ -18,7 +18,7 @@ public sealed class Solver : IDisposable
     public bool IsCompleted => CompletionTask?.IsCompleted ?? false;
 
     private Func<Task<SolverSolution>> SearchFunc { get; }
-    private MCTSConfig MCTSConfig => new(Config);
+    private MCTSConfig MCTSConfig => new(Config, State.Input.Recipe);
     private Task? CompletionTask { get; set; }
 
     private int progress;
@@ -158,6 +158,9 @@ public sealed class Solver : IDisposable
 
         maxProgress = 50000;
 
+        // Mira o quality target resolvido (não a MaxQuality bruta) — respeita QualityTargetPercent + cap.
+        var targetQuality = Math.Max(State.Input.StartingQuality, Config.ResolveQualityTarget(State.Input.Recipe));
+
         var s = new SimulatorNoRandom() { State = State };
         var pool = RaphaelUtils.ConvertToRawActions(Config.ActionPool.Where(a => a.Base().IsPossible(s)).ToArray());
         var input = new Raphael.SolverInput()
@@ -165,7 +168,7 @@ public sealed class Solver : IDisposable
             CP = checked((ushort)State.Input.Stats.CP),
             Durability = checked((ushort)State.Input.Recipe.MaxDurability),
             Progress = checked((ushort)State.Input.Recipe.MaxProgress),
-            Quality = checked((ushort)(State.Input.Recipe.MaxQuality - State.Input.StartingQuality)),
+            Quality = checked((ushort)(targetQuality - State.Input.StartingQuality)),
             BaseProgressGain = checked((ushort)State.Input.BaseProgressGain),
             BaseQualityGain = checked((ushort)State.Input.BaseQualityGain),
             JobLevel = checked((byte)State.Input.Stats.Level),

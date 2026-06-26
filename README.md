@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.26.3.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.26.4.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -123,6 +123,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix: busca de receita (adicionar à Lista de Coleta) exibia a lista de resultados em branco — o `ImGuiListClipper` do ImGui.NET é incompatível com o cimgui do SDK 15; substituído por virtualização manual. A lista agora aparece em **colunas alinhadas** (ícone · nome · job · nível), com nomes longos truncados e sem overflow
 - 🐛 Fix: suporte à condição **Robust** (FFXIV 7.41) no simulador/solver — modela corretamente a chance, a transição para Sturdy e o desconto de durabilidade pela metade; antes era tratada como Normal, gerando macros/cálculos incorretos em receitas expert 7.41+
 - ⬆️ Solver óptimo atualizado para **Raphael.Net 5.0.0** + suporte às ações Stellar/Cosmic (RapidSynthesis, HastyTouch, DaringTouch) no pool enviado ao solver
+- ⚙️ Solver com **objetivo de scoring lexicográfico** (paridade com o upstream): completar → quality até o alvo → menos passos. Durabilidade e CP saem do objetivo (não "enchem" mais o fim do craft); painel "Score Weights" removido e substituído por um único **Quality Target %**. Crafts de Cosmic Exploration deixam de ser limitados pelo cap de collectability
 - 🐛 Fix: plugin não carregava com Dalamud SDK 15+ — `ImGui.NET.dll` foi removida do runtime do Dalamud; agora shipada com o plugin (wrapper gerenciado que P/Invoca no `cimgui.dll` nativo do Dalamud)
 - Configuração de **Quality Target %**: slider 0–100% para limitar o alvo de qualidade
 - Novo solver **Next Action Forked**

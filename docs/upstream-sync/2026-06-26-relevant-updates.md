@@ -10,8 +10,9 @@ Comparação dos commits recentes do **Craftimizer** (`WorkingRobot/Craftimizer`
   e depois revisado por um agente adversarial (que corrigiu 2 conclusões — ver scoring e cosmic).
 - **De-para estrutural:** ver [`mapping.md`](mapping.md).
 
-> **Atualização (2026-06-26):** **#1 (Robust condition)** entregue na **v2.26.2.0** (`b40de6a`) e
-> **#2 (Raphael.Net 5.0)** entregue na **v2.26.3.0**. Os itens #3–#5 seguem pendentes (ver `backlog/`).
+> **Atualização (2026-06-26):** entregues — **#1 Robust condition** (v2.26.2.0), **#2 Raphael.Net 5.0**
+> (v2.26.3.0), **#3 scoring lexicográfico** e **#5 cosmic cap** (v2.26.4.0, no mesmo port literal).
+> Resta só **#4 (pruning)**, adiado por YAGNI (ver `backlog/`).
 
 ## Resumo
 
@@ -19,9 +20,9 @@ Comparação dos commits recentes do **Craftimizer** (`WorkingRobot/Craftimizer`
 |---|---|---|---|---|---|
 | 1 | **Robust condition (7.41)** | Simulator | ✅ **entregue (v2.26.2.0)** | 🔴 Alta (correctness) | Pequeno |
 | 2 | **Raphael.Net 4.1 → 5.0** + internals | Solver | ✅ **entregue (v2.26.3.0)** | 🟠 Média | Pequeno |
-| 3 | Rework de scoring (objetivo lexicográfico) | Solver | 🟡 parcial | 🟠 Média | Grande |
+| 3 | Rework de scoring (objetivo lexicográfico) | Solver | ✅ **entregue (v2.26.4.0)** | 🟠 Média | Grande |
 | 4 | Pruning no synthesis helper (`c34dc59`) | Solver | 🟡 parcial | ⚪ Baixa | Grande |
-| 5 | Fix cosmic exploration craft limiting | Solver/plugin | ⚪ não-aplicável | ⚪ Baixa | Médio |
+| 5 | Fix cosmic exploration craft limiting | Solver/plugin | ✅ **entregue (v2.26.4.0)** | ⚪ Baixa | Médio |
 | 6 | Attempted GC corruption fix | Solver | ✅ já coberto | ⚪ Baixa | — |
 | — | Changelog window, ImRaii ref-struct, mudanças de UI | UI | N/A (fork reescreveu) | — | — |
 

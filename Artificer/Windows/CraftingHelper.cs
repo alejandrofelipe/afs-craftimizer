@@ -1392,7 +1392,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
             if (!canUseDelineations)
                 config = config.FilterSpecialistActions();
-            var mctsConfig = new MCTSConfig(config);
+            var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
             var simulator = new SimulatorNoRandom();
             List<Macro> macros = [.. _plugin.MacroRepository.Macros];
 
@@ -1477,7 +1477,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
             if (!canUseDelineations)
                 config = config.FilterSpecialistActions();
-            var mctsConfig = new MCTSConfig(config);
+            var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
             var simulator = new SimulatorNoRandom();
             var macros = _plugin.CommunityMacros.RetrieveRotations((int)RecipeData.Table.RowId, token).GetAwaiter().GetResult();
 

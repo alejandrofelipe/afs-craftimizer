@@ -16,7 +16,7 @@ internal static class Program
         var initConfig = Bench.Configs.First();
         var initState = Bench.States.First();
 
-        var config = new MCTSConfig(initConfig.Data);
+        var config = new MCTSConfig(initConfig.Data, initState.Data.Input.Recipe);
 
         var s = Stopwatch.StartNew();
         for (var i = 0; i < 100; ++i)
