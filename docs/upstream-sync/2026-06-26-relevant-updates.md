@@ -10,11 +10,15 @@ Comparação dos commits recentes do **Craftimizer** (`WorkingRobot/Craftimizer`
   e depois revisado por um agente adversarial (que corrigiu 2 conclusões — ver scoring e cosmic).
 - **De-para estrutural:** ver [`mapping.md`](mapping.md).
 
+> **Atualização (2026-06-26):** o item **#1 (Robust condition)** foi **entregue na v2.26.2.0**
+> (commit `b40de6a`, com testes em `Artificer.Test/Simulator/RobustCondition.cs`). Os demais seguem
+> pendentes (ver `backlog/`).
+
 ## Resumo
 
 | # | Update upstream | Subsistema | Status no fork | Prioridade | Esforço |
 |---|---|---|---|---|---|
-| 1 | **Robust condition (7.41)** | Simulator | ❌ falta | 🔴 **Alta** (correctness) | Pequeno |
+| 1 | **Robust condition (7.41)** | Simulator | ✅ **entregue (v2.26.2.0)** | 🔴 Alta (correctness) | Pequeno |
 | 2 | **Raphael.Net 4.1 → 5.0** + internals | Solver | ❌ falta | 🟠 Média | Pequeno |
 | 3 | Rework de scoring (objetivo lexicográfico) | Solver | 🟡 parcial | 🟠 Média | Grande |
 | 4 | Pruning no synthesis helper (`c34dc59`) | Solver | 🟡 parcial | ⚪ Baixa | Grande |
