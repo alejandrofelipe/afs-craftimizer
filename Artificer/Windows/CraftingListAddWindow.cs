@@ -108,17 +108,40 @@ public sealed class CraftingListAddWindow : Window, IDisposable
             ref selected,
             _plugin.RecipeSearchHelper.Index,
             UiServices.Current.DefaultFont,
-            320 * scale,
+            400 * scale,
             r => r.ItemName,
             r => r.RecipeId.ToString(),
             r =>
             {
-                PluginImGuiUtils.DrawItemIcon(r.ItemId, ImGui.GetTextLineHeight());
-                ImGui.SameLine(0, 6 * scale);
-                ImGui.TextUnformatted(r.ItemName);
-                ImGui.SameLine();
+                // Colunas alinhadas (X fixo): [ícone] [nome truncado] [job] [Lv##]. Job e level
+                // ancorados na borda direita para alinharem entre as linhas e nunca dar overflow.
+                var rowStartX = ImGui.GetCursorPosX();
+                var rightX    = rowStartX + ImGui.GetContentRegionAvail().X;
+                var iconSize  = ImGui.GetTextLineHeight();
+                var gap       = 8 * scale;
+                var levelColW = 42 * scale;
+                var jobColW   = 34 * scale;
+
+                PluginImGuiUtils.DrawItemIcon(r.ItemId, iconSize);
+
+                var nameX    = rowStartX + iconSize + gap;
+                var levelX   = rightX - levelColW;
+                var jobX     = levelX - jobColW;
+                var nameMaxW = jobX - gap - nameX;
+
+                ImGui.SameLine(nameX);
+                var shown = ImGuiUtils.TruncateToWidth(r.ItemName, nameMaxW);
+                ImGui.TextUnformatted(shown);
+                if (shown != r.ItemName)
+                    ImGuiUtils.HoveredTooltip(r.ItemName);
+
                 using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                    ImGui.TextUnformatted($"{r.JobAbbrev} · Lv{r.Level}");
+                {
+                    ImGui.SameLine(jobX);
+                    ImGui.TextUnformatted(r.JobAbbrev);
+                    ImGui.SameLine(levelX);
+                    ImGui.TextUnformatted($"Lv{r.Level}");
+                }
             }))
         {
             _selectedRecipe = selected;
