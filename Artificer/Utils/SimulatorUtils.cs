@@ -220,6 +220,7 @@ internal static class ConditionUtils
             Condition.Malleable => (13455, 14208),
             Condition.Primed => (13454, 14207),
             Condition.GoodOmen => (14214, 14215),
+            Condition.Robust => (14218, 14219),
             _ => (226, 14200) // Unknown
         };
 
@@ -236,6 +237,7 @@ internal static class ConditionUtils
             Condition.Malleable => new(-80, -40, 180),
             Condition.Primed => new(30, -155, 200),
             Condition.GoodOmen => new(100, 20, 0),
+            Condition.Robust => new(-100, 45, 155), // espelha Sturdy (Robust telegrafa Sturdy); valor exato do jogo a confirmar
             _ => Vector3.Zero // Unknown
         };
 
@@ -286,6 +288,7 @@ internal static class ConditionUtils
                 Condition.Pliant => Vector3.Lerp(new(0, 150, 0), new(0, 249, 0), interp),
                 Condition.Primed => Vector3.Lerp(new(-30, -255, 50), new(29, -156, 199), interp),
                 Condition.GoodOmen => Vector3.Lerp(new(100, 20, 0), new(100, 99, 99), interp),
+                Condition.Robust => Vector3.Lerp(new(-100, 45, 155), new(-51, 89, 254), interp), // espelha Sturdy
                 _ => default
             };
         }
