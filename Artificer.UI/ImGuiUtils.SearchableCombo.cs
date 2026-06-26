@@ -139,7 +139,7 @@ public static partial class ImGuiUtils
                 using (var scrollingRegion = ImRaii.Child("scrollingRegion", new Vector2(size.X, size.Y * 10), false, ImGuiWindowFlags.HorizontalScrollbar))
                 {
                     T? _selectedItem = default;
-                    var height = ImGui.GetTextLineHeight();
+                    var height = ImGui.GetTextLineHeightWithSpacing();
                     var r = ListClip(data.filteredItems, height, t =>
                     {
                         var name = getString(t);
@@ -188,36 +188,38 @@ public static partial class ImGuiUtils
         return false;
     }
 
-    private static bool ListClip<T>(List<T> data, float lineHeight, Predicate<T> func)
+    // ImGui.NET 1.90.9.1 e o cimgui nativo do Dalamud SDK 15 têm layouts divergentes do struct
+    // ImGuiListClipper → ler DisplayStart/DisplayEnd cai em offsets errados (range lixo → 0 linhas
+    // renderizadas → dropdown em branco). Virtualizamos à mão via GetScrollY + Dummy, usando só
+    // APIs de função (que funcionam), sem depender do layout do struct.
+    private static bool ListClip<T>(List<T> data, float rowPitch, Predicate<T> func)
     {
-        ImGuiListClipperPtr imGuiListClipperPtr;
-        unsafe
-        {
-            imGuiListClipperPtr = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-        }
-        try
-        {
-            imGuiListClipperPtr.Begin(data.Count, lineHeight);
-            while (imGuiListClipperPtr.Step())
-            {
-                for (var i = imGuiListClipperPtr.DisplayStart; i <= imGuiListClipperPtr.DisplayEnd; i++)
-                {
-                    if (i >= data.Count)
-                        return false;
-
-                    if (i >= 0)
-                    {
-                        if (func(data[i]))
-                            return true;
-                    }
-                }
-            }
+        if (data.Count == 0)
             return false;
-        }
-        finally
+        if (rowPitch <= 0f)
+            rowPitch = 1f;
+
+        var scrollY = ImGui.GetScrollY();
+        var availY = ImGui.GetContentRegionAvail().Y;
+        var first = Math.Max(0, (int)(scrollY / rowPitch));
+        var last = Math.Min(data.Count, first + (int)(availY / rowPitch) + 2);
+
+        if (first > 0)
+            ImGui.Dummy(new Vector2(0, first * rowPitch));
+
+        var selected = false;
+        for (var i = first; i < last; i++)
         {
-            imGuiListClipperPtr.End();
-            imGuiListClipperPtr.Destroy();
+            if (func(data[i]))
+            {
+                selected = true;
+                break;
+            }
         }
+
+        if (!selected && last < data.Count)
+            ImGui.Dummy(new Vector2(0, (data.Count - last) * rowPitch));
+
+        return selected;
     }
 }
