@@ -64,6 +64,9 @@ Para contexto completo do projeto: `.claude/agents/artificer-specialist.md`
 .\scripts\build.ps1
 .\scripts\build.ps1 -Deploy
 
+# Build para TESTES/verificação in-game: só bump, NUNCA deploy
+.\scripts\build.ps1 -Bump
+
 # Testes (211 testes)
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 
@@ -77,3 +80,5 @@ Para contexto completo do projeto: `.claude/agents/artificer-specialist.md`
 ```
 
 > dotnet via Scoop — **sempre usar caminho completo** ou via PowerShell (nunca Bash).
+
+> **Ao testar / verificar in-game: NÃO fazer deploy.** Rodar apenas `.\scripts\build.ps1 -Bump` (bump de build, sem `-Deploy`). O deploy é feito manualmente pelo mantenedor.
