@@ -179,8 +179,8 @@ public partial class Configuration
     /// <summary>Piso de preço do jogo (nunca precificar abaixo).</summary>
     public int RetainerPriceFloor { get; set; } = 1;
 
-    /// <summary>Liga o Assistente de Preço do Retainer (abre a janela ao vender no mercado).</summary>
-    public bool EnableRetainerPriceAssistant { get; set; } = true;
+    /// <summary>Liga o Assistente de Preço do Retainer (abre a janela ao vender no mercado). Desabilitado por padrão (opt-in).</summary>
+    public bool EnableRetainerPriceAssistant { get; set; }
 
     [JsonSourceGenerationOptions(Converters = [typeof(StoredActionTypeConverter)])]
     [JsonSerializable(typeof(Configuration))]
