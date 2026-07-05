@@ -1,3 +1,4 @@
+using Artificer.Application.Retainer;
 using Artificer.Utils;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -220,6 +221,73 @@ public sealed partial class Settings
                 v => Config.IconCacheSizeLimit = v,
                 ref isDirty
             );
+        }
+
+        ImGuiHelpers.ScaledDummy(10);
+
+        // ── Feature: Preço do Retainer ────────────────────────────────────────
+        DrawSectionTitle("PREÇO DO RETAINER");
+
+        using (ImRaii2.GroupPanel("Preço do Retainer", -1, out _))
+        {
+            using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                ImGui.TextWrapped("Ao abrir a lista de venda do mercado de um retainer, mostra o preço atual " +
+                                  "vs. o menor preço do seu home world (preenchido quando você abre \"comparar " +
+                                  "preços\" de um item) e ajuda a aplicar um undercut. Modelo assistido: você " +
+                                  "confirma cada venda; o plugin nunca confirma sozinho.");
+
+            ImGuiHelpers.ScaledDummy(4);
+
+            DrawOption(
+                "Habilitar Assistente de Preço",
+                "Abre a janela de preços ao entrar na lista de venda do retainer.",
+                Config.EnableRetainerPriceAssistant,
+                v => Config.EnableRetainerPriceAssistant = v,
+                ref isDirty);
+
+            if (Config.EnableRetainerPriceAssistant)
+            {
+                ImGuiHelpers.ScaledDummy(4);
+
+                DrawOption<UndercutMode>(
+                    "Modo de undercut",
+                    "Como calcular o preço abaixo do menor do mercado.",
+                    m => m == UndercutMode.FixedAmount ? "Valor fixo (gil)" : "Percentual (%)",
+                    m => m == UndercutMode.FixedAmount ? "Subtrai uma quantia fixa de gil." : "Subtrai uma porcentagem do menor preço.",
+                    Config.UndercutMode,
+                    v => Config.UndercutMode = v,
+                    ref isDirty);
+
+                DrawOption(
+                    "Quantia do undercut",
+                    "Gil (modo fixo) ou porcentagem (modo percentual) a subtrair do menor preço.",
+                    Config.UndercutAmount,
+                    1, 99,
+                    v => Config.UndercutAmount = v,
+                    ref isDirty);
+
+                DrawOption(
+                    "Considerar qualidade (HQ/NQ)",
+                    "Casa o menor preço pela qualidade do item à venda. Desligado usa o menor entre HQ e NQ.",
+                    Config.RetainerPricingHqAware,
+                    v => Config.RetainerPricingHqAware = v,
+                    ref isDirty);
+
+                DrawOption(
+                    "Dar undercut nos próprios retainers",
+                    "Se o menor preço já é de um retainer seu: ligado desconta mesmo assim; desligado iguala (não compete consigo).",
+                    Config.UndercutSelf,
+                    v => Config.UndercutSelf = v,
+                    ref isDirty);
+
+                DrawOption(
+                    "Piso de preço",
+                    "Nunca precificar abaixo deste valor.",
+                    Config.RetainerPriceFloor,
+                    1, 999,
+                    v => Config.RetainerPriceFloor = v,
+                    ref isDirty);
+            }
         }
 
         ImGuiHelpers.ScaledDummy(10);
