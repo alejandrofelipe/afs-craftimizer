@@ -163,6 +163,22 @@ public partial class Configuration
     /// </summary>
     public int IconCacheSizeLimit { get; set; } = 1024;
 
+    // ── Retainer pricing (undercut assistido) ─────────────────────────────
+    /// <summary>Modo de undercut: valor fixo em gil ou porcentagem.</summary>
+    public Artificer.Application.Retainer.UndercutMode UndercutMode { get; set; } = Artificer.Application.Retainer.UndercutMode.FixedAmount;
+
+    /// <summary>Quantia do undercut: gil (FixedAmount) ou % (Percentage).</summary>
+    public int UndercutAmount { get; set; } = 1;
+
+    /// <summary>Se true, dá undercut mesmo quando a menor oferta é de um retainer próprio.</summary>
+    public bool UndercutSelf { get; set; }
+
+    /// <summary>Considera qualidade (HQ/NQ) ao casar o menor preço.</summary>
+    public bool RetainerPricingHqAware { get; set; } = true;
+
+    /// <summary>Piso de preço do jogo (nunca precificar abaixo).</summary>
+    public int RetainerPriceFloor { get; set; } = 1;
+
     [JsonSourceGenerationOptions(Converters = [typeof(StoredActionTypeConverter)])]
     [JsonSerializable(typeof(Configuration))]
     internal sealed partial class JsonContext : JsonSerializerContext
