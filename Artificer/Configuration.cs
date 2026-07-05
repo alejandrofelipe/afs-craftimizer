@@ -179,6 +179,9 @@ public partial class Configuration
     /// <summary>Piso de preço do jogo (nunca precificar abaixo).</summary>
     public int RetainerPriceFloor { get; set; } = 1;
 
+    /// <summary>Liga o Assistente de Preço do Retainer (abre a janela ao vender no mercado).</summary>
+    public bool EnableRetainerPriceAssistant { get; set; } = true;
+
     [JsonSourceGenerationOptions(Converters = [typeof(StoredActionTypeConverter)])]
     [JsonSerializable(typeof(Configuration))]
     internal sealed partial class JsonContext : JsonSerializerContext
