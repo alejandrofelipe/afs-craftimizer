@@ -13,6 +13,12 @@ Comparação dos commits recentes do **Craftimizer** (`WorkingRobot/Craftimizer`
 > **Atualização (2026-06-26):** entregues — **#1 Robust condition** (v2.26.2.0), **#2 Raphael.Net 5.0**
 > (v2.26.3.0), **#3 scoring lexicográfico** e **#5 cosmic cap** (v2.26.4.0, no mesmo port literal).
 > Resta só **#4 (pruning)**, adiado por YAGNI (ver `backlog/`).
+>
+> **Re-verificado (2026-07-08):** upstream **sem commits novos desde 2026-06-10** — o último
+> (`1d4a2c6 "Bump"`) é só bump de versão no `.csproj` (2.11.0.1 → 2.11.0.2), zero mudança funcional.
+> **#4 (pruning) rejeitado** — YAGNI confirmado por benchmark: o `NextActionForked` é ~5-8× mais rápido/passo
+> mas entrega qualidade menor e mais ruidosa que o `StepwiseGenetic` que o Synthesis Helper do fork já usa
+> (ver `backlog/feat-synthhelper-pruning.md`). **Paridade funcional completa; nada a portar.**
 
 ## Resumo
 
