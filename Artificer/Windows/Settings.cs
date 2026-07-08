@@ -194,9 +194,10 @@ public sealed partial class Settings : Window, IDisposable
                                                 "very different options compared to the rest, as it " +
                                                 "is designed using an entirely different algorithm.",
             SolverAlgorithm.NextActionForked => "Evaluates each candidate next action independently " +
-                                                "using forked MCTS and picks the best one. Designed " +
-                                                "for Synthesis Helper: faster response and better " +
-                                                "adaptation to changing conditions (Good, Excellent, etc.).",
+                                                "using forked MCTS and picks the best one. Faster " +
+                                                "per-step response, but lower and noisier quality than " +
+                                                "Stepwise Genetic on average — best when speed matters " +
+                                                "more than quality.",
             _ => "Unknown"
         };
 
