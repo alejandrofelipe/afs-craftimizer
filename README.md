@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.26.5.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.26.6.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -146,7 +146,6 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - **Entrada da Lista de Coleta repensada:** comando `/craftlist` (+ `/craftinglist`, `/coleta`) e botão em Configurações → Experimental abrem a janela; o FeatureHub flutuante (e o helper `DrawGuard`) foram removidos
 - **Lista de Coleta — passe de intuitividade visual:** ícones de item em todas as superfícies (materiais, cristais, pré-crafts, receitas e busca via `PluginImGuiUtils.DrawItemIcon`); layout em 2 linhas (material com `tem/precisa/faltam` + barra + teleporte/zona/preço; header com toggle `[Detalhada|Simples]` + kebab "Mais opções" + barra de progresso; browser com barra + `N receitas`); 🐛 Fix: Detalhe atualiza ao adicionar receita de outra janela (assina `ListsChanged`) e o ✕ da receita não estoura mais a borda do painel
 - **Lista de Coleta — Rota de Coleta:** nova janela (kebab → "🗺 Abrir Rota de Coleta") que agrupa os materiais base faltantes **por zona**, com teleporte por zona, **flag no mapa** por nó (coords reais via `ExportedGatheringPoint`) e preço de Market Board por unidade; grupo "Comprar / Outros" para itens sem nó de coleta; botão 📍 também na linha de material do Detalhe
-- **Assistente de Preço do Retainer:** ao abrir a lista de venda do mercado, mostra preço atual vs. menor preço do home world (via Market Board ao vivo) e oferece dois caminhos assistidos — copiar o undercut pro clipboard ou preencher o campo de preço direto — sempre com você confirmando cada venda (o plugin nunca confirma). Undercut configurável (gil fixo ou %), piso de preço, skip-self e consciência de HQ/NQ nas Settings → Experimental. ⚠️ Ferramenta de terceiros sob os ToS da Square Enix; a feature é assistida (sem automação de confirmação) — use por sua conta e risco.
 
 ---
 

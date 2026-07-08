@@ -28,8 +28,6 @@ public sealed class Service
     [PluginService] public static IFramework Framework { get; private set; }
     [PluginService] public static IPluginLog PluginLog { get; private set; }
     [PluginService] public static IGameInteropProvider GameInteropProvider { get; private set; }
-    [PluginService] public static IAddonLifecycle AddonLifecycle { get; private set; }
-    [PluginService] public static IMarketBoard MarketBoard { get; private set; }
     [PluginService] public static INotificationManager NotificationManager { get; private set; }
     [PluginService] public static ISeStringEvaluator SeStringEvaluator { get; private set; }
 
