@@ -305,40 +305,14 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
 
         if (Session.SolverSnapshots.Any())
         {
-            ImGuiHelpers.ScaledDummy(3);
-            DrawSolverProgress();
+            ImGuiHelpers.ScaledDummy(2);
+            PluginImGuiUtils.DrawSolverProgressArea(
+                ImGui.GetContentRegionAvail().X,
+                Session.SolverSnapshots.ToArray(),
+                _plugin.Configuration.ProgressType);
         }
 
         DrawMacroActions();
-    }
-
-    private void DrawSolverProgress()
-    {
-        var snapshots = Session.SolverSnapshots;
-        var snapshot  = snapshots[0];
-
-        var chipState = snapshot.State switch
-        {
-            ProgressBarComponent.ProgressState.Completed => ImGuiUtils.SolverState.Complete,
-            ProgressBarComponent.ProgressState.Cancelled or ProgressBarComponent.ProgressState.Failed
-                => ImGuiUtils.SolverState.Failed,
-            _ => ImGuiUtils.SolverState.Solving,
-        };
-        ImGuiUtils.DrawStateChip(chipState);
-
-        var config = new ProgressBarComponent.VisualConfig(
-            Mode: ProgressBarComponent.DisplayMode.Horizontal,
-            ColorTheme: _plugin.Configuration.ProgressType,
-            Width: ImGui.GetContentRegionAvail().X,
-            ShowPercentage: true,
-            ShowDetailedTooltip: true,
-            ShowSummaryWhenAggregated: true
-        );
-
-        if (snapshots.Count == 1)
-            ProgressBarComponent.DrawSingle(snapshots[0], config);
-        else
-            ProgressBarComponent.DrawAggregated(snapshots, config);
     }
 
     private void DrawStatusStrip(SimulationState state)
