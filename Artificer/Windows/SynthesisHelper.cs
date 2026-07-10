@@ -391,7 +391,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
     {
         using var panel = ImRaii2.GroupPanel("Suggested Actions", -1, out _);
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var imageSize = ImGui.GetFrameHeight() * 2;
+        var imageSize = ImGui.GetFrameHeight() * 1.4f;
         var canExecute = !Service.Condition[ConditionFlag.ExecutingCraftingAction];
         var lastState = Session.Macro.InitialState;
         hoveredState = null;
@@ -450,20 +450,11 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             lastState = state;
         }
 
-        var rows = (int)Math.Max(1, MathF.Ceiling(_plugin.Configuration.SynthHelperMaxDisplayCount / itemsPerRow));
         if (count == 0 && !Session.SolverRunning)
         {
-            var reservedH = rows * (imageSize + ImGui.GetStyle().ItemSpacing.Y);
+            var reservedH = imageSize + ImGui.GetStyle().ItemSpacing.Y;
             using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                 ImGuiUtils.TextMiddleNewLine("Click \"Suggest Macro\" below to get a suggestion", new(ImGui.GetContentRegionAvail().X, reservedH));
-        }
-        else
-        {
-            for (var i = 0; i < rows; ++i)
-            {
-                if (count <= i * itemsPerRow)
-                    ImGui.Dummy(new(0, imageSize));
-            }
         }
     }
 
