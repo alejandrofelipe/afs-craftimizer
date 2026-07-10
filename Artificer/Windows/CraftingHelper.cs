@@ -504,7 +504,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var state = new MacroTaskState();
 
             // branches: exceção(7) · progresso/prefill(2) · showSuggested(4) · saved(0/1/3/5/6)
-            if (suggException)
+            if (suggException && savedRes?.Best == null)   // só mostra o card de exceção quando não há salva p/ cair de volta
             {
                 state.Type        = MacroTaskType.Suggested;
                 state.Exception   = suggTask!.Exception;
@@ -574,7 +574,20 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
             if (suggException)
             {
-                // exceção já é renderizada pelo DrawMacro; sem footer
+                if (savedRes?.Best != null)
+                {
+                    var ex = suggTask!.Exception;
+                    state.Footer = () =>
+                    {
+                        ImGui.Spacing();
+                        using (ImRaii.PushColor(ImGuiCol.Text, Colors.Bad))
+                            ImGui.TextUnformatted("Solver failed to generate a suggestion.");
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("Copy error"))
+                            ImGui.SetClipboardText(ex?.ToString() ?? "");
+                    };
+                }
+                // sem salva → o card de exceção já mostra o erro; sem footer
             }
             else if (suggEmpty && savedRes?.Best != null && !showSuggested)
             {
