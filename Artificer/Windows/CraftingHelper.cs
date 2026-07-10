@@ -69,6 +69,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     private int? _currentCharacterHash;
     private IReadOnlyList<ActionType>? _prevSuggestedActions;
     private SimulationState?           _prevSuggestedState;
+    private bool _bestShowAlternative;
     private readonly Dictionary<MacroTaskType, DateTimeOffset> _copiedAt = new();
     private BackgroundTask<SavedMacroResult>? SavedMacroTask { get; set; }
     private BackgroundTask<SuggestedMacroResult>? SuggestedMacroTask { get; set; }
@@ -178,6 +179,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     SuggestedMacroTask = null;
                     _prevSuggestedActions = null;
                     _prevSuggestedState   = null;
+                    _bestShowAlternative  = false;
                 }
 
                 // If it didn't exist before or it already ran, we need to recalculate
@@ -317,6 +319,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 SuggestedMacroTask = null;
                 _prevSuggestedActions = null;
                 _prevSuggestedState   = null;
+                _bestShowAlternative  = false;
             }
 
             // If we want to search automatically, we should recalculate
@@ -468,58 +471,143 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             }
         }
 
+        // ── Card unificado "Best Macro" (Saved + Suggested) ────────────────────
         {
-            var savedResult = SavedMacroTask?.Result;
-            var bestMacro  = savedResult?.Best;
-            var state = new MacroTaskState()
+            var savedRes = SavedMacroTask?.Result;
+            var suggRes  = SuggestedMacroTask?.Result;
+            var suggTask = SuggestedMacroTask;
+            var suggDone = suggTask?.Completed ?? false;
+
+            var isRegenerating = _prevSuggestedActions != null && suggTask is { Completed: false };
+            var hashMatch      = savedRes?.HashMatch;
+            var hashMatchState = savedRes?.HashMatchState;
+            var isPrefilled    = hashMatch != null && !suggDone && !isRegenerating && suggRes == null;
+            var suggException  = suggDone && suggRes == null && suggTask?.Exception != null;
+
+            // Scores para escolher o vencedor (bestSaved vs sugerida).
+            float? savedScore = savedRes?.Best != null ? savedRes.Value.BestScore : null;
+            float? suggScore  = suggRes != null ? suggRes.Value.Score : null;
+            var winner = ImGuiUtils.PickBestMacroSource(savedScore, suggScore);
+
+            var bothExist = savedScore != null && suggScore != null;
+            if (!bothExist)
+                _bestShowAlternative = false;
+
+            // Qual fonte exibir: o vencedor, salvo se o usuário alternou para a alternativa.
+            var showSuggested = winner switch
             {
-                Type          = MacroTaskType.Saved,
-                Exception     = SavedMacroTask?.Exception,
-                Started       = SavedMacroTask != null,
-                Completed     = SavedMacroTask?.Completed ?? false,
-                Actions       = bestMacro?.Actions,
-                MacroName     = bestMacro?.Name,
-                State         = savedResult?.BestState,
-                HasHashMismatch = bestMacro?.CharacterStatsHash != null
-                               && bestMacro.CharacterStatsHash != _currentCharacterHash,
+                BestMacroSource.Suggested => !_bestShowAlternative,
+                BestMacroSource.Saved     =>  _bestShowAlternative,
+                _                         => false,
             };
-            if (bestMacro is { } savedMacro)
-                state.MacroEditorSetter = a => { savedMacro.ActionEnumerable = a; _plugin.MacroRepository.Update(savedMacro); };
-            DrawMacro(in state, panelWidth);
-        }
 
-        {
-            var solverResult   = SuggestedMacroTask?.Result;
-            var solverDone     = SuggestedMacroTask?.Completed ?? false;
-            var savedResult    = SavedMacroTask?.Result;
-            var hashMatch      = savedResult?.HashMatch;
-            var hashMatchState = savedResult?.HashMatchState;
-            var isRegenerating = _prevSuggestedActions != null
-                              && SuggestedMacroTask is { Completed: false };
-            var isPrefilled    = hashMatch != null && !solverDone && !isRegenerating;
+            var state = new MacroTaskState();
 
-            var state = new MacroTaskState()
+            // branches: exceção(7) · progresso/prefill(2) · showSuggested(4) · saved(0/1/3/5/6)
+            if (suggException)
             {
-                Type      = MacroTaskType.Suggested,
-                Exception = SuggestedMacroTask?.Exception,
-                Started   = SuggestedMacroTask != null || isPrefilled,
-                Completed = solverDone || isPrefilled,
-                Actions   = solverResult?.Solution.Actions ?? (isPrefilled ? hashMatch!.Actions : null),
-                State     = solverResult?.Solution.State   ?? (isPrefilled ? hashMatchState     : null),
-                Solver    = BestMacroSolver,
-                IsPrefilled          = isPrefilled && solverResult == null,
-                IsRegenerating       = isRegenerating,
-                RegeneratingSnapshot = isRegenerating
+                state.Type        = MacroTaskType.Suggested;
+                state.Exception   = suggTask!.Exception;
+                state.Started     = true;
+                state.Completed   = true;
+                state.TitleSuffix = BuildBestMacroBadge(BestMacroSource.Suggested, false);
+            }
+            else if (suggTask is { Completed: false } || isPrefilled)
+            {
+                // Solver em andamento / prefill → caminho de progresso da sugestão.
+                state.Type      = MacroTaskType.Suggested;
+                state.Exception = suggTask?.Exception;
+                state.Started   = suggTask != null || isPrefilled;
+                state.Completed = suggDone || isPrefilled;
+                state.Actions   = suggRes?.Solution.Actions ?? (isPrefilled ? hashMatch!.Actions : null);
+                state.State     = suggRes?.Solution.State   ?? (isPrefilled ? hashMatchState     : null);
+                state.Solver    = BestMacroSolver;
+                state.IsPrefilled          = isPrefilled;
+                state.IsRegenerating       = isRegenerating;
+                state.RegeneratingSnapshot = isRegenerating
                     ? (_prevSuggestedActions!, _prevSuggestedState!.Value)
-                    : null,
-            };
+                    : null;
+                state.TitleSuffix = BuildBestMacroBadge(BestMacroSource.Suggested, isPrefilled);
+            }
+            else if (showSuggested)
+            {
+                state.Type        = MacroTaskType.Suggested;
+                state.Exception   = suggTask?.Exception;
+                state.Started     = true;
+                state.Completed   = true;
+                state.Actions     = suggRes?.Solution.Actions;
+                state.State       = suggRes?.Solution.State;
+                state.Solver      = BestMacroSolver;
+                state.TitleSuffix = BuildBestMacroBadge(BestMacroSource.Suggested, false);
+            }
+            else
+            {
+                // Mostra a salva (venceu, ou toggle, ou fallback quando a sugestão falhou/ausente, ou nada).
+                state.Type      = MacroTaskType.Saved;
+                state.Exception = SavedMacroTask?.Exception;
+                state.Started   = SavedMacroTask != null;
+                state.Completed = SavedMacroTask?.Completed ?? false;
+                state.Actions   = savedRes?.Best?.Actions;
+                state.MacroName = savedRes?.Best?.Name;
+                state.State     = savedRes?.BestState;
+                state.HasHashMismatch = savedRes?.Best is { CharacterStatsHash: not null } bm
+                                     && bm.CharacterStatsHash != _currentCharacterHash;
+                if (savedRes?.Best is { } savedMacro)
+                {
+                    state.TitleSuffix       = BuildBestMacroBadge(BestMacroSource.Saved, false);
+                    state.MacroEditorSetter = a => { savedMacro.ActionEnumerable = a; _plugin.MacroRepository.Update(savedMacro); };
+                }
+            }
 
-            if (solverDone)
+            // Rodapé: comparação (quando as duas fontes existem, com sugestão não-vazia) ou nota de fallback.
+            var suggEmpty = suggDone && suggRes is { } sres0 && (sres0.Solution.Actions?.Count ?? 0) == 0;
+
+            // "%" apenas quando é significativo: receita com quality E macro completa o craft.
+            // Caso contrário marca "✗" (não completa) ou "—" (receita sem quality).
+            string HqOrMark(SimulationState? st)
+            {
+                if (st is not { } s || RecipeData!.RecipeInfo.MaxQuality <= 0)
+                    return "—";
+                var completes = s.Progress >= RecipeData.RecipeInfo.MaxProgress;
+                return completes ? $"{s.HQPercent}%" : "✗";
+            }
+
+            if (suggException)
+            {
+                // exceção já é renderizada pelo DrawMacro; sem footer
+            }
+            else if (suggEmpty && savedRes?.Best != null && !showSuggested)
+            {
+                state.Footer = () =>
+                {
+                    ImGui.Spacing();
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                        ImGui.TextUnformatted("Solver couldn't improve on your saved macro.");
+                };
+            }
+            else if (bothExist && !suggEmpty && savedRes is { } sr && suggRes is { } su)
+            {
+                var savedMark = HqOrMark(sr.BestState);
+                var suggMark  = HqOrMark(su.Solution.State);
+                var altName   = showSuggested ? "saved" : "suggested";
+                state.Footer = () =>
+                {
+                    ImGui.Spacing();
+                    using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+                        ImGui.TextUnformatted($"✦ {suggMark}  vs  ★ saved {savedMark}");
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton($"View {altName}"))
+                        _bestShowAlternative = !_bestShowAlternative;
+                };
+            }
+
+            if (suggDone)
             {
                 _prevSuggestedActions = null;
                 _prevSuggestedState   = null;
             }
 
+            state.TitleOverride = "Best Macro";
             DrawMacro(in state, panelWidth);
         }
 
@@ -908,19 +996,44 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         public bool IsPrefilled;      // only valid for MacroTaskType.Suggested
         public bool IsRegenerating;   // only valid for MacroTaskType.Suggested
         public (IReadOnlyList<ActionType> Actions, SimulationState State)? RegeneratingSnapshot;
+        public Action? TitleSuffix;   // badge de fonte (★ Saved / ✦ Suggested) + bookmark de prefill
+        public Action? Footer;        // rodapé de comparação/nota, desenhado dentro do painel
+        public string? TitleOverride; // substitui o título padrão (ex.: "Best Macro" no card unificado)
+    }
+
+    private static Action BuildBestMacroBadge(BestMacroSource source, bool prefilled)
+    {
+        var (icon, color, label) = source == BestMacroSource.Suggested
+            ? ("✦", Colors.Progress, "Suggested")
+            : ("★", Colors.Quality,  "Saved");
+        return () =>
+        {
+            ImGui.SameLine(0, 6);
+            ImGui.AlignTextToFramePadding();
+            using (ImRaii.PushColor(ImGuiCol.Text, color))
+                ImGui.TextUnformatted($"{icon} {label}");
+            if (prefilled)
+            {
+                ImGui.SameLine(0, 4);
+                using (ImRaii.PushFont(UiBuilder.IconFont))
+                using (ImRaii.PushColor(ImGuiCol.Text, ImGui.GetColorU32(ImGuiCol.TextDisabled)))
+                    ImGui.TextUnformatted(FontAwesomeIcon.Bookmark.ToIconString());
+                ImGuiUtils.HoveredTooltip("Pre-filled from saved macro — solver still comparing");
+            }
+        };
     }
 
     private void DrawMacro(in MacroTaskState state, float panelWidth)
     {
-        var panelTitle = state.Type switch
+        var panelTitle = state.TitleOverride ?? (state.Type switch
         {
             MacroTaskType.Saved => "Best Saved Macro",
             MacroTaskType.Suggested => "Suggested Macro",
             MacroTaskType.Community => "Best Community Macro",
             _ => throw new ArgumentOutOfRangeException(nameof(state), "state.Type must have a valid type")
-        };
+        });
 
-        Action? titleSuffix = state.IsPrefilled ? () =>
+        Action? titleSuffix = state.TitleSuffix ?? (state.IsPrefilled ? () =>
         {
             ImGui.SameLine(0, 4);
             using (ImRaii.PushFont(UiBuilder.IconFont))
@@ -930,7 +1043,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ImGui.TextUnformatted(FontAwesomeIcon.Bookmark.ToIconString());
             }
             ImGuiUtils.HoveredTooltip("Pre-filled from saved macro — solver still comparing");
-        } : null;
+        } : null);
 
         using var panel = ImRaii2.GroupPanel(panelTitle, panelWidth, out var contentW, titleSuffix: titleSuffix);
         if (!panel)
@@ -1280,6 +1393,9 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 }
             }
         }
+
+        if (state.Footer is { } drawFooter)
+            drawFooter();
     }
 
     private static void DrawRequiredStatsTable(int current, int required)
@@ -1448,6 +1564,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             _prevSuggestedState   = null;
         }
         BestMacroSolver = null;
+        _bestShowAlternative = false;
         SuggestedMacroTask?.Cancel();
         var hasDelineations = Gearsets.HasDelineations();
         SuggestedMacroTask = new(token =>
