@@ -72,3 +72,6 @@ mockup/
 
 # Test output files
 test_output.txt
+
+# Graphify knowledge graph output (local only)
+graphify-out/
