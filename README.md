@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.26.6.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.27.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -17,7 +17,7 @@ Artificer.UI/          ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NE
 Artificer.UIStudio/    ← App desktop standalone para testar UI sem o FFXIV rodando
 Artificer.Simulator/   ← Lógica de simulação de crafting (puro C#, sem dependências externas)
 Artificer.Solver/      ← Algoritmos MCTS, genético e Raphael
-Artificer.Test/        ← 215 testes cobrindo Simulator, Solver e UI
+Artificer.Test/        ← 248 testes cobrindo Simulator, Solver e UI
 Artificer.Benchmark/   ← Benchmarks de performance do solver
 ```
 
@@ -146,6 +146,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - **Entrada da Lista de Coleta repensada:** comando `/craftlist` (+ `/craftinglist`, `/coleta`) e botão em Configurações → Experimental abrem a janela; o FeatureHub flutuante (e o helper `DrawGuard`) foram removidos
 - **Lista de Coleta — passe de intuitividade visual:** ícones de item em todas as superfícies (materiais, cristais, pré-crafts, receitas e busca via `PluginImGuiUtils.DrawItemIcon`); layout em 2 linhas (material com `tem/precisa/faltam` + barra + teleporte/zona/preço; header com toggle `[Detalhada|Simples]` + kebab "Mais opções" + barra de progresso; browser com barra + `N receitas`); 🐛 Fix: Detalhe atualiza ao adicionar receita de outra janela (assina `ListsChanged`) e o ✕ da receita não estoura mais a borda do painel
 - **Lista de Coleta — Rota de Coleta:** nova janela (kebab → "🗺 Abrir Rota de Coleta") que agrupa os materiais base faltantes **por zona**, com teleporte por zona, **flag no mapa** por nó (coords reais via `ExportedGatheringPoint`) e preço de Market Board por unidade; grupo "Comprar / Outros" para itens sem nó de coleta; botão 📍 também na linha de material do Detalhe
+- **CraftingHelper — card unificado "Best Macro":** os cards separados "Best Saved Macro" e "Suggested Macro" foram fundidos num único card que mostra automaticamente a macro de **maior score** (paridade com o `CalculateScore` usado nas salvas) e revela a alternativa num **rodapé de comparação** com toggle in-place ("View saved/suggested"). Faz **fallback para a macro salva** quando o solver não supera/não gera, exibe a exceção do solver quando ela ocorre, e o rodapé é honesto (marca `✗` quando a macro não completa o craft, `—` em receita sem quality). O card **Best Community Macro** permanece separado. Componente de seleção puro (`ImGuiUtils.PickBestMacroSource`) com testes; story do UIStudio cobrindo os estados do card
 
 ---
 
@@ -179,7 +180,7 @@ UI Studio:
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" run --project Artificer.UIStudio
 ```
 
-Testes (215 testes cobrindo Simulator, Solver e UI):
+Testes (248 testes cobrindo Simulator, Solver e UI):
 ```powershell
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
