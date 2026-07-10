@@ -13,8 +13,7 @@ internal sealed class CraftingHelperStory : IStory
     private static readonly string[] Sections =
     [
         "0 · CraftableStatus", "1 · Recipe Header", "2 · Gear Condition",
-        "3 · Saved Macro",     "4 · Suggested Macro", "5 · Community Macro",
-        "6 · Main Button",
+        "3 · Best Macro",      "4 · Community Macro", "5 · Main Button",
     ];
 
     private int _section;
@@ -43,10 +42,9 @@ internal sealed class CraftingHelperStory : IStory
             case 0: DrawSection_CraftableStatus(width); break;
             case 1: DrawSection_RecipeHeader(width);    break;
             case 2: DrawSection_GearCondition(width);   break;
-            case 3: DrawSection_SavedMacro(width);      break;
-            case 4: DrawSection_SuggestedMacro(width);  break;
-            case 5: DrawSection_CommunityMacro(width);  break;
-            case 6: DrawSection_MainButton(width);      break;
+            case 3: DrawSection_BestMacro(width);       break;
+            case 4: DrawSection_CommunityMacro(width);  break;
+            case 5: DrawSection_MainButton(width);      break;
         }
     }
 
@@ -235,53 +233,112 @@ internal sealed class CraftingHelperStory : IStory
         DrawGallery(states, PanelW);
     }
 
-    // ── Seção 3: Saved Macro Card ─────────────────────────────────────────────
+    // ── Seção 3: Best Macro Card ──────────────────────────────────────────────
 
-    private static void DrawSection_SavedMacro(float totalW)
+    private static void DrawSection_BestMacro(float totalW)
     {
         var states = new (string Label, Action Draw)[]
         {
-            ("Calculando",    DrawSaved_Loading),
-            ("Vazio",         DrawSaved_Empty),
-            ("Falhou",        DrawSaved_Failed),
-            ("Exceção",       DrawSaved_Exception),
-            ("Pronto",        DrawSaved_Ready),
-            ("HashMismatch",  DrawSaved_HashMismatch),
+            ("Vazio",                     DrawBest_Empty),
+            ("Só salva",                  DrawBest_SavedOnly),
+            ("Solver rodando",            DrawBest_Solving),
+            ("Ambos (sugerida vence)",    DrawBest_BothSuggestedWins),
+            ("Ambos (toggle: salva)",     DrawBest_BothToggleSaved),
+            ("Ambos (salva não completa)", DrawBest_BothSavedIncomplete),
+            ("Só sugerida",               DrawBest_SuggestedOnly),
+            ("Fallback p/ salva",         DrawBest_FallbackToSaved),
+            ("Erro (sem salva)",          DrawBest_Failed),
+            ("Exceção",                   DrawSaved_Exception),
         };
         DrawGallery(states, PanelW);
     }
 
-    private static void DrawSaved_Loading()
-        => ImGuiUtils.TextMiddleNewLine("Calculating...", new Vector2(PanelW, CardH));
+    private static void DrawBest_Empty()
+        => ImGuiUtils.TextMiddleNewLine("No macro yet — Suggest one below", new Vector2(PanelW, CardH + 1));
 
-    private static void DrawSaved_Empty()
+    private static void DrawBest_SavedOnly()
     {
-        var availW  = PanelW;
-        var spacing = ImGui.GetStyle().ItemSpacing.Y;
-        var iconH   = ImGui.GetTextLineHeight() * 1.6f;
-        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight();
-        var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
-        ImGui.SetCursorPosY(startY);
-        ImGuiUtils.TextCentered("📂", availW);
-        ImGuiUtils.TextCentered("No saved macro for this recipe", availW);
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGuiUtils.TextCentered("Create one in the Macro Editor or solve below.", availW);
-        ImGui.SetCursorPosY(startY + CardH + spacing);
+        BadgeLine("★ Saved", Colors.Quality);
+        DrawMockMacroCard("best_savedonly", "Iron Will", 85, hashMismatch: false);
     }
 
-    private static void DrawSaved_Failed()
+    private static void DrawBest_Solving()
+    {
+        ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Solver");
+        ImGui.SameLine(0, 6);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted("MCTS");
+        ImGui.ProgressBar(0.48f, new Vector2(-1, ImGui.GetFrameHeight()), "48%");
+    }
+
+    private static void DrawBest_BothSuggestedWins()
+    {
+        BadgeLine("✦ Suggested", Colors.Progress);
+        DrawMockMacroCard("best_suggwins", "AI Suggestion", 92, hashMismatch: false);
+        CompareFooter("✦ 92%  vs  ★ saved 85%", "View saved");
+    }
+
+    private static void DrawBest_BothToggleSaved()
+    {
+        BadgeLine("★ Saved", Colors.Quality);
+        DrawMockMacroCard("best_toggle_saved", "Iron Will", 85, hashMismatch: false);
+        CompareFooter("✦ 92%  vs  ★ saved 85%", "View suggested");
+    }
+
+    private static void DrawBest_BothSavedIncomplete()
+    {
+        BadgeLine("✦ Suggested", Colors.Progress);
+        DrawMockMacroCard("best_savedincomplete", "AI Suggestion", 92, hashMismatch: false);
+        CompareFooter("✦ 92%  vs  ★ saved ✗", "View saved");
+    }
+
+    private static void DrawBest_SuggestedOnly()
+    {
+        BadgeLine("✦ Suggested", Colors.Progress);
+        DrawMockMacroCard("best_suggonly", "AI Suggestion", 91, hashMismatch: false);
+    }
+
+    private static void DrawBest_FallbackToSaved()
+    {
+        BadgeLine("★ Saved", Colors.Quality);
+        DrawMockMacroCard("best_fallback", "Iron Will", 85, hashMismatch: false);
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted("Solver couldn't improve on your saved macro.");
+    }
+
+    private static void DrawBest_Failed()
     {
         var availW  = PanelW;
         var spacing = ImGui.GetStyle().ItemSpacing.Y;
         var iconH   = ImGui.GetTextLineHeight() * 1.6f;
-        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing() + ImGui.GetTextLineHeight();
+        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing()
+                           + ImGui.GetTextLineHeight()
+                           + spacing + ImGui.GetFrameHeight();
         var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
         ImGui.SetCursorPosY(startY);
         ImGuiUtils.TextCentered("⚠", availW);
         ImGuiUtils.TextCentered("Couldn't generate a macro", availW);
         using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
             ImGuiUtils.TextCentered("Try adjusting solver settings", availW);
+        if (ImGuiUtils.ButtonCentered("Suggest Again")) _ = 0;
         ImGui.SetCursorPosY(startY + CardH + spacing);
+    }
+
+    // Badge de fonte na primeira linha do card mock.
+    private static void BadgeLine(string text, Vector4 color)
+    {
+        using (ImRaii.PushColor(ImGuiCol.Text, color))
+            ImGui.TextUnformatted(text);
+    }
+
+    // Rodapé de comparação com botão de toggle (no-op na story).
+    private static void CompareFooter(string text, string buttonLabel)
+    {
+        ImGui.Spacing();
+        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
+            ImGui.TextUnformatted(text);
+        ImGui.SameLine();
+        if (ImGui.SmallButton(buttonLabel)) _ = 0;
     }
 
     private static void DrawSaved_Exception()
@@ -292,9 +349,6 @@ internal sealed class CraftingHelperStory : IStory
         if (ImGuiUtils.ButtonCentered("Copy Error Message"))
             ImGui.SetClipboardText("System.Exception: Mock error");
     }
-
-    private static void DrawSaved_Ready()        => DrawMockMacroCard("ready", "Iron Will", 87, hashMismatch: false);
-    private static void DrawSaved_HashMismatch() => DrawMockMacroCard("mismatch", "Iron Will", 87, hashMismatch: true);
 
     // Renders the macro card without PluginImGuiUtils (replaces arcs with colored grid).
     private static void DrawMockMacroCard(string id, string name, int hqPct, bool hashMismatch)
@@ -394,83 +448,7 @@ internal sealed class CraftingHelperStory : IStory
     // Default height for macro card content (2 frame rows).
     private static float CardH => 2 * ImGui.GetFrameHeightWithSpacing();
 
-    // ── Seção 4: Suggested Macro Card ────────────────────────────────────────
-
-    private static void DrawSection_SuggestedMacro(float totalW)
-    {
-        var states = new (string Label, Action Draw)[]
-        {
-            ("Não iniciado",   DrawSugg_NotStarted),
-            ("Solver rodando", DrawSugg_Running),
-            ("Regenerando",    DrawSugg_Regenerating),
-            ("Prefilled",      DrawSugg_Prefilled),
-            ("Falhou",         DrawSugg_Failed),
-            ("Exceção",        DrawSugg_Exception),
-            ("Pronto",         DrawSugg_Ready),
-        };
-        DrawGallery(states, PanelW);
-    }
-
-    private static void DrawSugg_NotStarted()
-    {
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGuiUtils.TextMiddleNewLine(
-                "Click \"Suggest Macro\" below to get a suggestion",
-                new Vector2(PanelW, CardH + 1));
-    }
-
-    private static void DrawSugg_Running()
-    {
-        // Visual substitute for DrawSolverProgressArea
-        ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Solver");
-        ImGui.SameLine(0, 6);
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted("MCTS");
-        ImGui.ProgressBar(0.48f, new Vector2(-1, ImGui.GetFrameHeight()), "48%");
-    }
-
-    private static void DrawSugg_Regenerating()
-    {
-        // Old card dimmed as anchor
-        using (ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0.25f))
-            DrawMockMacroCard("regen", "AI Suggestion", 72, hashMismatch: false);
-        // Overlay: progress
-        ImGuiUtils.DrawStateChip(ImGuiUtils.SolverState.Solving, "Solver");
-        ImGui.SameLine(0, 6);
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted("Regenerating...");
-        ImGui.ProgressBar(0.31f, new Vector2(-1, ImGui.GetFrameHeight()), "31%");
-    }
-
-    private static void DrawSugg_Prefilled()
-    {
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGui.TextUnformatted("Pre-filled \U0001f516  (solver still comparing)");
-        DrawMockMacroCard("prefilled", "AI Suggestion", 72, hashMismatch: false);
-    }
-
-    private static void DrawSugg_Failed()
-    {
-        var availW  = PanelW;
-        var spacing = ImGui.GetStyle().ItemSpacing.Y;
-        var iconH   = ImGui.GetTextLineHeight() * 1.6f;
-        var totalH  = iconH + spacing + ImGui.GetTextLineHeightWithSpacing()
-                           + ImGui.GetTextLineHeight()
-                           + spacing + ImGui.GetFrameHeight();
-        var startY  = ImGui.GetCursorPosY() + Math.Max(0f, (CardH - totalH) / 2f);
-        ImGui.SetCursorPosY(startY);
-        ImGuiUtils.TextCentered("⚠", availW);
-        ImGuiUtils.TextCentered("Couldn't generate a macro", availW);
-        using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-            ImGuiUtils.TextCentered("Try adjusting solver settings", availW);
-        if (ImGuiUtils.ButtonCentered("Suggest Again")) _ = 0;
-        ImGui.SetCursorPosY(startY + CardH + spacing);
-    }
-
-    private static void DrawSugg_Exception() => DrawSaved_Exception();
-    private static void DrawSugg_Ready()     => DrawMockMacroCard("sugg", "AI Suggestion", 91, hashMismatch: false);
-
-    // ── Seção 5: Community Macro Card ────────────────────────────────────────
+    // ── Seção 4: Community Macro Card ────────────────────────────────────────
 
     private static void DrawSection_CommunityMacro(float _)
     {
@@ -506,7 +484,7 @@ internal sealed class CraftingHelperStory : IStory
     private static void DrawComm_Ready()
         => DrawMockMacroCard("comm", "r/ffxivgil via Teamcraft", 95, hashMismatch: false);
 
-    // ── Seção 6: Main Button ──────────────────────────────────────────────────
+    // ── Seção 5: Main Button ──────────────────────────────────────────────────
 
     private static void DrawSection_MainButton(float _)
     {
