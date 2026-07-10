@@ -295,11 +295,11 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
 
         DrawMacro();
 
-        ImGuiHelpers.ScaledDummy(5);
+        ImGuiHelpers.ScaledDummy(3);
 
         DrawMacroInfo();
 
-        ImGuiHelpers.ScaledDummy(5);
+        ImGuiHelpers.ScaledDummy(3);
 
         DrawMacroExecutionProgress();
 
@@ -439,7 +439,7 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
         // 1. Status strip: condition dot + Step X/Y + tempo estimado
         DrawStatusStrip(state);
 
-        ImGuiHelpers.ScaledDummy(5);
+        ImGuiHelpers.ScaledDummy(3);
 
         // 2. Progress bars
         var reliability = Session.Macro.GetReliability(Session.RecipeData!, _plugin.Configuration.SynthHelperDisplayOnlyFirstStep ? 0 : ^1);
@@ -465,8 +465,6 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
 
             DynamicBars.DrawColumns(allBars, 2);
         }
-
-        ImGuiHelpers.ScaledDummy(3);
 
         // 3. Buffs inline — nada é desenhado quando não há buff ativo.
         {
