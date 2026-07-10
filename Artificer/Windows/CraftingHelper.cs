@@ -70,8 +70,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     private IReadOnlyList<ActionType>? _prevSuggestedActions;
     private SimulationState?           _prevSuggestedState;
     private readonly Dictionary<MacroTaskType, DateTimeOffset> _copiedAt = new();
-    private BackgroundTask<(Macro?, SimulationState?, Macro?, SimulationState?)>? SavedMacroTask { get; set; }
-    private BackgroundTask<SolverSolution>? SuggestedMacroTask { get; set; }
+    private BackgroundTask<SavedMacroResult>? SavedMacroTask { get; set; }
+    private BackgroundTask<SuggestedMacroResult>? SuggestedMacroTask { get; set; }
     private BackgroundTask<(CommunityMacros.CommunityMacro?, SimulationState?)>? CommunityMacroTask { get; set; }
 
     private Solver.Solver? BestMacroSolver { get; set; }
@@ -470,7 +470,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
         {
             var savedResult = SavedMacroTask?.Result;
-            var bestMacro  = savedResult?.Item1;
+            var bestMacro  = savedResult?.Best;
             var state = new MacroTaskState()
             {
                 Type          = MacroTaskType.Saved,
@@ -479,7 +479,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 Completed     = SavedMacroTask?.Completed ?? false,
                 Actions       = bestMacro?.Actions,
                 MacroName     = bestMacro?.Name,
-                State         = savedResult?.Item2,
+                State         = savedResult?.BestState,
                 HasHashMismatch = bestMacro?.CharacterStatsHash != null
                                && bestMacro.CharacterStatsHash != _currentCharacterHash,
             };
@@ -492,8 +492,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var solverResult   = SuggestedMacroTask?.Result;
             var solverDone     = SuggestedMacroTask?.Completed ?? false;
             var savedResult    = SavedMacroTask?.Result;
-            var hashMatch      = savedResult?.Item3;
-            var hashMatchState = savedResult?.Item4;
+            var hashMatch      = savedResult?.HashMatch;
+            var hashMatchState = savedResult?.HashMatchState;
             var isRegenerating = _prevSuggestedActions != null
                               && SuggestedMacroTask is { Completed: false };
             var isPrefilled    = hashMatch != null && !solverDone && !isRegenerating;
@@ -504,8 +504,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 Exception = SuggestedMacroTask?.Exception,
                 Started   = SuggestedMacroTask != null || isPrefilled,
                 Completed = solverDone || isPrefilled,
-                Actions   = solverResult?.Actions ?? (isPrefilled ? hashMatch!.Actions : null),
-                State     = solverResult?.State   ?? (isPrefilled ? hashMatchState     : null),
+                Actions   = solverResult?.Solution.Actions ?? (isPrefilled ? hashMatch!.Actions : null),
+                State     = solverResult?.Solution.State   ?? (isPrefilled ? hashMatchState     : null),
                 Solver    = BestMacroSolver,
                 IsPrefilled          = isPrefilled && solverResult == null,
                 IsRegenerating       = isRegenerating,
@@ -884,6 +884,14 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         Suggested,
         Community
     }
+    // T de BackgroundTask<T> precisa ser struct; record struct atende e carrega o score.
+    private readonly record struct SavedMacroResult(
+        Macro? Best, SimulationState? BestState, float BestScore,
+        Macro? HashMatch, SimulationState? HashMatchState);
+
+    private readonly record struct SuggestedMacroResult(
+        SolverSolution Solution, float Score);
+
     private record struct MacroTaskState
     {
         public MacroTaskType Type;
@@ -1399,7 +1407,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             token.ThrowIfCancellationRequested();
 
             if (macros.Count == 0)
-                return (null, null, null, null);
+                return default;   // SavedMacroResult vazio (Best == null)
 
             var results = macros
                 .Select(macro =>
@@ -1420,7 +1428,9 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 ? hashMatchResults.MaxBy(r => r.score)
                 : null;
 
-            return (bestSaved.macro, bestSaved.outState, bestHashMatch?.macro, bestHashMatch?.outState);
+            return new SavedMacroResult(
+                bestSaved.macro, bestSaved.outState, bestSaved.score,
+                bestHashMatch?.macro, bestHashMatch?.outState);
         });
         SavedMacroTask.Start();
     }
@@ -1429,8 +1439,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     {
         if (SuggestedMacroTask?.Result is { } prev)
         {
-            _prevSuggestedActions = prev.Actions;
-            _prevSuggestedState   = prev.State;
+            _prevSuggestedActions = prev.Solution.Actions;
+            _prevSuggestedState   = prev.Solution.State;
         }
         else
         {
@@ -1460,7 +1470,11 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
             token.ThrowIfCancellationRequested();
 
-            return solution;
+            var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
+            var simulator  = new SimulatorNoRandom();
+            var (score, _) = CommunityMacros.CommunityMacro.CalculateScore(
+                solution.Actions, simulator, in state, in mctsConfig);
+            return new SuggestedMacroResult(solution, score);
         });
         SuggestedMacroTask.Start();
     }
