@@ -81,4 +81,48 @@ internal static class DynamicBars
         ImGuiUtils.DrawBarRow(mapped, totalWidth);
     }
 
+    /// <summary>
+    /// Desenha as barras como barras horizontais numa grade de <paramref name="columns"/> colunas
+    /// (1 barra por célula, label+valor no overlay). Preserva o tooltip de reliability.
+    /// Alternativa compacta ao <see cref="DrawRow"/> (que desenha arcos).
+    /// </summary>
+    public static void DrawColumns(IReadOnlyList<BarData> bars, int columns = 2, float? totalWidth = null)
+    {
+        if (bars.Count == 0) return;
+        columns = Math.Max(1, columns);
+
+        var totalW = totalWidth ?? ImGui.GetContentRegionAvail().X;
+        var barH   = ImGui.GetFrameHeight();
+
+        using var table = ImRaii.Table("dynbars2col", columns,
+            ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.NoClip,
+            new Vector2(totalW, 0));
+        if (!table) return;
+
+        for (var i = 0; i < bars.Count; i++)
+        {
+            if (i % columns == 0)
+                ImGui.TableNextRow();
+            ImGui.TableSetColumnIndex(i % columns);
+
+            var bar   = bars[i];
+            var cellW = ImGui.GetContentRegionAvail().X;
+            var frac  = bar.Max > 0 ? Math.Clamp(bar.Value / bar.Max, 0f, 1f) : 0f;
+            var value = bar.Caption ?? bar.Value.ToString("0");
+            var overlay = $"{bar.Name} {value}";
+
+            var pos  = ImGui.GetCursorScreenPos();
+            var size = new Vector2(cellW, barH);
+            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, bar.Color))
+                ImGuiUtils.ProgressBar(frac, size, overlay);
+
+            if (bar.Reliability is { } r && ImGui.IsMouseHoveringRect(pos, pos + size))
+            {
+                ImGui.BeginTooltip();
+                DrawReliabilityTooltip(bar, r);
+                ImGui.EndTooltip();
+            }
+        }
+    }
+
 }
