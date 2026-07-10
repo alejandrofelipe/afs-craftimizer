@@ -33,4 +33,5 @@ StudioApp.Run(
     new CraftingListAddWindowStory(),
     new CraftingListDetailWindowStory(),
     new CraftingListMergeWindowStory(),
+    new MeldGuideStory(),
 ]);
