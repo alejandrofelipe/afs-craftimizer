@@ -498,40 +498,37 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
             else if (Session.RecipeData.RecipeInfo.MaxQuality > 0)
                 allBars.Add(new("HQ %", Colors.HQ, reliability.ParamScore, state.HQPercent, 100, null, $"{state.HQPercent}%"));
 
-            DynamicBars.DrawRow(allBars);
+            DynamicBars.DrawColumns(allBars, 2);
         }
 
         ImGuiHelpers.ScaledDummy(3);
 
-        // 3. Buffs (movido para depois das barras)
-        using (var panel = ImRaii2.GroupPanel("Buffs", -1, out _))
+        // 3. Buffs inline — nada é desenhado quando não há buff ativo.
         {
-            using var _font = AxisFont.Push();
-
             var effects = state.ActiveEffects;
             var hasAnyEffect = false;
             foreach (var effect in AllEffectTypes)
                 if (effects.HasEffect(effect)) { hasAnyEffect = true; break; }
 
-            if (!hasAnyEffect)
+            if (hasAnyEffect)
             {
-                using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                    ImGui.TextUnformatted("No active buffs");
-            }
-            else
-            {
-                var iconHeight    = ImGui.GetFrameHeight() * 1.75f;
+                ImGuiHelpers.ScaledDummy(3);
+                using var _font = AxisFont.Push();
+
+                var iconHeight    = ImGui.GetFrameHeight() * 1.5f;
                 var durationShift = iconHeight * .2f;
 
-                ImGui.Dummy(new(0, iconHeight + ImGui.GetStyle().ItemSpacing.Y + ImGui.GetTextLineHeight() - durationShift));
-                ImGui.SameLine(0, 0);
-
+                var first = true;
                 foreach (var effect in AllEffectTypes)
                 {
                     if (!effects.HasEffect(effect))
                         continue;
 
-                    using (var group = ImRaii.Group())
+                    if (!first)
+                        ImGui.SameLine();
+                    first = false;
+
+                    using (ImRaii.Group())
                     {
                         var icon = effect.GetIcon(effects.GetStrength(effect));
                         var size = new Vector2(iconHeight * (icon.AspectRatio ?? 1), iconHeight);
@@ -550,7 +547,6 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
                         using var _reset = ImRaii.DefaultFont();
                         ImGuiUtils.Tooltip($"{status.Name}\n{status.Description}");
                     }
-                    ImGui.SameLine();
                 }
             }
         }
