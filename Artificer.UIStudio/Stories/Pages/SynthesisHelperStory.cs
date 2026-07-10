@@ -1,6 +1,5 @@
 using Artificer.Utils;
 using ImGuiNET;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace Artificer.UIStudio.Stories;
@@ -74,16 +73,30 @@ internal sealed class SynthesisHelperStory : IStory
     // ── Overlay principal ─────────────────────────────────────────────────────
     private void DrawOverlay()
     {
-        using (ImRaii2.GroupPanel("Synth Helper", 320f, out var inner))
+        using (ImRaii2.GroupPanel("Synth Helper", 320f, out _))
         {
-            // Barras de stats da síntese.
-            ImGuiUtils.DrawBarRow(new List<ImGuiUtils.BarData>
+            // Barras de stats (2 colunas, compacto) — mock manual (DynamicBars é do projeto plugin).
+            var bars = new (string Name, Vector4 Color, float Value, float Max)[]
             {
-                new("Progress",   Colors.Progress,   ProgressCur,   ProgressMax),
-                new("Quality",    Colors.Quality,    QualityCur,    QualityMax),
-                new("Durability", Colors.Durability, DurabilityCur, DurabilityMax),
-                new("CP",         Colors.CP,         CpCur,         CpMax),
-            }, inner);
+                ("Progress",   Colors.Progress,   ProgressCur,   ProgressMax),
+                ("Quality",    Colors.Quality,    QualityCur,    QualityMax),
+                ("Durability", Colors.Durability, DurabilityCur, DurabilityMax),
+                ("CP",         Colors.CP,         CpCur,         CpMax),
+            };
+            if (ImGui.BeginTable("synthbars", 2, ImGuiTableFlags.SizingStretchSame))
+            {
+                for (var i = 0; i < bars.Length; i++)
+                {
+                    if (i % 2 == 0) ImGui.TableNextRow();
+                    ImGui.TableSetColumnIndex(i % 2);
+                    var b = bars[i];
+                    var frac = b.Max > 0 ? System.Math.Clamp(b.Value / b.Max, 0f, 1f) : 0f;
+                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, b.Color);
+                    ImGuiUtils.ProgressBar(frac, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()), $"{b.Name} {b.Value:0}");
+                    ImGui.PopStyleColor();
+                }
+                ImGui.EndTable();
+            }
 
             ImGui.Spacing();
             ImGui.Separator();
