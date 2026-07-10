@@ -574,20 +574,24 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
                          Session.Macro.State.Progress >= Session.RecipeData.RecipeInfo.MaxProgress;
         var hasMacro = Session.Macro.Count > 0;
 
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var halfW   = (ImGui.GetContentRegionAvail().X - spacing) / 2f;
+
         if (isComplete)
         {
             Theme.PushPrimaryButton();
-            if (ImGui.Button("Open in Macro Editor", new(-1, 0)))
+            if (ImGui.Button("Open in Macro Editor", new(halfW, 0)))
                 _plugin.OpenMacroEditor(Session.CharacterStats!, Session.RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), null, [], null);
             Theme.PopPrimaryButton();
-            if (ImGui.Button("Generate New", new(-1, 0)))
+            ImGui.SameLine(0, spacing);
+            if (ImGui.Button("Generate New", new(halfW, 0)))
                 AttemptRetry();
         }
         else
         {
             var label = hasMacro ? "Generate New" : "Suggest Macro";
             Theme.PushPrimaryButton();
-            if (ImGui.Button(label, new(-1, 0)))
+            if (ImGui.Button(label, new(halfW, 0)))
                 AttemptRetry();
             ImGuiUtils.HoveredTooltip(hasMacro
                 ? "Generate a new macro suggestion from scratch, discarding the current one."
@@ -595,7 +599,8 @@ public sealed unsafe class SynthesisHelper : Window, IDisposable
                   "Results aren't perfect, and levels of success " +
                   "can vary wildly depending on the solver's settings.", wrapWidth: 300);
             Theme.PopPrimaryButton();
-            if (ImGui.Button("Open in Macro Editor", new(-1, 0)))
+            ImGui.SameLine(0, spacing);
+            if (ImGui.Button("Open in Macro Editor", new(halfW, 0)))
                 _plugin.OpenMacroEditor(Session.CharacterStats!, Session.RecipeData!, new(Service.Objects.LocalPlayer!.StatusList), null, [], null);
         }
     }
