@@ -38,4 +38,11 @@ public static class MacroSelection
         }
         return best;
     }
+
+    /// <summary>
+    /// Nome da macro do auto-save: usa o nome do item resolvido; vazio/whitespace/null cai no
+    /// fallback "Recipe {id}" (o `??` do call-site só pegava null, não string vazia).
+    /// </summary>
+    public static string ResolveMacroName(string? resolved, ushort recipeId) =>
+        string.IsNullOrWhiteSpace(resolved) ? $"Recipe {recipeId}" : resolved;
 }

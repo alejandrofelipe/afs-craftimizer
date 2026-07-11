@@ -69,4 +69,19 @@ public class MacroSelectionTests
         var best = MacroSelection.SelectBestForRecipe(macros, 10, _ => 0.5f);
         Assert.AreSame(first, best);
     }
+
+    [TestMethod]
+    public void ResolveMacroName_NullResolved_UsesRecipeFallback()
+        => Assert.AreEqual("Recipe 42", MacroSelection.ResolveMacroName(null, 42));
+
+    [TestMethod]
+    public void ResolveMacroName_EmptyOrWhitespace_UsesRecipeFallback()
+    {
+        Assert.AreEqual("Recipe 42", MacroSelection.ResolveMacroName("", 42));
+        Assert.AreEqual("Recipe 42", MacroSelection.ResolveMacroName("   ", 42));
+    }
+
+    [TestMethod]
+    public void ResolveMacroName_RealName_UsesIt()
+        => Assert.AreEqual("Rarefied Tacos", MacroSelection.ResolveMacroName("Rarefied Tacos", 42));
 }

@@ -180,7 +180,8 @@ public sealed class CraftingSession : IDisposable
         var newScore = MacroScoring.ScoreState(_currentState, cfg);
 
         var recipeId = RecipeData.RecipeId;
-        var itemName = RecipeData.Recipe.ItemResult.ValueNullable?.Name.ExtractText() ?? $"Recipe {recipeId}";
+        var resolvedName = RecipeData.Recipe.ItemResult.ValueNullable?.Name.ExtractText();
+        var itemName = MacroSelection.ResolveMacroName(resolvedName, recipeId);
         var actions = PlayedActions.ToArray();
         var hash = CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : (int?)null;
 
@@ -221,6 +222,11 @@ public sealed class CraftingSession : IDisposable
                 existing.SavedScore = newScore;
                 existing.Actions = actions;
                 existing.CharacterStatsHash = hash;
+                // Auto-cura o nome: se o item resolveu e o nome atual é um fallback ruim
+                // (vazio ou o literal "Recipe {id}"), corrige — sem clobberar um nome bom/renomeado.
+                if (!string.IsNullOrWhiteSpace(resolvedName) &&
+                    (string.IsNullOrWhiteSpace(existing.Name) || existing.Name == $"Recipe {recipeId}"))
+                    existing.Name = itemName;
                 _plugin.MacroRepository.Update(existing);
                 global::Artificer.Plugin.Plugin.DisplayNotification(new()
                 {
