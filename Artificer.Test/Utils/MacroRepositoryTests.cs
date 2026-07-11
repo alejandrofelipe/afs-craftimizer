@@ -122,9 +122,15 @@ public class MacroRepositoryTests
                 catch (System.Exception ex) { failure = ex; }
             });
 
-            for (var i = 0; i < 200; i++)
+            // Add/Remove mudam Count e forçam realocação do array interno (_size/_items),
+            // ao contrário de Swap (que só troca elementos via indexador). É essa realocação
+            // concorrente com o ToArray() do SnapshotMacros() que pode lançar sem o lock.
+            for (var i = 0; i < 150; i++)
             {
-                repo.Swap(0, repo.Macros.Count - 1);
+                var m = new Macro { Name = $"churn{i}", RecipeId = (ushort)i };
+                m.Actions = new[] { ActionType.BasicSynthesis };
+                repo.Add(m);
+                repo.Remove(m);
             }
             System.Threading.Volatile.Write(ref stop, true);
             reader.Wait();
