@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Sim = Artificer.Simulator.Simulator;
 using SimNoRandom = Artificer.Simulator.SimulatorNoRandom;
 
@@ -25,7 +24,7 @@ public sealed class CraftingSession : IDisposable
     public CharacterStats? CharacterStats { get; private set; }
     public SimulationInput? SimulationInput { get; private set; }
     internal SimulatedMacro Macro { get; }
-    public Solver.Solver? SolverObject { get; private set; }
+    public Solver.Solver? SolverObject => _run.Current;
     public bool SolverRunning => !(SolverTask?.Completed ?? true);
     public bool SolverCancelling => SolverTask?.Cancelling ?? false;
     public int CurrentActionCount { get; private set; }
@@ -41,7 +40,7 @@ public sealed class CraftingSession : IDisposable
     /// <para>
     /// Ciclo de vida:
     /// - <b>Início do solver</b>: Lista limpa em CalculateBestMacro()
-    /// - <b>Durante execução</b>: Atualiza a cada 100ms via UpdateSnapshotsPeriodically()
+    /// - <b>Durante execução</b>: Atualiza a cada 100ms via poller interno do <see cref="SolverRun"/>
     /// - <b>Conclusão</b>: Snapshot final com State=Completed adicionado
     /// - <b>Cancelamento</b>: Snapshot com State=Cancelled preservado
     /// </para>
@@ -50,7 +49,7 @@ public sealed class CraftingSession : IDisposable
     /// Atualmente contém apenas um snapshot (single-solver), mas arquitetura suporta múltiplos.
     /// </para>
     /// </remarks>
-    public IReadOnlyList<ProgressBarComponent.ProgressSnapshot> SolverSnapshots => _solverSnapshots;
+    public IReadOnlyList<ProgressBarComponent.ProgressSnapshot> SolverSnapshots => _run.Snapshots;
 
     public ActionType? NextAction => Macro.Count > 0 ? Macro[0].Action : null;
 
@@ -62,8 +61,7 @@ public sealed class CraftingSession : IDisposable
     private SimulationState _currentState;
     private List<ActionType> PlayedActions { get; } = [];
     private bool CraftAutoSaved { get; set; }
-    private readonly List<ProgressBarComponent.ProgressSnapshot> _solverSnapshots = [];
-    private CancellationTokenSource? _snapshotUpdateCts;
+    private readonly SolverRun _run = new();
 
     private readonly global::Artificer.Plugin.Plugin _plugin;
 
@@ -244,24 +242,8 @@ public sealed class CraftingSession : IDisposable
     /// <summary>Cancels any running solver task.</summary>
     public void CancelSolver()
     {
-        if (SolverObject != null && SolverTask?.Completed == false)
-        {
-            // Preserve current progress in snapshot before cancelling
-            var algorithmName = _plugin.Configuration.SynthHelperSolverConfig.Algorithm.ToString();
-            var snapshot = SolverProgressBar.FromSolver(SolverObject, algorithmName) with
-            {
-                State = ProgressBarComponent.ProgressState.Cancelled
-            };
-
-            lock (_solverSnapshots)
-            {
-                _solverSnapshots.Clear();
-                _solverSnapshots.Add(snapshot);
-            }
-        }
-
+        _run.Cancel(markCancelled: true);
         SolverTask?.Cancel();
-        _snapshotUpdateCts?.Cancel();
     }
 
     /// <summary>Triggers a new solver run (same as starting a fresh calculation).</summary>
@@ -270,8 +252,7 @@ public sealed class CraftingSession : IDisposable
     public void Dispose()
     {
         SolverTask?.Cancel();
-        _snapshotUpdateCts?.Cancel();
-        _snapshotUpdateCts?.Dispose();
+        _run.Dispose();
     }
 
     // ── Private solver/state logic ─────────────────────────────────────────────
@@ -279,10 +260,8 @@ public sealed class CraftingSession : IDisposable
     private void CalculateBestMacro()
     {
         SolverTask?.Cancel();
-        _snapshotUpdateCts?.Cancel();
-        _snapshotUpdateCts?.Dispose();
-        _snapshotUpdateCts = null;
-        _solverSnapshots.Clear();
+        _run.Cancel();
+        _run.SetInitialSnapshot(null); // limpa os snapshots (equivalente ao Clear() da lista antiga)
         Macro.ClearQueue();
         Macro.Clear();
 
@@ -300,72 +279,18 @@ public sealed class CraftingSession : IDisposable
 
     private int CalculateBestMacroTask(SimulationState state, CancellationToken token, bool hasDelineations)
     {
-        var config = _plugin.Configuration.SynthHelperSolverConfig;
-        var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
-        if (!canUseDelineations)
-            config = config.FilterSpecialistActions();
+        var config = _plugin.Configuration.SynthHelperSolverConfig
+            .ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
 
-        token.ThrowIfCancellationRequested();
-
-        var solver = new Solver.Solver(config, state) { Token = token };
-        solver.OnLog += Log.Debug;
-        solver.OnWarn += t => global::Artificer.Plugin.Plugin.DisplaySolverWarning(t);
-        solver.OnNewAction += EnqueueAction;
-        SolverObject = solver;
-
-        // Start periodic snapshot updates
-        _snapshotUpdateCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var snapshotTask = Task.Run(() => UpdateSnapshotsPeriodically(solver, _snapshotUpdateCts.Token), _snapshotUpdateCts.Token);
-
-        solver.Start();
-        _ = solver.GetTask().GetAwaiter().GetResult();
-
-        // Stop snapshot updates and create final snapshot
-        _snapshotUpdateCts?.Cancel();
-        try
-        {
-            snapshotTask.GetAwaiter().GetResult();
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected when we cancel
-        }
-
-        // Create final completed snapshot
-        lock (_solverSnapshots)
-        {
-            _solverSnapshots.Clear();
-            var algorithmName = config.Algorithm.ToString();
-            _solverSnapshots.Add(SolverProgressBar.FromSolver(solver, algorithmName) with
+        _run.Run(config, state, token,
+            onNewAction: a =>
             {
-                State = ProgressBarComponent.ProgressState.Completed
+                var newSize = Macro.Enqueue(a, _plugin.Configuration.SynthHelperMaxDisplayCount);
+                return newSize < _plugin.Configuration.SynthHelperStepCount
+                    && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount; // false = early-stop
             });
-        }
-
-        token.ThrowIfCancellationRequested();
 
         return 0;
-    }
-
-    private void EnqueueAction(ActionType action)
-    {
-        var newSize = Macro.Enqueue(action, _plugin.Configuration.SynthHelperMaxDisplayCount);
-        if (newSize >= _plugin.Configuration.SynthHelperStepCount || newSize >= _plugin.Configuration.SynthHelperMaxDisplayCount)
-        {
-            if (SolverObject != null)
-            {
-                var algorithmName = _plugin.Configuration.SynthHelperSolverConfig.Algorithm.ToString();
-                lock (_solverSnapshots)
-                {
-                    _solverSnapshots.Clear();
-                    _solverSnapshots.Add(SolverProgressBar.FromSolver(SolverObject, algorithmName) with
-                    {
-                        State = ProgressBarComponent.ProgressState.Completed
-                    });
-                }
-            }
-            SolverTask?.Cancel();
-        }
     }
 
     private Artificer.Solver.MCTSConfig CurrentMctsConfig() =>
@@ -417,42 +342,4 @@ public sealed class CraftingSession : IDisposable
 
     private Sim CreateSim(in SimulationState state) =>
         _plugin.Configuration.ConditionRandomness ? new Sim() { State = state } : new SimNoRandom() { State = state };
-
-    /// <summary>
-    /// Periodically polls the solver for progress and updates the snapshots list.
-    /// Runs in a background task until cancelled.
-    /// </summary>
-    /// <summary>
-    /// Atualiza snapshots periodicamente durante execução do solver.
-    /// Roda em background task separada, polling a cada 100ms.
-    /// Thread-safe via lock() na lista de snapshots.
-    /// </summary>
-    /// <param name="solver">Instância do solver sendo monitorado</param>
-    /// <param name="token">Token de cancelamento para parar polling</param>
-    private async Task UpdateSnapshotsPeriodically(Solver.Solver solver, CancellationToken token)
-    {
-        var algorithmName = _plugin.Configuration.SynthHelperSolverConfig.Algorithm.ToString();
-        
-        while (!token.IsCancellationRequested)
-        {
-            try
-            {
-                // Update snapshot from current solver state
-                var snapshot = SolverProgressBar.FromSolver(solver, algorithmName);
-                
-                lock (_solverSnapshots)
-                {
-                    _solverSnapshots.Clear();
-                    _solverSnapshots.Add(snapshot);
-                }
-
-                // Update every 100ms for smooth progress
-                await Task.Delay(100, token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-        }
-    }
 }
