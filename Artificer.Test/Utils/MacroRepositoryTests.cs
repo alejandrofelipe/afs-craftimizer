@@ -96,6 +96,44 @@ public class MacroRepositoryTests
         finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
     }
 
+    [TestMethod]
+    public void SnapshotMacros_DoesNotThrow_WhileListMutated()
+    {
+        var path = TempDb();
+        try
+        {
+            using var repo = new MacroRepository(path);
+            for (var i = 0; i < 20; i++)
+            {
+                var m = new Macro { Name = $"m{i}", RecipeId = (ushort)i };
+                m.Actions = new[] { ActionType.BasicSynthesis };
+                repo.Add(m);
+            }
+
+            System.Exception? failure = null;
+            var stop = false;
+            var reader = System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    while (!System.Threading.Volatile.Read(ref stop))
+                        foreach (var _ in repo.SnapshotMacros()) { /* itera a cópia */ }
+                }
+                catch (System.Exception ex) { failure = ex; }
+            });
+
+            for (var i = 0; i < 200; i++)
+            {
+                repo.Swap(0, repo.Macros.Count - 1);
+            }
+            System.Threading.Volatile.Write(ref stop, true);
+            reader.Wait();
+
+            Assert.IsNull(failure, $"enumerar o snapshot não deve lançar: {failure}");
+        }
+        finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
+    }
+
     private static void Exec(SqliteConnection db, string sql)
     {
         using var cmd = db.CreateCommand();

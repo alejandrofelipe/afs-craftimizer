@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace Artificer.Utils;
 
@@ -17,8 +18,16 @@ public sealed class MacroRepository : IDisposable, IMacroStore
 {
     private readonly SqliteConnection _db;
     private readonly List<Macro> _macros = [];
+    private readonly Lock _gate = new();
 
     public IReadOnlyList<Macro> Macros => _macros;
+
+    /// <summary>Cópia independente da lista de macros, segura para enumerar em outra thread.</summary>
+    public IReadOnlyList<Macro> SnapshotMacros()
+    {
+        lock (_gate)
+            return _macros.ToArray();
+    }
 
     /// <summary>Fired after <see cref="Update"/> persists a macro mutation.</summary>
     public event Action<Macro>? MacroUpdated;
@@ -160,7 +169,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         }
         catch { tx.Rollback(); throw; }
 
-        _macros.Add(macro);
+        lock (_gate) _macros.Add(macro);
         MacroListChanged?.Invoke();
     }
 
@@ -169,23 +178,26 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         using var cmd = Command("DELETE FROM Macros WHERE Id=$id");
         cmd.Parameters.AddWithValue("$id", macro.Id);
         cmd.ExecuteNonQuery();
-        _macros.Remove(macro);
+        lock (_gate) _macros.Remove(macro);
         RewriteDisplayOrders();
         MacroListChanged?.Invoke();
     }
 
     public void Swap(int i, int j)
     {
-        (_macros[i], _macros[j]) = (_macros[j], _macros[i]);
+        lock (_gate) (_macros[i], _macros[j]) = (_macros[j], _macros[i]);
         RewriteDisplayOrders();
         MacroListChanged?.Invoke();
     }
 
     public void Move(int fromIdx, int toIdx)
     {
-        var macro = _macros[fromIdx];
-        _macros.RemoveAt(fromIdx);
-        _macros.Insert(toIdx, macro);
+        lock (_gate)
+        {
+            var macro = _macros[fromIdx];
+            _macros.RemoveAt(fromIdx);
+            _macros.Insert(toIdx, macro);
+        }
         RewriteDisplayOrders();
         MacroListChanged?.Invoke();
     }
@@ -209,7 +221,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
                 var id = InsertMacroRow(macro, _macros.Count, tx);
                 macro.Id = (int)id;
                 InsertActions(macro, tx);
-                _macros.Add(macro);
+                lock (_gate) _macros.Add(macro);
             }
             tx.Commit();
         }
