@@ -242,7 +242,7 @@ public sealed class CraftingSession : IDisposable
     /// <summary>Cancels any running solver task.</summary>
     public void CancelSolver()
     {
-        _run.Cancel(markCancelled: true);
+        _run.Cancel(markCancelled: SolverRunning);
         SolverTask?.Cancel();
     }
 
