@@ -1,0 +1,590 @@
+<title>Artificer · Macros: dados, estado, busca &amp; save</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#eceff3; --panel:#ffffff; --panel2:#f3f5f8; --border:#dbe1e9;
+    --ink:#161b22; --muted:#5b6672; --faint:#8892a0;
+    --accent:#a9661a; --accent-soft:rgba(169,102,26,.12);
+    --quality:#0f7676;
+    --gate:#5f4ec7; --gate-soft:rgba(95,78,199,.12);
+    --insert:#1a7f37; --insert-soft:rgba(26,127,55,.12);
+    --update:#0860ca; --update-soft:rgba(8,96,202,.12);
+    --exit:#b24a2c; --exit-soft:rgba(178,74,44,.10);
+    --shadow:0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.18);
+    --font-body:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --font-kick:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --font-mono:"Cascadia Code","Cascadia Mono",Consolas,ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d1117; --panel:#151b23; --panel2:#1a222c; --border:#293341;
+      --ink:#e6edf3; --muted:#8b98a5; --faint:#6b7683;
+      --accent:#e0a458; --accent-soft:rgba(224,164,88,.14);
+      --quality:#5ecaca;
+      --gate:#a78bfa; --gate-soft:rgba(167,139,250,.16);
+      --insert:#3fb950; --insert-soft:rgba(63,185,80,.15);
+      --update:#58a6ff; --update-soft:rgba(88,166,255,.15);
+      --exit:#ec7a5a; --exit-soft:rgba(236,122,90,.14);
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --bg:#eceff3; --panel:#ffffff; --panel2:#f3f5f8; --border:#dbe1e9;
+    --ink:#161b22; --muted:#5b6672; --faint:#8892a0;
+    --accent:#a9661a; --accent-soft:rgba(169,102,26,.12);
+    --quality:#0f7676;
+    --gate:#5f4ec7; --gate-soft:rgba(95,78,199,.12);
+    --insert:#1a7f37; --insert-soft:rgba(26,127,55,.12);
+    --update:#0860ca; --update-soft:rgba(8,96,202,.12);
+    --exit:#b24a2c; --exit-soft:rgba(178,74,44,.10);
+    --shadow:0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.18);
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0d1117; --panel:#151b23; --panel2:#1a222c; --border:#293341;
+    --ink:#e6edf3; --muted:#8b98a5; --faint:#6b7683;
+    --accent:#e0a458; --accent-soft:rgba(224,164,88,.14);
+    --quality:#5ecaca;
+    --gate:#a78bfa; --gate-soft:rgba(167,139,250,.16);
+    --insert:#3fb950; --insert-soft:rgba(63,185,80,.15);
+    --update:#58a6ff; --update-soft:rgba(88,166,255,.15);
+    --exit:#ec7a5a; --exit-soft:rgba(236,122,90,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 22px}
+  a{color:inherit}
+  code,.mono{font-family:var(--font-mono)}
+
+  /* ---------- top bar ---------- */
+  header.bar{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter:saturate(1.4) blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .bar-in{display:flex; align-items:center; gap:18px; height:56px}
+  .brand{display:flex; align-items:baseline; gap:9px; font-weight:800; letter-spacing:-.02em}
+  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); transform:translateY(-1px)}
+  .brand small{font-family:var(--font-kick); font-style:italic; font-weight:400; color:var(--muted); letter-spacing:0}
+  nav.sections{display:flex; gap:4px; margin-left:auto}
+  nav.sections a{
+    text-decoration:none; color:var(--muted); font-size:13px; font-weight:600;
+    padding:7px 11px; border-radius:8px; letter-spacing:.01em; white-space:nowrap;
+  }
+  nav.sections a:hover{color:var(--ink); background:var(--panel2)}
+  nav.sections a.active{color:var(--accent); background:var(--accent-soft)}
+  .toggle{
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    border:1px solid var(--border); background:var(--panel); color:var(--muted);
+    border-radius:9px; padding:7px 10px; font:inherit; font-size:12.5px; font-weight:600;
+  }
+  .toggle:hover{color:var(--ink); border-color:var(--faint)}
+  .toggle:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:52px 0 30px}
+  .kick{font-family:var(--font-kick); font-style:italic; color:var(--accent); font-size:16px; margin:0 0 10px}
+  h1{
+    margin:0; font-size:clamp(29px,4.6vw,45px); line-height:1.05; font-weight:800;
+    letter-spacing:-.025em; text-wrap:balance; max-width:16ch;
+  }
+  .lede{margin:16px 0 0; color:var(--muted); font-size:17px; max-width:60ch; text-wrap:pretty}
+  .statrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:24px}
+  .chip{
+    display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600;
+    background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:6px 12px;
+    font-family:var(--font-mono); letter-spacing:-.01em;
+  }
+  .chip i{width:8px; height:8px; border-radius:50%; display:inline-block}
+
+  /* ---------- sections ---------- */
+  section{padding:34px 0; border-top:1px solid var(--border); scroll-margin-top:70px}
+  .eyebrow{font-family:var(--font-kick); font-style:italic; color:var(--accent); font-size:15px; margin:0}
+  h2{margin:6px 0 4px; font-size:clamp(22px,3vw,30px); font-weight:750; letter-spacing:-.02em; text-wrap:balance}
+  .sub{margin:0 0 22px; color:var(--muted); max-width:70ch}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr}}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow)}
+  .card-h{
+    display:flex; align-items:center; gap:10px; padding:13px 16px; border-bottom:1px solid var(--border);
+    font-weight:700; font-size:14px; letter-spacing:-.01em;
+  }
+  .card-h .tag{
+    margin-left:auto; font-family:var(--font-mono); font-size:11px; font-weight:600;
+    color:var(--muted); background:var(--panel2); border:1px solid var(--border);
+    padding:2px 8px; border-radius:6px;
+  }
+  .card-b{padding:6px 4px 8px}
+
+  /* ---------- tables ---------- */
+  .scroll-x{overflow-x:auto}
+  table{border-collapse:collapse; width:100%; font-size:12.7px}
+  th,td{text-align:left; padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+  thead th{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--faint);
+    font-weight:700; border-bottom:1px solid var(--border);
+  }
+  tbody tr:last-child td{border-bottom:0}
+  td.k{font-family:var(--font-mono); color:var(--ink); font-weight:600; white-space:nowrap}
+  td .ty{font-family:var(--font-mono); color:var(--accent); font-size:11.5px}
+  .pill{display:inline-block; font-size:10px; font-weight:700; padding:1px 7px; border-radius:5px; letter-spacing:.02em}
+  .pill.pk{color:var(--accent); background:var(--accent-soft)}
+  .pill.fk{color:var(--update); background:var(--update-soft)}
+  .pill.nl{color:var(--muted); background:var(--panel2)}
+  .note-line{color:var(--muted)}
+
+  /* ---------- flow ---------- */
+  .flow{display:flex; flex-direction:column; align-items:stretch; gap:0}
+  .node{
+    background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--faint);
+    border-radius:11px; padding:11px 14px; box-shadow:var(--shadow); position:relative;
+  }
+  .node .nt{font-size:10px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--faint); margin-bottom:3px}
+  .node .nh{font-weight:700; font-size:14px; letter-spacing:-.01em}
+  .node .nc{font-family:var(--font-mono); font-size:12px; color:var(--ink); margin-top:5px; overflow-wrap:anywhere}
+  .node .nm{color:var(--muted); font-size:12.5px; margin-top:4px}
+  .node--gate{border-left-color:var(--gate)} .node--gate .nt{color:var(--gate)}
+  .node--proc{border-left-color:var(--accent)}
+  .node--insert{border-left-color:var(--insert); background:linear-gradient(0deg,var(--insert-soft),transparent)} .node--insert .nt{color:var(--insert)}
+  .node--update{border-left-color:var(--update); background:linear-gradient(0deg,var(--update-soft),transparent)} .node--update .nt{color:var(--update)}
+  .node--exit{border-left-color:var(--exit); background:var(--exit-soft)} .node--exit .nt{color:var(--exit)}
+  .node--ok{border-left-color:var(--quality)} .node--ok .nt{color:var(--quality)}
+
+  .down{display:flex; flex-direction:column; align-items:center; gap:2px; padding:5px 0; color:var(--faint)}
+  .down .lab{font-size:11px; font-style:italic; color:var(--muted)}
+  .down::after{content:"▼"; font-size:10px; line-height:1}
+  .down .line{width:2px; height:12px; background:var(--border)}
+
+  /* gate with side exit */
+  .gaterow{display:grid; grid-template-columns:1fr auto minmax(0,1.05fr); align-items:center; gap:10px}
+  .gaterow .toexit{display:flex; align-items:center; gap:6px; color:var(--muted); font-size:11px; font-style:italic}
+  .gaterow .toexit::before{content:"→"; color:var(--faint); font-style:normal}
+  @media (max-width:680px){
+    .gaterow{grid-template-columns:1fr}
+    .gaterow .toexit{padding-left:14px}
+    .gaterow .toexit::before{content:"↳"}
+  }
+
+  ol.steps{margin:6px 0 2px; padding-left:0; list-style:none; counter-reset:s}
+  ol.steps li{
+    counter-increment:s; position:relative; padding:6px 0 6px 30px;
+    border-top:1px dashed var(--border); font-size:12.7px;
+  }
+  ol.steps li:first-child{border-top:0}
+  ol.steps li::before{
+    content:counter(s); position:absolute; left:0; top:6px; width:20px; height:20px;
+    display:grid; place-items:center; border-radius:6px; font-size:11px; font-weight:800;
+    color:var(--accent); background:var(--accent-soft);
+  }
+  ol.steps code{color:var(--ink)}
+  ol.steps .mm{color:var(--muted); display:block; font-size:11.8px; margin-top:2px}
+
+  /* busca/save store */
+  .store{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:linear-gradient(0deg,var(--accent-soft),transparent);
+    border:1px solid var(--border); border-radius:14px; padding:14px 18px; box-shadow:var(--shadow);
+  }
+  .store .db{font-weight:800; font-size:15px; display:flex; align-items:center; gap:9px}
+  .store .db::before{content:""; width:20px; height:16px; border-radius:4px; border:2px solid var(--accent); box-shadow:inset 0 4px 0 -2px var(--accent)}
+  .store .tabs{display:flex; gap:8px; flex-wrap:wrap}
+  .store .t{font-family:var(--font-mono); font-size:12px; background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:4px 9px}
+  .store .io{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+  .io .io-b{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:999px}
+  .io .rd{color:var(--quality); background:color-mix(in srgb,var(--quality) 14%, transparent)}
+  .io .wr{color:var(--accent); background:var(--accent-soft)}
+
+  .lanehead{display:flex; align-items:center; gap:9px; margin:2px 0 10px; font-weight:750; font-size:14.5px}
+  .lanehead .b{font-family:var(--font-mono); font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:6px; color:#fff}
+  .b--a{background:var(--quality)} .b--b{background:var(--gate)} .b--s{background:var(--accent); color:#1a1200}
+
+  /* conditional fields */
+  .cond{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  @media (max-width:820px){.cond{grid-template-columns:1fr}}
+  .cond .cc{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow)}
+  .cond .ch{font-weight:750; font-size:13px; margin:0 0 9px; display:flex; align-items:center; gap:8px}
+  .cond .ch .sw{width:10px; height:10px; border-radius:3px}
+  .cond ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+  .cond li{font-size:12.3px; line-height:1.4}
+  .cond li b{font-family:var(--font-mono); font-weight:600; color:var(--ink)}
+  .cond li span{color:var(--muted)}
+
+  .legend{display:flex; flex-wrap:wrap; gap:14px 18px; margin:18px 0 0; font-size:12px; color:var(--muted)}
+  .legend .li{display:inline-flex; align-items:center; gap:7px}
+  .legend .sw{width:13px; height:13px; border-radius:4px; border:1px solid var(--border)}
+
+  .callout{
+    margin-top:18px; border:1px solid var(--border); border-left:4px solid var(--accent);
+    background:var(--accent-soft); border-radius:11px; padding:13px 16px; font-size:13.5px;
+  }
+  .callout b{color:var(--accent)}
+
+  footer{padding:30px 0 60px; color:var(--muted); font-size:12.5px; border-top:1px solid var(--border)}
+  footer .files{display:flex; flex-direction:column; gap:5px; margin-top:10px; font-family:var(--font-mono); font-size:11.5px}
+  footer .files span{color:var(--accent)}
+
+  @media (prefers-reduced-motion:no-preference){
+    .node,.card,.cond .cc{transition:transform .16s ease, box-shadow .16s ease}
+    .node:hover,.cond .cc:hover{transform:translateY(-1px)}
+    .hero>*{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+    .hero .lede{animation-delay:.05s} .hero .statrow{animation-delay:.1s}
+    @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="brand">Artificer<small>macros</small><span class="dot"></span></div>
+    <nav class="sections">
+      <a href="#tabela">Tabela de macro</a>
+      <a href="#estado">Estado do simulador</a>
+      <a href="#buscasave">Busca &amp; Save</a>
+    </nav>
+    <button class="toggle" id="themeBtn" aria-label="Alternar tema">
+      <span id="themeIcon">◐</span><span id="themeTxt">Tema</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <p class="kick">Guia técnico do fork</p>
+    <h1>Como uma macro vive no Artificer</h1>
+    <p class="lede">Dos campos persistidos em SQLite ao motor de estado do craft, até como uma macro é <em>encontrada</em> para uma receita e <em>gravada</em> de volta. Três subsistemas, uma chave em comum: <code>RecipeId</code>.</p>
+    <div class="statrow" aria-hidden="true">
+      <span class="chip"><i style="background:var(--accent)"></i>Progress</span>
+      <span class="chip"><i style="background:var(--quality)"></i>Quality</span>
+      <span class="chip"><i style="background:var(--insert)"></i>Durability</span>
+      <span class="chip"><i style="background:var(--gate)"></i>CP</span>
+      <span class="chip"><i style="background:var(--muted)"></i>Condition</span>
+      <span class="chip"><i style="background:var(--update)"></i>Effects</span>
+    </div>
+  </div>
+
+  <!-- ============ 1. TABELA ============ -->
+  <section id="tabela">
+    <p class="eyebrow">01 — Persistência</p>
+    <h2>A tabela de macro</h2>
+    <p class="sub">A macro existe em duas camadas: o modelo C# <code>Macro</code> (em memória / JSON legado) e o banco SQLite <code>macros.db</code>, a fonte de verdade. Nem tudo casa 1:1 — há coluna que só existe no SQL e dado que só existe no C#.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h">Modelo C# <code>Macro</code><span class="tag">Artificer/Models/Macro.cs</span></div>
+        <div class="card-b scroll-x">
+          <table>
+            <thead><tr><th>Campo</th><th>Tipo</th><th>JSON</th><th>Papel</th></tr></thead>
+            <tbody>
+              <tr><td class="k">Id</td><td><span class="ty">int</span></td><td><span class="pill nl">Ignore</span></td><td>rowid do SQLite; <code>0</code> = não persistido</td></tr>
+              <tr><td class="k">Name</td><td><span class="ty">string</span></td><td>"Name"</td><td>nome de exibição</td></tr>
+              <tr><td class="k">RecipeId</td><td><span class="ty">ushort?</span></td><td>"RecipeId"</td><td>receita associada; <code>null</code> = genérica</td></tr>
+              <tr><td class="k">SavedScore</td><td><span class="ty">float</span></td><td>"SavedScore"</td><td>score 0..1 (objetivo do solver); gate de overwrite</td></tr>
+              <tr><td class="k">CharacterStatsHash</td><td><span class="ty">int?</span></td><td>"CharacterStatsHash"</td><td>hash dos stats quando gravou; flag de "mudou"</td></tr>
+              <tr><td class="k">Source</td><td><span class="ty">MacroSource</span></td><td>"Source"</td><td><b>User</b> | <b>Auto</b>; auto-save só cria/atualiza <b>Auto</b></td></tr>
+              <tr><td class="k">actions</td><td><span class="ty">ActionType[]</span></td><td>Include → "Actions"</td><td>a sequência de ações (único membro serializado)</td></tr>
+              <tr><td class="k">Actions</td><td><span class="ty">IReadOnlyList</span></td><td><span class="pill nl">Ignore</span></td><td>view pública; get→<code>actions</code>, set→copia</td></tr>
+              <tr><td class="k">ActionEnumerable</td><td><span class="ty">IEnumerable</span></td><td><span class="pill nl">Ignore</span></td><td>só-set; <code>actions = [.. value]</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">SQLite <code>macros.db</code><span class="tag">Utils/MacroRepository.cs</span></div>
+        <div class="card-b scroll-x">
+          <table>
+            <thead><tr><th>Coluna</th><th>Tipo</th><th>Chave</th><th>↔ C#</th></tr></thead>
+            <tbody>
+              <tr><td colspan="4" style="color:var(--accent);font-weight:700;font-size:11px;letter-spacing:.05em;padding-top:10px">TABELA Macros</td></tr>
+              <tr><td class="k">Id</td><td><span class="ty">INTEGER</span></td><td><span class="pill pk">PK auto</span></td><td>Macro.Id</td></tr>
+              <tr><td class="k">Name</td><td><span class="ty">TEXT</span></td><td><span class="pill nl">NOT NULL</span></td><td>Macro.Name</td></tr>
+              <tr><td class="k">RecipeId</td><td><span class="ty">INTEGER</span></td><td><span class="pill nl">null · idx</span></td><td>Macro.RecipeId</td></tr>
+              <tr><td class="k">SavedScore</td><td><span class="ty">REAL</span></td><td><span class="pill nl">NOT NULL</span></td><td>Macro.SavedScore</td></tr>
+              <tr><td class="k">DisplayOrder</td><td><span class="ty">INTEGER</span></td><td><span class="pill nl">NOT NULL</span></td><td><span class="note-line">só SQL — sem campo C#</span></td></tr>
+              <tr><td class="k">CharacterStatsHash</td><td><span class="ty">INTEGER</span></td><td><span class="pill nl">null · V2</span></td><td>Macro.CharacterStatsHash</td></tr>
+              <tr><td class="k">Source</td><td><span class="ty">INTEGER</span></td><td><span class="pill nl">NOT NULL · V3</span></td><td>Macro.Source</td></tr>
+              <tr><td colspan="4" style="color:var(--accent);font-weight:700;font-size:11px;letter-spacing:.05em;padding-top:12px">TABELA MacroActions</td></tr>
+              <tr><td class="k">MacroId</td><td><span class="ty">INTEGER</span></td><td><span class="pill fk">FK cascade</span></td><td>Macro.Id</td></tr>
+              <tr><td class="k">Position</td><td><span class="ty">INTEGER</span></td><td><span class="pill pk">PK</span></td><td>índice 0-based</td></tr>
+              <tr><td class="k">ActionType</td><td><span class="ty">TEXT</span></td><td><span class="pill nl">Enum.GetName</span></td><td>1 elemento do array</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Descasamentos:</b> a lista de ações <em>não</em> é coluna de <code>Macros</code> — vira linhas na tabela filha <code>MacroActions</code> (PK composta <code>MacroId+Position</code>, cascade delete). E <code>DisplayOrder</code> só existe no SQL: a ordem no C# é a posição na lista em memória. Migrations: <code>WAL</code> → <code>foreign_keys=ON</code> → V1 (schema) → V2 (<code>ADD CharacterStatsHash</code>) → V3 (<code>ADD Source</code>).
+    </div>
+  </section>
+
+  <!-- ============ 2. ESTADO ============ -->
+  <section id="estado">
+    <p class="eyebrow">02 — Simulação</p>
+    <h2>O motor de estado</h2>
+    <p class="sub">Três papéis separados: <code>SimulationInput</code> (entrada imutável: stats, receita, RNG) · <code>SimulationState</code> (<span class="mono">record struct</span> copiada e mutada a cada passo) · <code>Simulator</code> (o motor que executa a ação e avança o estado). Só o passo <code>Use()</code> muta — as duas saídas retornam antes de tocar em nada.</p>
+
+    <div class="flow">
+      <div class="node node--proc">
+        <div class="nt">entrada</div>
+        <div class="nh">Execute(in state, action)</div>
+        <div class="nc">copia a struct e tenta executar</div>
+      </div>
+      <div class="down"><span class="lab">·</span><span class="line"></span></div>
+
+      <div class="gaterow">
+        <div class="node node--gate">
+          <div class="nt">◇ decisão ①</div>
+          <div class="nh">IsComplete ?</div>
+          <div class="nc">Progress ≥ Recipe.MaxProgress · Durability ≤ 0</div>
+        </div>
+        <div class="toexit">sim</div>
+        <div class="node node--exit">
+          <div class="nt">✗ saída (não muta)</div>
+          <div class="nh">SimulationComplete</div>
+          <div class="nm">craft já terminou</div>
+        </div>
+      </div>
+      <div class="down"><span class="lab">não</span><span class="line"></span></div>
+
+      <div class="gaterow">
+        <div class="node node--gate">
+          <div class="nt">◇ decisão ②</div>
+          <div class="nh">CanUse = IsPossible &amp;&amp; CouldUse</div>
+          <div class="nc">IsPossible: Stats.Level ≥ action.Level</div>
+          <div class="nc">CouldUse: CP ≥ CPCost(s) &nbsp;(+ gates por ação)</div>
+        </div>
+        <div class="toexit">não pode</div>
+        <div class="node node--exit">
+          <div class="nt">✗ classifica o motivo</div>
+          <div class="nc">Level &gt; Stats.Level → ActionNotUnlocked</div>
+          <div class="nc">!CanUseManipulation / !IsSpecialist → NotUnlocked</div>
+          <div class="nc">CPCost &gt; CP → NotEnoughCP · senão CannotUseAction</div>
+        </div>
+      </div>
+      <div class="down"><span class="lab">pode usar</span><span class="line"></span></div>
+
+      <div class="node node--proc">
+        <div class="nt">③ processo — muta o estado nesta ordem</div>
+        <div class="nh" style="margin-bottom:2px">baseAction.Use(s)</div>
+        <ol class="steps">
+          <li><code>RollSuccess(SuccessRate)</code> → sucesso: <code>UseSuccess</code> aplica <b>+Progress / +Quality</b></li>
+          <li><code>ReduceCP(CPCost)</code><span class="mm">Condition=Pliant ⇒ CP ÷2</span></li>
+          <li><code>ReduceDurability(cost)</code><span class="mm">TrainedPerfection ⇒ 0 · WasteNot(2)/Sturdy/Robust ⇒ ÷2</span></li>
+          <li>se <code>IncreasesStepCount</code>:<span class="mm">• Manipulation &amp; Durab&gt;0 ⇒ +5 · StepCount++ → StepCondition() sorteia Condition · ActiveEffects.DecrementDuration()</span></li>
+          <li><code>ActionStates.MutateState(this)</code><span class="mm">combo · CarefulObsCount · flags Used…</span></li>
+          <li><code>ActionCount++</code></li>
+        </ol>
+      </div>
+      <div class="down"><span class="line"></span></div>
+
+      <div class="node node--ok">
+        <div class="nt">✓ saída</div>
+        <div class="nh">(UsedAction, novo SimulationState)</div>
+        <div class="nm">a struct mutada é devolvida ao chamador</div>
+      </div>
+    </div>
+
+    <h3 style="margin:30px 0 4px;font-size:16px;letter-spacing:-.01em">Os campos lidos nas condicionais</h3>
+    <p class="sub" style="margin-bottom:16px">Exatamente o estado que cada decisão consulta — o coração da lógica.</p>
+    <div class="cond">
+      <div class="cc">
+        <p class="ch"><span class="sw" style="background:var(--gate)"></span>Fim / falha do craft</p>
+        <ul>
+          <li><b>Progress</b> <span>≥ Recipe.MaxProgress → completo</span></li>
+          <li><b>Durability</b> <span>≤ 0 → falha (NoMoreDurability)</span></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <p class="ch"><span class="sw" style="background:var(--accent)"></span>Gates “posso usar agora?”</p>
+        <ul>
+          <li><b>Condition</b> <span>∈ {Good, Excellent} — Intensive / Precise / Tricks</span></li>
+          <li><b>InnerQuiet</b> <span>Byregot; ==10 → TrainedFinesse</span></li>
+          <li><b>HeartAndSoul · WasteNot · Expedience</b> <span>Prudent · Daring</span></li>
+          <li><b>ActionStates.Combo</b> <span>· CarefulObsCount&lt;3 · Used…</span></li>
+          <li><b>StepCount==0</b> <span>(IsFirstStep) — MuMe / Reflect / TrainedEye</span></li>
+          <li><b>CP</b> <span>≥ CPCost</span></li>
+        </ul>
+      </div>
+      <div class="cc">
+        <p class="ch"><span class="sw" style="background:var(--quality)"></span>Modificadores (custo / magnitude)</p>
+        <ul>
+          <li><b>Condition</b> <span>Centered +25% · Pliant CP÷2 · Sturdy/Robust durab÷2 · Malleable/Poor/Good/Excellent quality · Primed +2 buff</span></li>
+          <li><b>Effects</b> <span>Veneration/MuscleMemory→progress · Innovation/GreatStrides/InnerQuiet→quality · Manipulation +5 durab · FinalAppraisal trava progress</span></li>
+          <li><b>Stats</b> <span>(imutável) Level · CanUseManipulation · IsSpecialist · Splendorous</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. BUSCA & SAVE ============ -->
+  <section id="buscasave">
+    <p class="eyebrow">03 — Ciclo de vida</p>
+    <h2>Busca &amp; Save</h2>
+    <p class="sub">As duas pontas que tocam a macro persistida. A <b>busca</b> lê a tabela; o <b>save</b> escreve. O save só grava a macro <b>Auto</b> da receita — nunca uma macro sua (<code>Source=User</code>). A busca tem dois caminhos, ambos agora restritos à receita atual.</p>
+
+    <div class="store">
+      <div class="db">macros.db</div>
+      <div class="tabs"><span class="t">Macros</span><span class="t">MacroActions</span></div>
+      <div class="io">
+        <span class="io-b rd">◃ lê &nbsp;SnapshotMacros()</span>
+        <span class="io-b wr">grava&nbsp; Add / Update ▹</span>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:18px; align-items:start">
+
+      <!-- BUSCA -->
+      <div>
+        <div class="lanehead"><span class="b b--a">BUSCA</span> qual macro para a receita atual</div>
+
+        <div class="flow">
+          <div class="node node--ok">
+            <div class="nt">Path A — card “Best Macro” · por score</div>
+            <div class="nc">macros = [.. SnapshotMacros().Where(RecipeId==atual)]</div>
+            <div class="nm">só a receita atual · snapshot seguro (lock)</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--proc">
+            <div class="nt">score ao vivo por macro</div>
+            <div class="nc">CommunityMacro.CalculateScore(macro.Actions, sim)</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--proc">
+            <div class="nc">Best = MaxBy(score), só score&gt;0 → exibida</div>
+            <div class="nm">HashMatch = Hash==atual &amp;&amp; score&gt;0 → prefill</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--gate">
+            <div class="nt">◇ fonte a mostrar</div>
+            <div class="nh">PickBestMacroSource(saved, sugg)</div>
+            <div class="nc">sugg &gt; saved ? Suggested : Saved</div>
+            <div class="nm">empate → Saved · ambos null → None</div>
+          </div>
+        </div>
+
+        <div class="flow" style="margin-top:16px">
+          <div class="node node--gate">
+            <div class="nt">Path B — sessão de craft · por receita</div>
+            <div class="nc">SelectBestForRecipe(SnapshotMacros(), recipeId)</div>
+            <div class="nm">melhor score entre as macros da receita (User + Auto)</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--proc">
+            <div class="nc">achou → usa / compara</div>
+            <div class="nm">swap se savedScore &gt; solverScore + 0.001f · senão null</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVE -->
+      <div>
+        <div class="lanehead"><span class="b b--s">SAVE</span> auto-save ao completar o craft</div>
+
+        <div class="flow">
+          <div class="node node--gate">
+            <div class="nt">◇ guards — senão return</div>
+            <div class="nc">AutoSaveCraftMacro · PlayedActions&gt;0</div>
+            <div class="nc">Progress ≥ MaxProgress &nbsp;(só craft COMPLETO)</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--proc">
+            <div class="nc">newScore = MacroScoring.ScoreState(state)</div>
+            <div class="nm">objetivo do solver · target/collectable-aware</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--proc">
+            <div class="nc">existing = FirstOrDefault(RecipeId==id &amp;&amp; Source==Auto)</div>
+          </div>
+          <div class="down"><span class="line"></span></div>
+          <div class="node node--gate">
+            <div class="nh">◇ existing == null ?</div>
+          </div>
+
+          <div class="gaterow" style="margin-top:8px">
+            <div class="node node--insert">
+              <div class="nt">= null → INSERT</div>
+              <div class="nc">novo Macro { …, SavedScore, Actions, Source=Auto }</div>
+              <div class="nm">Add(macro, hash) → INSERT · try/catch, CraftAutoSaved só após o write</div>
+            </div>
+            <div class="toexit">senão</div>
+            <div class="node node--gate">
+              <div class="nt">◇ decisão</div>
+              <div class="nc">newScore &gt; SavedScore + 0.001f ?</div>
+            </div>
+          </div>
+          <div class="down"><span class="lab">≠ null</span><span class="line"></span></div>
+
+          <div class="gaterow">
+            <div class="node node--update">
+              <div class="nt">SIM → UPDATE (overwrite)</div>
+              <div class="nc">SavedScore · Actions · CharacterStatsHash</div>
+              <div class="nm">Repository.Update → UPDATE Macros + re-INSERT MacroActions</div>
+            </div>
+            <div class="toexit">não</div>
+            <div class="node node--exit">
+              <div class="nt">no-op</div>
+              <div class="nm">craft não superou o salvo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="li"><span class="sw" style="background:var(--gate-soft);border-color:var(--gate)"></span>decisão</span>
+      <span class="li"><span class="sw" style="background:var(--panel);border-color:var(--accent)"></span>passo</span>
+      <span class="li"><span class="sw" style="background:var(--insert-soft);border-color:var(--insert)"></span>cria (INSERT)</span>
+      <span class="li"><span class="sw" style="background:var(--update-soft);border-color:var(--update)"></span>atualiza (UPDATE)</span>
+      <span class="li"><span class="sw" style="background:var(--exit-soft);border-color:var(--exit)"></span>saída / no-op</span>
+    </div>
+
+    <div class="callout">
+      <b>O que amarra as pontas:</b> o save grava só a macro <b>Auto</b> da receita — o que você criou/importou (<code>Source=User</code>) nunca é sobrescrito. A busca (Path A e B) fica restrita à receita atual, lendo um <b>snapshot seguro</b> (lock) da lista. E o score é <b>unificado</b>: o objetivo do solver (quality-target/collectable-aware) em todos os pontos — o mesmo critério do card e da % da biblioteca.
+    </div>
+  </section>
+
+  <footer>
+    <div>Referência gerada a partir do código-fonte do fork. Todos os caminhos relativos à raiz do repositório.</div>
+    <div class="files">
+      <div><span>Artificer/Models/Macro.cs</span> · <span>Artificer/Utils/MacroRepository.cs</span></div>
+      <div><span>Artificer.Simulator/Simulator.cs</span> · <span>SimulationState.cs</span> · <span>Effects.cs</span> · <span>Actions/BaseAction.cs</span></div>
+      <div><span>Artificer/Windows/CraftingHelper.cs</span> · <span>Artificer/Application/Crafting/CraftingSession.cs</span> · <span>Application/Crafting/MacroScoring.cs</span> · <span>MacroSelection.cs</span></div>
+    </div>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    var root=document.documentElement, btn=document.getElementById('themeBtn'),
+        icon=document.getElementById('themeIcon'), txt=document.getElementById('themeTxt');
+    function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches}
+    function cur(){return root.getAttribute('data-theme')|| (sysDark()?'dark':'light')}
+    function apply(t){root.setAttribute('data-theme',t); icon.textContent=(t==='dark'?'☾':'☀'); txt.textContent=(t==='dark'?'Escuro':'Claro')}
+    apply(cur());
+    btn.addEventListener('click',function(){apply(cur()==='dark'?'light':'dark')});
+
+    // scroll-spy
+    var links=[].slice.call(document.querySelectorAll('nav.sections a'));
+    var map={}; links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+    if('IntersectionObserver' in window){
+      var obs=new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){
+          links.forEach(function(l){l.classList.remove('active')});
+          if(map[e.target.id]) map[e.target.id].classList.add('active');
+        }});
+      },{rootMargin:'-45% 0px -50% 0px'});
+      ['tabela','estado','buscasave'].forEach(function(id){var el=document.getElementById(id); if(el)obs.observe(el)});
+    }
+  })();
+</script>
