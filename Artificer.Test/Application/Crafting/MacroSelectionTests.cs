@@ -58,4 +58,15 @@ public class MacroSelectionTests
         var best = MacroSelection.SelectBestForRecipe(new[] { empty, other }, 10, _ => 1f);
         Assert.IsNull(best);
     }
+
+    [TestMethod]
+    public void SelectBestForRecipe_Tie_KeepsFirstInIterationOrder()
+    {
+        var first = M(10, ActionType.BasicSynthesis);
+        var second = M(10, ActionType.CarefulSynthesis);
+        var macros = new List<Macro> { first, second };
+        // Ambas mesmo recipe, mesmo score => empate deve manter a primeira na ordem de iteração.
+        var best = MacroSelection.SelectBestForRecipe(macros, 10, _ => 0.5f);
+        Assert.AreSame(first, best);
+    }
 }
