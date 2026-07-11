@@ -78,6 +78,8 @@ public sealed class SolverRun : IDisposable
         using var pollerCts = CancellationTokenSource.CreateLinkedTokenSource(runToken);
         var pollerTask = Task.Run(() => PollSnapshots(solver, pollerCts.Token), pollerCts.Token);
 
+        var completedNaturally = false;
+
         try
         {
             solver.Start();
@@ -85,11 +87,7 @@ public sealed class SolverRun : IDisposable
             _ = t.ContinueWith(f => onFaulted?.Invoke(f.Exception!), TaskContinuationOptions.OnlyOnFaulted);
             _ = t.GetAwaiter().GetResult();
 
-            // Completou naturalmente → snapshot Completed.
-            SetSnapshot(SolverProgressBar.FromSolver(solver, _algo) with
-            {
-                State = ProgressBarComponent.ProgressState.Completed
-            });
+            completedNaturally = true;
         }
         catch (OperationCanceledException)
         {
@@ -101,6 +99,13 @@ public sealed class SolverRun : IDisposable
             try { pollerTask.GetAwaiter().GetResult(); }
             catch (OperationCanceledException) { }
         }
+
+        // Poller já parado → seguro gravar o snapshot final sem clobber (espelha a ordem do código original).
+        if (completedNaturally)
+            SetSnapshot(SolverProgressBar.FromSolver(solver, _algo) with
+            {
+                State = ProgressBarComponent.ProgressState.Completed
+            });
 
         token.ThrowIfCancellationRequested();
     }
