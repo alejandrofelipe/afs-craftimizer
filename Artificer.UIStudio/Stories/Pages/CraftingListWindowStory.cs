@@ -159,7 +159,7 @@ internal sealed class CraftingListWindowStory : IStory
     }
 
     // ── Rodapé — contagem ─────────────────────────────────────────────────────
-    private void DrawFooter()
+    private static void DrawFooter()
     {
         ImGui.TextDisabled($"{Lists.Length} listas de coleta");
     }

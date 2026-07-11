@@ -89,7 +89,8 @@ public class ImRaiiShimTests
         var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
             () => _ = ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0.5f));
 
-        StringAssert.Contains(ex.Message, "ImGuiStyleVarId");
+        Assert.IsTrue(ex.Message.Contains("ImGuiStyleVarId", StringComparison.Ordinal),
+            $"esperava 'ImGuiStyleVarId' na mensagem: {ex.Message}");
     }
 
     // --- ImGuiStyleVarId completeness: all 5 values must be present ---

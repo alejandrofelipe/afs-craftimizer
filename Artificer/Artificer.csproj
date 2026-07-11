@@ -18,6 +18,12 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- NU1903: SQLitePCLRaw.lib.e_sqlite3 (transitivo via Microsoft.Data.Sqlite) tem o advisory
+         CVE-2025-6965. Não há versão corrigida na linha 2.1.x — o fix upstream exige migração ao
+         SQLitePCLRaw 3.x. Não é alcançável aqui: o plugin só executa SQL próprio/fixo (macros.db),
+         nunca queries de entrada não-confiável. Remover quando o Microsoft.Data.Sqlite empacotar um
+         SQLite corrigido. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
   
    <ItemGroup>

@@ -29,7 +29,8 @@ public class GearMessageTests
     public void FormatGearRepairMessage_NoParenNoData()
     {
         var result = ImGuiUtils.FormatGearRepairMessage(50f);
-        StringAssert.DoesNotMatch(result, new System.Text.RegularExpressions.Regex(@"\(no data\)"));
+        Assert.IsFalse(result.Contains("(no data)", System.StringComparison.Ordinal),
+            $"não deveria conter '(no data)': {result}");
     }
 
     [TestMethod]

@@ -90,6 +90,7 @@ internal static class Program
         TypeLayout.PrintLayout<SimulationNode>(true);
         return;
 
+#if false // benchmark scratch desabilitado — mantido para referência
         var input = new SimulationInput(
             new CharacterStats
             {
@@ -156,5 +157,6 @@ internal static class Program
         solver.Start();
         var (_, s) = await solver.GetTask().ConfigureAwait(false);
         Console.WriteLine($"Qual: {s.Quality}/{s.Input.Recipe.MaxQuality}");
+#endif
     }
 }

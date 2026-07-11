@@ -49,7 +49,7 @@ public class ArenaTests
             Assert.AreEqual((0, i), node.ChildIdx);
         }
         Assert.AreEqual(ArenaBuffer.BatchSize, buf.Count);
-        Assert.IsNull(buf.Data[1]);
+        Assert.IsNull(buf.Data![1]);
     }
 
     [TestMethod]
@@ -66,7 +66,7 @@ public class ArenaTests
         }
 
         Assert.AreEqual(ArenaBuffer.BatchSize + 1, buf.Count);
-        Assert.IsNotNull(buf.Data[1]);
+        Assert.IsNotNull(buf.Data![1]);
         Assert.AreEqual((1, 0), firstOfSecondBatch!.ChildIdx);
     }
 

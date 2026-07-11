@@ -138,7 +138,7 @@ internal sealed class MacroLibraryStory : IStory
     }
 
     // ── Rodapé — contagem + botão ─────────────────────────────────────────────
-    private void DrawFooter()
+    private static void DrawFooter()
     {
         ImGui.TextDisabled($"{Macros.Length} macros salvos");
         ImGui.SameLine();

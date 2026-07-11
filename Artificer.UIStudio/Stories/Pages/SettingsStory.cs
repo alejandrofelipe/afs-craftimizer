@@ -25,7 +25,7 @@ internal sealed class SettingsStory : IStory
     private bool _enableRecipeNote     = true;
     private bool _enableSynthHelper    = true;
     private bool _enableCosmicTracker  = true;
-    private bool _enableCollectionList = false;
+    private bool _enableCollectionList;
 
     // ── MacroEditor ──
     private bool  _conditionRandomness = true;
@@ -37,7 +37,7 @@ internal sealed class SettingsStory : IStory
 
     // ── SynthHelper ──
     private bool _anchorSynthesis  = true;
-    private bool _hideWhenCollapsed = false;
+    private bool _hideWhenCollapsed;
 
     // ── Solver ──
     private int _iterations = 500000;
@@ -128,7 +128,7 @@ internal sealed class SettingsStory : IStory
     }
 
     // ── About ─────────────────────────────────────────────────────────────────
-    private void DrawAbout()
+    private static void DrawAbout()
     {
         ImGui.TextColored(Colors.CosmicActive, "Artificer");
         ImGui.Spacing();
