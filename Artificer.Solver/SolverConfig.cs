@@ -87,6 +87,13 @@ public readonly record struct SolverConfig
         this with { ActionPool = ActionPool.Where(action => !SpecialistActions.Contains(action)).ToArray() };
 
     /// <summary>
+    /// Resolve o pool para o estado de delineations: se o check está ligado e o jogador não tem
+    /// delineations, remove as ações de specialist; caso contrário mantém o config como está.
+    /// </summary>
+    public SolverConfig ForDelineations(bool checkDelineations, bool hasDelineations) =>
+        (!checkDelineations || hasDelineations) ? this : FilterSpecialistActions();
+
+    /// <summary>
     /// Resolve o QualityTarget absoluto (em pontos de quality) a partir do percent + recipe.
     /// Aplica o cap de collectability quando <see cref="QualityTargetToMaxCollectability"/> e
     /// <see cref="RecipeInfo.CollectableTargetQuality"/> têm valor (null = sem cap, ex.: Cosmic).

@@ -1526,9 +1526,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var input = new SimulationInput(CharacterStats!, RecipeData!.RecipeInfo, StartingQuality);
             var state = new SimulationState(input);
             var config = _plugin.Configuration.RecipeNoteSolverConfig;
-            var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
-            if (!canUseDelineations)
-                config = config.FilterSpecialistActions();
+            config = config.ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
             var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
             var simulator = new SimulatorNoRandom();
             List<Macro> macros = [.. _plugin.MacroRepository.SnapshotMacros()
@@ -1589,9 +1587,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var input = new SimulationInput(CharacterStats!, RecipeData!.RecipeInfo, StartingQuality);
             var state = new SimulationState(input);
             var config = _plugin.Configuration.RecipeNoteSolverConfig;
-            var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
-            if (!canUseDelineations)
-                config = config.FilterSpecialistActions();
+            config = config.ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
 
             token.ThrowIfCancellationRequested();
 
@@ -1622,9 +1618,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var input = new SimulationInput(CharacterStats!, RecipeData!.RecipeInfo, StartingQuality);
             var state = new SimulationState(input);
             var config = _plugin.Configuration.RecipeNoteSolverConfig;
-            var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
-            if (!canUseDelineations)
-                config = config.FilterSpecialistActions();
+            config = config.ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
             var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
             var simulator = new SimulatorNoRandom();
             var macros = _plugin.CommunityMacros.RetrieveRotations((int)RecipeData.Table.RowId, token).GetAwaiter().GetResult();
