@@ -18,12 +18,6 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <!-- NU1903: SQLitePCLRaw.lib.e_sqlite3 (transitivo via Microsoft.Data.Sqlite) tem o advisory
-         CVE-2025-6965. Não há versão corrigida na linha 2.1.x — o fix upstream exige migração ao
-         SQLitePCLRaw 3.x. Não é alcançável aqui: o plugin só executa SQL próprio/fixo (macros.db),
-         nunca queries de entrada não-confiável. Remover quando o Microsoft.Data.Sqlite empacotar um
-         SQLite corrigido. -->
-    <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
   
    <ItemGroup>
@@ -40,6 +34,11 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
+    <!-- Security override do SQLite nativo (CVE-2025-6965 / CVE-2025-70873): força o binário
+         lib.e_sqlite3 patched (SQLite 3.53.x), sobrepondo o 2.1.10 transitivo do Microsoft.Data.Sqlite.
+         O pacote nativo não tem dependência gerenciada, então pareia com o core 2.x. Remover quando o
+         Microsoft.Data.Sqlite empacotar SQLite 3.5x (11.x estável). -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.264">
       <PrivateAssets>all</PrivateAssets>
