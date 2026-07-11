@@ -36,6 +36,32 @@ public class MacroRepositoryTests
     }
 
     [TestMethod]
+    public void Source_RoundTrips_ThroughUpdate()
+    {
+        var path = TempDb();
+        try
+        {
+            Macro m;
+            using (var repo = new MacroRepository(path))
+            {
+                m = new Macro { Name = "x", RecipeId = 42, Source = MacroSource.User };
+                m.Actions = new[] { ActionType.BasicSynthesis };
+                repo.Add(m);
+
+                m.Source = MacroSource.Auto;
+                repo.Update(m);
+            }
+            using (var repo2 = new MacroRepository(path))
+            {
+                var loaded = repo2.Macros.Single();
+                Assert.AreEqual(MacroSource.Auto, loaded.Source);
+            }
+        }
+        // ClearAllPools() clears pools process-wide; assumes these SQLite tests don't run in parallel with other SQLite-backed tests.
+        finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
+    }
+
+    [TestMethod]
     public void MigrationV3_AddsSourceColumn_ExistingMacrosBecomeUser()
     {
         var path = TempDb();

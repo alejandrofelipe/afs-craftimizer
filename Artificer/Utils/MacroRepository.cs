@@ -33,7 +33,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
 
     internal MacroRepository(string dbPath)
     {
-        _db = new SqliteConnection($"Data Source={dbPath};Pooling=False");
+        _db = new SqliteConnection($"Data Source={dbPath}");
         _db.Open();
         RunMigrations();
         _macros.AddRange(LoadAll());
