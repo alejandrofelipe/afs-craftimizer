@@ -13,6 +13,20 @@ public static class Colors
     public static readonly Vector4 Collectability = new(0.255f, 0.769f, 0.910f, 1f); // #42C4E8 sky
     public static readonly Vector4 CP          = new(1.000f, 0.424f, 0.541f, 1f); // #FF6C8A rose
 
+    // ── Contraste de texto sobre fundo ────────────────────────────────────────
+    private static readonly Vector4 ContrastDark  = new(0.08f, 0.08f, 0.10f, 1f);
+    private static readonly Vector4 ContrastLight = new(0.96f, 0.96f, 0.98f, 1f);
+
+    /// <summary>
+    /// Cor de texto legível sobre <paramref name="background"/>: escura em fundo claro, clara em fundo escuro.
+    /// Luminância percebida (Rec. 601) ponderada pelo alpha (aproxima o blend sobre um fundo escuro).
+    /// </summary>
+    public static Vector4 ContrastText(Vector4 background)
+    {
+        var luminance = (0.299f * background.X + 0.587f * background.Y + 0.114f * background.Z) * background.W;
+        return luminance > 0.5f ? ContrastDark : ContrastLight;
+    }
+
     // ── Action category tints ─────────────────────────────────────────────────
     public static readonly Vector4 ActionSynth   = Progress;
     public static readonly Vector4 ActionTouch   = Quality;

@@ -136,7 +136,30 @@ public static partial class ImGuiUtils
         {
             var textSz  = ImGui.CalcTextSize(overlay);
             var textPos = new Vector2(bbMin.X + (bbMax.X - bbMin.X - textSz.X) * 0.5f, bbMin.Y + (bbMax.Y - bbMin.Y - textSz.Y) * 0.5f);
-            dl.AddText(textPos, ImGui.GetColorU32(ImGuiCol.Text), overlay);
+
+            var frameBg   = style.Colors[(int)ImGuiCol.FrameBg];
+            var frameText = ImGui.GetColorU32(Colors.ContrastText(frameBg));
+
+            if (indeterminate)
+            {
+                dl.AddText(textPos, frameText, overlay);
+            }
+            else
+            {
+                // Duotone: a metade do texto sobre o preenchimento contrasta com o fill;
+                // a metade sobre o vazio contrasta com o FrameBg.
+                var fillBg    = fillColor ?? style.Colors[(int)ImGuiCol.PlotHistogram];
+                var fillText  = ImGui.GetColorU32(Colors.ContrastText(fillBg));
+                var boundaryX = bbMin.X + (bbMax.X - bbMin.X) * bar_end;
+
+                dl.PushClipRect(bbMin, new Vector2(boundaryX, bbMax.Y), true);
+                dl.AddText(textPos, fillText, overlay);
+                dl.PopClipRect();
+
+                dl.PushClipRect(new Vector2(boundaryX, bbMin.Y), bbMax, true);
+                dl.AddText(textPos, frameText, overlay);
+                dl.PopClipRect();
+            }
         }
     }
 }
