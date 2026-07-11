@@ -1390,7 +1390,12 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                         ImGui.SetCursorPos(new Vector2(cellStart.X, cellStart.Y + (botRowH - ImGui.GetTextLineHeight()) * 0.5f));
                         var nameScrnMin = ImGui.GetCursorScreenPos();
                         ImGui.PushClipRect(nameScrnMin, nameScrnMin + new Vector2(nameMaxW, botRowH), true);
-                        var displayName = state.MacroName ?? (state.Type == MacroTaskType.Suggested ? "AI Suggestion" : "");
+                        // Sugestão do solver não tem nome salvo → mostra o nome do item craftado
+                        // (o badge "✦ Suggested" no topo já marca a fonte). "AI Suggestion" fica só de fallback.
+                        var suggestedItemName = RecipeData!.Recipe.ItemResult.Value!.Name.ToString();
+                        var displayName = state.MacroName ?? (state.Type == MacroTaskType.Suggested
+                            ? (string.IsNullOrWhiteSpace(suggestedItemName) ? "AI Suggestion" : suggestedItemName)
+                            : "");
                         if (!string.IsNullOrEmpty(displayName))
                         {
                             if (state.MacroUrl is { } macroUrl)
