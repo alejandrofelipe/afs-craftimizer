@@ -1,9 +1,7 @@
 using Artificer.Plugin;
 using Artificer.Simulator;
 using Artificer.Utils;
-using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Artificer.Windows;
 
@@ -12,27 +10,9 @@ public sealed partial class MacroEditor
     private void CalculateBestMacro()
     {
         SolverTask?.Cancel();
-        _snapshotUpdateCts?.Cancel();
-        _snapshotUpdateCts?.Dispose();
-        _snapshotUpdateCts = null;
-
-        // Snapshot inicial: garante loading imediato no primeiro frame após o clique.
-        // Sem isto, solverSnapshots.Length == 0 por ~100ms e o bloco de progresso
-        // não renderiza nada (Caso A: macro salva, primeira geração da sessão).
-        var initialAlgoName = _plugin.Configuration.EditorSolverConfig.Algorithm.ToString();
-        lock (_solverSnapshots)
-        {
-            _solverSnapshots.Clear();
-            _solverSnapshots.Add(new ProgressBarComponent.ProgressSnapshot(
-                Name: initialAlgoName,
-                CurrentValue: 0,
-                MaxValue: 1,
-                State: ProgressBarComponent.ProgressState.Indeterminate
-            ));
-        }
+        _run.Cancel();
 
         Macro.ClearQueue();
-
         RevertPreviousMacro();
 
         if (_plugin.Configuration.ConditionRandomness)
@@ -44,6 +24,12 @@ public sealed partial class MacroEditor
 
         SolverStartStepCount = Macro.Count;
 
+        // Snapshot inicial na UI thread (loading imediato no 1º frame — preserva o comportamento atual).
+        _run.SetInitialSnapshot(new ProgressBarComponent.ProgressSnapshot(
+            Name: _plugin.Configuration.EditorSolverConfig.Algorithm.ToString(),
+            CurrentValue: 0, MaxValue: 1,
+            State: ProgressBarComponent.ProgressState.Indeterminate));
+
         var state = State;
         SolverTask = new(token => CalculateBestMacroTask(state, token, Gearsets.HasDelineations()));
         SolverTask.Start();
@@ -51,64 +37,18 @@ public sealed partial class MacroEditor
 
     private int CalculateBestMacroTask(SimulationState state, CancellationToken token, bool hasDelineations)
     {
-        var config = _plugin.Configuration.EditorSolverConfig;
-        var canUseDelineations = !_plugin.Configuration.CheckDelineations || hasDelineations;
-        if (!canUseDelineations)
-            config = config.FilterSpecialistActions();
+        var config = _plugin.Configuration.EditorSolverConfig
+            .ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
 
-        token.ThrowIfCancellationRequested();
+        _run.Run(config, state, token,
+            onNewAction: a => { Macro.Enqueue(a); return true; },
+            onSuggestSolution: a => Macro.EnqueueEphemeral(a.Actions),
+            onFaulted: ex => Log.Error(ex, "Solver task faulted"));
 
-        var solver = new Solver.Solver(config, state) { Token = token };
-        solver.OnLog += Log.Debug;
-        solver.OnWarn += t => Plugin.Plugin.DisplaySolverWarning(t);
-        solver.OnNewAction += a => Macro.Enqueue(a);
-        solver.OnSuggestSolution += a => Macro.EnqueueEphemeral(a.Actions);
-        SolverObject = solver;
-
-        _snapshotUpdateCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var snapshotTask = Task.Run(() => UpdateSnapshotsPeriodically(solver, config, _snapshotUpdateCts.Token), _snapshotUpdateCts.Token);
-
-        solver.Start();
-        var t = solver.GetTask();
-        _ = t.ContinueWith(_ => Macro.RemoveEphemeral(), TaskContinuationOptions.NotOnCanceled);
-        _ = t.ContinueWith(faulted => Log.Error(faulted.Exception!, "Solver task faulted"), TaskContinuationOptions.OnlyOnFaulted);
-        _ = t.GetAwaiter().GetResult();
-
-        _snapshotUpdateCts?.Cancel();
-        try { snapshotTask.GetAwaiter().GetResult(); }
-        catch (OperationCanceledException) { }
-
-        lock (_solverSnapshots)
-        {
-            _solverSnapshots.Clear();
-            _solverSnapshots.Add(SolverProgressBar.FromSolver(solver, config.Algorithm.ToString()) with
-            {
-                State = ProgressBarComponent.ProgressState.Completed
-            });
-        }
-
-        token.ThrowIfCancellationRequested();
+        if (!token.IsCancellationRequested)
+            Macro.RemoveEphemeral();
 
         return 0;
-    }
-
-    private async Task UpdateSnapshotsPeriodically(Solver.Solver solver, Solver.SolverConfig config, CancellationToken token)
-    {
-        var algorithmName = config.Algorithm.ToString();
-        while (!token.IsCancellationRequested)
-        {
-            try
-            {
-                var snapshot = SolverProgressBar.FromSolver(solver, algorithmName);
-                lock (_solverSnapshots)
-                {
-                    _solverSnapshots.Clear();
-                    _solverSnapshots.Add(snapshot);
-                }
-                await Task.Delay(100, token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) { break; }
-        }
     }
 
     private void RevertPreviousMacro()

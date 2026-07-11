@@ -163,8 +163,7 @@ public sealed partial class MacroEditor
         // Capturar snapshots ANTES do cálculo de altura: garante que altura e conteúdo
         // são determinados pelo mesmo estado, eliminando o layout shift.
         ProgressBarComponent.ProgressSnapshot[] solverSnapshots;
-        lock (_solverSnapshots)
-            solverSnapshots = [.. _solverSnapshots];
+        solverSnapshots = [.. _run.Snapshots];
 
         using var panel = ImRaii2.GroupPanel("Macro", -1, out var availSpace);
         ImGui.Dummy(new(0, imageSize));

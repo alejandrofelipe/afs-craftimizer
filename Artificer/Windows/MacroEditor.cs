@@ -24,7 +24,6 @@ using Sim = Artificer.Simulator.Simulator;
 using SimNoRandom = Artificer.Simulator.SimulatorNoRandom;
 using Recipe = Lumina.Excel.Sheets.Recipe;
 using Dalamud.Utility;
-using Artificer.Solver;
 
 namespace Artificer.Windows;
 
@@ -89,10 +88,8 @@ public sealed partial class MacroEditor : Window, IDisposable
 
     private BackgroundTask<int>? SolverTask { get; set; }
     private bool SolverRunning => (!SolverTask?.Completed) ?? false;
-    private Solver.Solver? SolverObject { get; set; }
     private int? SolverStartStepCount { get; set; }
-    private readonly List<ProgressBarComponent.ProgressSnapshot> _solverSnapshots = [];
-    private CancellationTokenSource? _snapshotUpdateCts;
+    private readonly Application.Crafting.SolverRun _run = new();
 
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
@@ -322,8 +319,7 @@ public sealed partial class MacroEditor : Window, IDisposable
 
     public void Dispose()
     {
-        _snapshotUpdateCts?.Cancel();
-        _snapshotUpdateCts?.Dispose();
+        _run.Dispose();
         _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         _plugin.WindowSystem.RemoveWindow(this);
 
