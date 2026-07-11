@@ -163,9 +163,6 @@ public partial class Configuration
     /// </summary>
     public int IconCacheSizeLimit { get; set; } = 1024;
 
-    /// <summary>Selected gear tier id in the Meld Guide window.</summary>
-    public string MeldGuideSelectedTier { get; set; } = "";
-
     [JsonSourceGenerationOptions(Converters = [typeof(StoredActionTypeConverter)])]
     [JsonSerializable(typeof(Configuration))]
     internal sealed partial class JsonContext : JsonSerializerContext
