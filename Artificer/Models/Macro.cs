@@ -94,6 +94,12 @@ public class StoredActionTypeConverter : JsonConverter<ActionType[]>
     }
 }
 
+public enum MacroSource : byte
+{
+    User = 0,
+    Auto = 1,
+}
+
 public class Macro
 {
     /// <summary>SQLite row ID. 0 when not yet persisted.</summary>
@@ -108,6 +114,9 @@ public class Macro
     public float SavedScore { get; set; }
 
     public int? CharacterStatsHash { get; set; }
+
+    /// <summary>Origem da macro. Auto = gerada pelo auto-save; User = criada/importada pelo usuário.</summary>
+    public MacroSource Source { get; set; } = MacroSource.User;
 
     [JsonInclude] [JsonPropertyName("Actions")]
     internal ActionType[] actions { get; set; } = [];

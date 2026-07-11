@@ -31,6 +31,20 @@
     <ProjectReference Include="..\Artificer.UI\Artificer.UI.csproj" />
   </ItemGroup>
 
+  <!-- Artificer.MacroRepository exposes a public ctor taking IDalamudPluginInterface. Even though
+       tests only call the internal (string) ctor, the C# compiler must resolve the whole overload
+       set for `new MacroRepository(...)`, which requires the Dalamud assembly to be resolvable here
+       too (same DalamudLibPath convention as Dalamud.NET.Sdk). Artificer.csproj already requires a
+       Dalamud install to build, so this adds no new environmental dependency. -->
+  <PropertyGroup>
+    <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="$(DALAMUD_HOME) != ''">$(DALAMUD_HOME)/</DalamudLibPath>
+    <AssemblySearchPaths>$(AssemblySearchPaths);$(DalamudLibPath)</AssemblySearchPaths>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dalamud" Private="false" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(IS_BENCH)'=='1' Or '$(Configuration)'=='Deterministic'">
     <DefineConstants>$(DefineConstants);IS_DETERMINISTIC</DefineConstants>
   </PropertyGroup>

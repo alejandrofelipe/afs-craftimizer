@@ -48,6 +48,12 @@
     <ProjectReference Include="..\Artificer.UI\Artificer.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Artificer.Test</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- Dalamud provides cimgui.dll natively; shipping our own causes a second GImGui context
        (GImGui==NULL) that crashes Theme.Push(). ImGui.NET.dll is a managed-only wrapper
        that P/Invokes into cimgui.dll, so shipping it is safe — we ship it, Dalamud owns

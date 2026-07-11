@@ -27,19 +27,27 @@ public sealed class MacroRepository : IDisposable, IMacroStore
     public event Action? MacroListChanged;
 
     public MacroRepository(IDalamudPluginInterface pluginInterface)
+        : this(Path.Combine(EnsureDir(pluginInterface.GetPluginConfigDirectory()), "macros.db"))
     {
-        var dir = pluginInterface.GetPluginConfigDirectory();
-        Directory.CreateDirectory(dir);
-        var dbPath = Path.Combine(dir, "macros.db");
-        _db = new SqliteConnection($"Data Source={dbPath}");
+    }
+
+    internal MacroRepository(string dbPath)
+    {
+        _db = new SqliteConnection($"Data Source={dbPath};Pooling=False");
         _db.Open();
         RunMigrations();
         _macros.AddRange(LoadAll());
     }
 
+    private static string EnsureDir(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        return dir;
+    }
+
     // ── Schema migrations ─────────────────────────────────────────────────────
 
-    private const int TargetSchemaVersion = 2;
+    private const int TargetSchemaVersion = 3;
 
     private void RunMigrations()
     {
@@ -50,6 +58,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
 
         if (version < 1) ApplyV1_InitialSchema();
         if (version < 2) ApplyV2_CharacterHash();
+        if (version < 3) ApplyV3_Source();
 
         Exec($"PRAGMA user_version = {TargetSchemaVersion}");
     }
@@ -89,6 +98,11 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         Exec("ALTER TABLE Macros ADD COLUMN CharacterStatsHash INTEGER");
     }
 
+    private void ApplyV3_Source()
+    {
+        Exec("ALTER TABLE Macros ADD COLUMN Source INTEGER NOT NULL DEFAULT 0");
+    }
+
     // ── Load ──────────────────────────────────────────────────────────────────
 
     private IEnumerable<Macro> LoadAll()
@@ -110,7 +124,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
             }
         }
 
-        using var macroCmd = Command("SELECT Id, Name, RecipeId, SavedScore, CharacterStatsHash FROM Macros ORDER BY DisplayOrder, Id");
+        using var macroCmd = Command("SELECT Id, Name, RecipeId, SavedScore, CharacterStatsHash, Source FROM Macros ORDER BY DisplayOrder, Id");
         using var mr = macroCmd.ExecuteReader();
         while (mr.Read())
         {
@@ -122,6 +136,7 @@ public sealed class MacroRepository : IDisposable, IMacroStore
                 RecipeId = mr.IsDBNull(2) ? null : (ushort)mr.GetInt64(2),
                 SavedScore = (float)mr.GetDouble(3),
                 CharacterStatsHash = mr.IsDBNull(4) ? null : mr.GetInt32(4),
+                Source = mr.IsDBNull(5) ? MacroSource.User : (MacroSource)(byte)mr.GetInt64(5),
             };
             if (actionsByMacro.TryGetValue(id, out var actions))
                 macro.actions = [.. actions];
@@ -217,12 +232,13 @@ public sealed class MacroRepository : IDisposable, IMacroStore
         using var tx = _db.BeginTransaction();
         try
         {
-            using (var cmd = Command("UPDATE Macros SET Name=$name, RecipeId=$recipeId, SavedScore=$score, CharacterStatsHash=$hash WHERE Id=$id", tx))
+            using (var cmd = Command("UPDATE Macros SET Name=$name, RecipeId=$recipeId, SavedScore=$score, CharacterStatsHash=$hash, Source=$source WHERE Id=$id", tx))
             {
                 cmd.Parameters.AddWithValue("$name", macro.Name);
                 cmd.Parameters.AddWithValue("$recipeId", macro.RecipeId.HasValue ? (object)macro.RecipeId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("$score", macro.SavedScore);
                 cmd.Parameters.AddWithValue("$hash", macro.CharacterStatsHash.HasValue ? (object)macro.CharacterStatsHash.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("$source", (byte)macro.Source);
                 cmd.Parameters.AddWithValue("$id", macro.Id);
                 cmd.ExecuteNonQuery();
             }
@@ -242,13 +258,14 @@ public sealed class MacroRepository : IDisposable, IMacroStore
     private long InsertMacroRow(Macro macro, int displayOrder, SqliteTransaction tx)
     {
         using var cmd = Command(
-            "INSERT INTO Macros (Name, RecipeId, SavedScore, DisplayOrder, CharacterStatsHash) VALUES ($name, $recipeId, $score, $order, $hash); SELECT last_insert_rowid()",
+            "INSERT INTO Macros (Name, RecipeId, SavedScore, DisplayOrder, CharacterStatsHash, Source) VALUES ($name, $recipeId, $score, $order, $hash, $source); SELECT last_insert_rowid()",
             tx);
         cmd.Parameters.AddWithValue("$name", macro.Name);
         cmd.Parameters.AddWithValue("$recipeId", macro.RecipeId.HasValue ? (object)macro.RecipeId.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("$score", macro.SavedScore);
         cmd.Parameters.AddWithValue("$order", displayOrder);
         cmd.Parameters.AddWithValue("$hash", macro.CharacterStatsHash.HasValue ? (object)macro.CharacterStatsHash.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("$source", (byte)macro.Source);
         return (long)cmd.ExecuteScalar()!;
     }
 
