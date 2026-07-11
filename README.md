@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.29.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -151,6 +151,9 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - **SynthesisHelper — layout compacto:** reestruturação para reduzir a altura da janela — stats em **barras horizontais em 2 colunas** (no lugar dos arcos), painel de **buffs inline** (some quando não há buff ativo), **ícones de ação menores**, **botões lado a lado** e o progresso do solver reusando o componente compartilhado (`DrawSolverProgressArea`, dedup)
 - 🐛 Fix + legibilidade das progress bars: (1) as barras 2-col do Synthesis Helper voltaram a **colorir** — o preenchimento é colorido direto por `Vector4`, não pelo slot `ImGuiCol.PlotHistogram` que tinha índice divergente entre os bindings Dalamud/ImGui.NET (bug só in-game na 2.28.0.0); (2) o texto do overlay das barras agora **se adapta ao fundo** via `Colors.ContrastText` + render duotone (contraste-com-fill na parte cheia, contraste-com-FrameBg na parte vazia) — legível em qualquer % de preenchimento
 - 🔧 Fix + feat: **fluxos de macro (busca e auto-save) revisados** — score **unificado** ao objetivo do solver (a % na biblioteca passa a refletir a proximidade do **quality-target**, correta para collectables, em vez de fração da quality máxima); **auto-save não-destrutivo** via flag `Source` (User/Auto) + migration SQLite **V3**, que **nunca sobrescreve** macros que você criou/importou (cria/atualiza só a macro `Auto` da receita); a busca do card **filtra por `RecipeId`** e lê um **snapshot seguro** da lista (corrige uma corrida de concorrência com o `MacroLibrary`), e só promove no card uma macro que **completa** a receita. Decisões puras testadas (`MacroScoring`, `MacroSelection`); auto-save com `try/catch` (não perde retry em falha de escrita)
+- 🔒 Segurança: **SQLite nativo atualizado para 3.53.x** (override do pacote `lib.e_sqlite3`, sobrepondo o 2.1.10 transitivo do `Microsoft.Data.Sqlite`) — resolve **CVE-2025-6965** e **CVE-2025-70873**; o `NoWarn NU1903` foi removido (o advisory é corrigido de verdade)
+- ♻️ Refactor: o ciclo de execução do solver foi deduplicado num componente único **`SolverRun`** (poller de snapshot + early-stop + cancel), compartilhado por MacroEditor e SynthHelper; e a resolução de delineations virou `SolverConfig.ForDelineations`. Sem mudança de comportamento
+- 🗑 Removida a janela **`/meldguide`** (guia de melding) do fork
 
 ---
 
