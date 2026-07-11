@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.1.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -154,6 +154,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🔒 Segurança: **SQLite nativo atualizado para 3.53.x** (override do pacote `lib.e_sqlite3`, sobrepondo o 2.1.10 transitivo do `Microsoft.Data.Sqlite`) — resolve **CVE-2025-6965** e **CVE-2025-70873**; o `NoWarn NU1903` foi removido (o advisory é corrigido de verdade)
 - ♻️ Refactor: o ciclo de execução do solver foi deduplicado num componente único **`SolverRun`** (poller de snapshot + early-stop + cancel), compartilhado por MacroEditor e SynthHelper; e a resolução de delineations virou `SolverConfig.ForDelineations`. Sem mudança de comportamento
 - 🗑 Removida a janela **`/meldguide`** (guia de melding) do fork
+- 🐛 Fix: o **auto-save** da macro de craft não ficava com o nome do item — o fallback só tratava `null`, então um nome vazio do item deixava a macro sem nome. Agora usa `MacroSelection.ResolveMacroName` (vazio/whitespace → `"Recipe {id}"`) e **auto-cura** o nome no overwrite quando o item resolve e o nome atual é um fallback ruim (sem sobrescrever um nome renomeado à mão)
+- 🐛 Fix: o card **"Best Macro"** mostrava `"AI Suggestion"` no lugar do nome do item quando a sugestão viva do solver vencia (macro ainda não salva). Agora exibe o **nome do item craftado**; o badge **`✦ Suggested`** no topo do card continua marcando que é uma sugestão
 
 ---
 
