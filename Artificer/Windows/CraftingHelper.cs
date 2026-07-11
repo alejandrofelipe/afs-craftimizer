@@ -1531,7 +1531,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 config = config.FilterSpecialistActions();
             var mctsConfig = new MCTSConfig(config, RecipeData!.RecipeInfo);
             var simulator = new SimulatorNoRandom();
-            List<Macro> macros = [.. _plugin.MacroRepository.Macros];
+            List<Macro> macros = [.. _plugin.MacroRepository.SnapshotMacros()
+                .Where(m => m.RecipeId == RecipeData!.RecipeId)];
 
             token.ThrowIfCancellationRequested();
 
@@ -1548,7 +1549,10 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
             token.ThrowIfCancellationRequested();
 
-            var bestSaved = results.MaxBy(m => m.score);
+            var completing = results.Where(r => r.score > 0f).ToList();
+            if (completing.Count == 0)
+                return default; // nenhuma macro da receita completa → sem "Best"
+            var bestSaved = completing.MaxBy(m => m.score);
 
             var hashMatchResults = currentHash.HasValue
                 ? results.Where(r => r.macro.CharacterStatsHash == currentHash && r.score > 0).ToList()
