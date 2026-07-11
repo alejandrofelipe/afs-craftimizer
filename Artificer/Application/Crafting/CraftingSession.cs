@@ -286,8 +286,11 @@ public sealed class CraftingSession : IDisposable
             onNewAction: a =>
             {
                 var newSize = Macro.Enqueue(a, _plugin.Configuration.SynthHelperMaxDisplayCount);
-                return newSize < _plugin.Configuration.SynthHelperStepCount
-                    && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount; // false = early-stop
+                var shouldContinue = newSize < _plugin.Configuration.SynthHelperStepCount
+                    && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount;
+                if (!shouldContinue)
+                    SolverTask?.Cancel(); // restaura o comportamento antigo: cancela o BackgroundTask (SolverCancelling=true, task Canceled)
+                return shouldContinue;
             });
 
         return 0;
