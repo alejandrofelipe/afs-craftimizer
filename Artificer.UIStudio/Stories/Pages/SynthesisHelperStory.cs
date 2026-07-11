@@ -91,8 +91,7 @@ internal sealed class SynthesisHelperStory : IStory
                     ImGui.TableSetColumnIndex(i % 2);
                     var b = bars[i];
                     var frac = b.Max > 0 ? System.Math.Clamp(b.Value / b.Max, 0f, 1f) : 0f;
-                    using (ImRaii.PushColor(ImGuiCol.PlotHistogram, b.Color))
-                        ImGuiUtils.ProgressBar(frac, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()), $"{b.Name} {b.Value:0}");
+                    ImGuiUtils.ProgressBar(frac, new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()), $"{b.Name} {b.Value:0}", b.Color);
                 }
                 ImGui.EndTable();
             }

@@ -99,7 +99,7 @@ public static partial class ImGuiUtils
 
     // ── Progress bar ──────────────────────────────────────────────────────────
 
-    public static void ProgressBar(float value, Vector2 size, string? overlay = null)
+    public static void ProgressBar(float value, Vector2 size, string? overlay = null, Vector4? fillColor = null)
     {
         var style = ImGui.GetStyle();
         var pos = ImGui.GetCursorScreenPos();
@@ -129,7 +129,8 @@ public static partial class ImGuiUtils
         bbMax -= new Vector2(style.FrameBorderSize);
 
         var dl = ImGui.GetWindowDrawList();
-        ImGuiExtras.RenderRectFilledRangeH(dl, new(bbMin.X, bbMin.Y, bbMax.X, bbMax.Y), ImGui.GetColorU32(ImGuiCol.PlotHistogram), bar_begin, bar_end, style.FrameRounding);
+        var fillCol = fillColor.HasValue ? ImGui.GetColorU32(fillColor.Value) : ImGui.GetColorU32(ImGuiCol.PlotHistogram);
+        ImGuiExtras.RenderRectFilledRangeH(dl, new(bbMin.X, bbMin.Y, bbMax.X, bbMax.Y), fillCol, bar_begin, bar_end, style.FrameRounding);
 
         if (overlay != null)
         {

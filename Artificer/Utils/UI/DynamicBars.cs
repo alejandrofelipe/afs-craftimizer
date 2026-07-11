@@ -113,8 +113,7 @@ internal static class DynamicBars
 
             var pos  = ImGui.GetCursorScreenPos();
             var size = new Vector2(cellW, barH);
-            using (ImRaii.PushColor(ImGuiCol.PlotHistogram, bar.Color))
-                ImGuiUtils.ProgressBar(frac, size, overlay);
+            ImGuiUtils.ProgressBar(frac, size, overlay, bar.Color);
 
             if (bar.Reliability is { } r && ImGui.IsMouseHoveringRect(pos, pos + size))
             {
