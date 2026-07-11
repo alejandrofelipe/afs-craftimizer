@@ -178,49 +178,66 @@ public sealed class CraftingSession : IDisposable
 
         if (_currentState.Progress < SimulationInput.Recipe.MaxProgress) return;
 
-        CraftAutoSaved = true;
-
-        var newScore = SimulationInput.Recipe.MaxQuality > 0
-            ? (float)_currentState.Quality / SimulationInput.Recipe.MaxQuality
-            : 1f;
+        var cfg = CurrentMctsConfig();
+        var newScore = MacroScoring.ScoreState(_currentState, cfg);
 
         var recipeId = RecipeData.RecipeId;
         var itemName = RecipeData.Recipe.ItemResult.ValueNullable?.Name.ExtractText() ?? $"Recipe {recipeId}";
         var actions = PlayedActions.ToArray();
+        var hash = CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : (int?)null;
 
-        var existing = _plugin.MacroRepository.Macros.FirstOrDefault(m => m.RecipeId == recipeId);
-
-        if (existing == null)
+        // Auto-save só mira a macro Auto da receita; nunca toca uma macro User (feita/importada).
+        var existing = _plugin.MacroRepository.SnapshotMacros()
+            .FirstOrDefault(m => m.RecipeId == recipeId && m.Source == MacroSource.Auto);
+        var outcome = MacroSelection.DecideAutoSave(existing?.SavedScore, newScore);
+        if (outcome == MacroSelection.AutoSaveOutcome.Skip)
         {
-            var macro = new Macro
-            {
-                Name = itemName,
-                RecipeId = recipeId,
-                SavedScore = newScore,
-            };
-            macro.Actions = actions;
-            _plugin.MacroRepository.Add(macro, CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : null);
-            global::Artificer.Plugin.Plugin.DisplayNotification(new()
-            {
-                Content = $"Macro saved for \"{itemName}\".",
-                MinimizedText = "Craft macro saved",
-                Title = "Artificer",
-                Type = Dalamud.Interface.ImGuiNotification.NotificationType.Success
-            });
+            CraftAutoSaved = true;
+            return;
         }
-        else if (newScore > existing.SavedScore + 0.001f)
+
+        try
         {
-            existing.SavedScore = newScore;
-            existing.Actions = actions;
-            existing.CharacterStatsHash = CharacterStats != null ? CharacterStats.ComputeHash(CharacterStats) : null;
-            _plugin.MacroRepository.Update(existing);
-            global::Artificer.Plugin.Plugin.DisplayNotification(new()
+            if (outcome == MacroSelection.AutoSaveOutcome.Insert)
             {
-                Content = $"Better result found! Macro updated for \"{itemName}\" ({existing.SavedScore * 100:F0}% → {newScore * 100:F0}%).",
-                MinimizedText = "Craft macro updated",
-                Title = "Artificer",
-                Type = Dalamud.Interface.ImGuiNotification.NotificationType.Success
-            });
+                var macro = new Macro
+                {
+                    Name = itemName,
+                    RecipeId = recipeId,
+                    SavedScore = newScore,
+                    Source = MacroSource.Auto,
+                };
+                macro.Actions = actions;
+                _plugin.MacroRepository.Add(macro, hash);
+                global::Artificer.Plugin.Plugin.DisplayNotification(new()
+                {
+                    Content = $"Macro saved for \"{itemName}\".",
+                    MinimizedText = "Craft macro saved",
+                    Title = "Artificer",
+                    Type = Dalamud.Interface.ImGuiNotification.NotificationType.Success
+                });
+            }
+            else // Overwrite
+            {
+                var oldPct = existing!.SavedScore * 100;
+                existing.SavedScore = newScore;
+                existing.Actions = actions;
+                existing.CharacterStatsHash = hash;
+                _plugin.MacroRepository.Update(existing);
+                global::Artificer.Plugin.Plugin.DisplayNotification(new()
+                {
+                    Content = $"Better result found! Macro updated for \"{itemName}\" ({oldPct:F0}% → {newScore * 100:F0}%).",
+                    MinimizedText = "Craft macro updated",
+                    Title = "Artificer",
+                    Type = Dalamud.Interface.ImGuiNotification.NotificationType.Success
+                });
+            }
+            CraftAutoSaved = true; // só após o write persistir (S3)
+        }
+        catch (System.Exception ex)
+        {
+            Log.Error(ex, "Auto-save de macro falhou; permitindo retry");
+            // NÃO seta CraftAutoSaved: o próximo frame pode tentar de novo.
         }
     }
 
@@ -351,23 +368,29 @@ public sealed class CraftingSession : IDisposable
         }
     }
 
+    private Artificer.Solver.MCTSConfig CurrentMctsConfig() =>
+        new(_plugin.Configuration.SynthHelperSolverConfig, RecipeData!.RecipeInfo);
+
     private void TryUseBetterSavedMacro()
     {
         if (RecipeData == null || SimulationInput == null) return;
 
-        var existing = _plugin.MacroRepository.Macros.FirstOrDefault(m => m.RecipeId == RecipeData.RecipeId);
-        if (existing == null || existing.Actions.Count == 0) return;
-
-        var solverScore = CalculateMacroScore(Macro.State);
+        var cfg = CurrentMctsConfig();
         var sim = new SimNoRandom();
-        var (_, savedFinalState, _) = sim.ExecuteMultiple(Macro.InitialState, existing.Actions);
-        var savedScore = CalculateMacroScore(savedFinalState);
+        var initial = Macro.InitialState;
+        var best = MacroSelection.SelectBestForRecipe(
+            _plugin.MacroRepository.SnapshotMacros(), RecipeData.RecipeId,
+            m => MacroScoring.ScoreActions(m.Actions, sim, initial, cfg));
+        if (best == null) return;
+
+        var solverScore = MacroScoring.ScoreState(Macro.State, cfg);
+        var savedScore = MacroScoring.ScoreActions(best.Actions, sim, initial, cfg);
 
         if (savedScore > solverScore + 0.001f)
         {
             Macro.Clear();
             Macro.ClearQueue();
-            foreach (var action in existing.Actions)
+            foreach (var action in best.Actions)
                 Macro.Enqueue(action, _plugin.Configuration.SynthHelperMaxDisplayCount);
             Macro.FlushQueue();
         }
@@ -375,29 +398,21 @@ public sealed class CraftingSession : IDisposable
 
     private void ReSyncSavedMacroScore(ushort recipeId, SimulationInput input)
     {
-        var existing = _plugin.MacroRepository.Macros.FirstOrDefault(m => m.RecipeId == recipeId);
-        if (existing == null || existing.Actions.Count == 0) return;
-
+        var cfg = new Artificer.Solver.MCTSConfig(_plugin.Configuration.SynthHelperSolverConfig, input.Recipe);
         var sim = new SimNoRandom();
-        var (_, finalState, _) = sim.ExecuteMultiple(new SimulationState(input), existing.Actions);
-        var newScore = input.Recipe.MaxQuality > 0
-            ? (float)finalState.Quality / input.Recipe.MaxQuality
-            : (finalState.Progress >= input.Recipe.MaxProgress ? 1f : 0f);
+        var start = new SimulationState(input);
 
-        if (MathF.Abs(newScore - existing.SavedScore) > 0.001f)
+        foreach (var macro in _plugin.MacroRepository.SnapshotMacros())
         {
-            existing.SavedScore = newScore;
-            _plugin.MacroRepository.Update(existing);
+            if (macro.RecipeId != recipeId || macro.Actions.Count == 0)
+                continue;
+            var newScore = MacroScoring.ScoreActions(macro.Actions, sim, start, cfg);
+            if (MathF.Abs(newScore - macro.SavedScore) > 0.001f)
+            {
+                macro.SavedScore = newScore;
+                _plugin.MacroRepository.Update(macro);
+            }
         }
-    }
-
-    private float CalculateMacroScore(in SimulationState state)
-    {
-        if (SimulationInput == null) return 0f;
-        if (state.Progress < SimulationInput.Recipe.MaxProgress) return 0f;
-        return SimulationInput.Recipe.MaxQuality > 0
-            ? (float)state.Quality / SimulationInput.Recipe.MaxQuality
-            : 1f;
     }
 
     private Sim CreateSim(in SimulationState state) =>
