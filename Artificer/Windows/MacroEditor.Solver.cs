@@ -40,13 +40,20 @@ public sealed partial class MacroEditor
         var config = _plugin.Configuration.EditorSolverConfig
             .ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
 
-        _run.Run(config, state, token,
-            onNewAction: a => { Macro.Enqueue(a); return true; },
-            onSuggestSolution: a => Macro.EnqueueEphemeral(a.Actions),
-            onFaulted: ex => Log.Error(ex, "Solver task faulted"));
-
-        if (!token.IsCancellationRequested)
-            Macro.RemoveEphemeral();
+        try
+        {
+            _run.Run(config, state, token,
+                onNewAction: a => { Macro.Enqueue(a); return true; },
+                onSuggestSolution: a => Macro.EnqueueEphemeral(a.Actions),
+                onFaulted: ex => Log.Error(ex, "Solver task faulted"));
+        }
+        finally
+        {
+            // Remove ephemeral em conclusão OU falha (não em cancelamento) — espelha o antigo
+            // ContinueWith(..., TaskContinuationOptions.NotOnCanceled).
+            if (!token.IsCancellationRequested)
+                Macro.RemoveEphemeral();
+        }
 
         return 0;
     }
