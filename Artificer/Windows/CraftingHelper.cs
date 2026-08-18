@@ -75,7 +75,8 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     private BackgroundTask<SuggestedMacroResult>? SuggestedMacroTask { get; set; }
     private BackgroundTask<(CommunityMacros.CommunityMacro?, SimulationState?)>? CommunityMacroTask { get; set; }
 
-    private Solver.Solver? BestMacroSolver { get; set; }
+    private readonly GenerationSlot<Solver.Solver> _bestMacroSolver = new();
+    private Solver.Solver? BestMacroSolver => _bestMacroSolver.Value;
     public bool HasSavedMacro { get; private set; }
 
     private ILoadedTextureIcon ExpertBadge { get; }
@@ -160,6 +161,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             if (WasCalculatable)
             {
                 SavedMacroTask?.Cancel();
+                _bestMacroSolver.Invalidate();
                 SuggestedMacroTask?.Cancel();
                 CommunityMacroTask?.Cancel();
             }
@@ -175,6 +177,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 // If we don't want to suggest automatically, we should cancel and clean out the task
                 else if (!_plugin.Configuration.SuggestMacroAutomatically && SuggestedMacroTask?.Result == null)
                 {
+                    _bestMacroSolver.Invalidate();
                     SuggestedMacroTask?.Cancel();
                     SuggestedMacroTask = null;
                     _prevSuggestedActions = null;
@@ -315,6 +318,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             // Otherwise, we should cancel and clean out the task
             else
             {
+                _bestMacroSolver.Invalidate();
                 SuggestedMacroTask?.Cancel();
                 SuggestedMacroTask = null;
                 _prevSuggestedActions = null;
@@ -656,7 +660,10 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 else
                 {
                     if (ImGui.Button("Stop", new(availWidth, 0)))
+                    {
+                        _bestMacroSolver.Invalidate();
                         task.Cancel();
+                    }
                 }
             }
             else
@@ -1583,7 +1590,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             _prevSuggestedActions = null;
             _prevSuggestedState   = null;
         }
-        BestMacroSolver = null;
+        var generation = _bestMacroSolver.Begin();
         _bestShowAlternative = false;
         SuggestedMacroTask?.Cancel();
         var hasDelineations = Gearsets.HasDelineations();
@@ -1599,7 +1606,10 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             var solver = new Solver.Solver(config, state) { Token = token };
             solver.OnLog += Log.Debug;
             solver.OnWarn += t => Plugin.Plugin.DisplaySolverWarning(t);
-            BestMacroSolver = solver;
+            token.ThrowIfCancellationRequested();
+            if (!_bestMacroSolver.TryPublish(generation, solver))
+                throw new OperationCanceledException(token);
+
             solver.Start();
             var solution = solver.GetTask().GetAwaiter().GetResult();
 
@@ -1667,6 +1677,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     {
         _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         SavedMacroTask?.Dispose();
+        _bestMacroSolver.Invalidate();
         SuggestedMacroTask?.Dispose();
         CommunityMacroTask?.Dispose();
         _plugin.WindowSystem.RemoveWindow(this);
