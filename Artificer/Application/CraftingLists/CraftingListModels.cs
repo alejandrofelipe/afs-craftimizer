@@ -73,6 +73,19 @@ public sealed record MarketPrice(
         DateTime.UtcNow - CachedAt > TimeSpan.FromMinutes(ttlMinutes);
 }
 
+/// <summary>A marketboard price snapshot for exactly one world or data center cache scope.</summary>
+internal sealed record MarketScopePrice(
+    uint ItemId,
+    string Scope,
+    int PricePerUnit,
+    string ServerName,
+    int TotalAvailable,
+    DateTime CachedAt)
+{
+    public bool IsStale(int ttlMinutes) =>
+        DateTime.UtcNow - CachedAt > TimeSpan.FromMinutes(ttlMinutes);
+}
+
 /// <summary>A fully resolved ingredient: what it is, how much is needed, and where to get it.</summary>
 public sealed record ResolvedIngredient(
     uint ItemId,

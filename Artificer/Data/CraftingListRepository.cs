@@ -17,13 +17,22 @@ public sealed class CraftingListRepository : IDisposable
     private readonly SqliteConnection _db;
 
     public CraftingListRepository(IDalamudPluginInterface pluginInterface)
+        : this(GetDatabasePath(pluginInterface))
+    {
+    }
+
+    internal CraftingListRepository(string databasePath)
+    {
+        _db = new SqliteConnection($"Data Source={databasePath}");
+        _db.Open();
+        EnsureSchema();
+    }
+
+    private static string GetDatabasePath(IDalamudPluginInterface pluginInterface)
     {
         var dir = pluginInterface.GetPluginConfigDirectory();
         Directory.CreateDirectory(dir);
-        var dbPath = Path.Combine(dir, "crafting_lists.db");
-        _db = new SqliteConnection($"Data Source={dbPath}");
-        _db.Open();
-        EnsureSchema();
+        return Path.Combine(dir, "crafting_lists.db");
     }
 
     // ── Schema ────────────────────────────────────────────────────────────────
@@ -336,7 +345,7 @@ public sealed class CraftingListRepository : IDisposable
 
     // ── Market price cache ──────────────────────────────────────────────────────
 
-    public MarketPrice? GetCachedPrice(uint itemId, string worldOrDc)
+    internal MarketScopePrice? GetCachedScopePrice(uint itemId, string worldOrDc)
     {
         using var cmd = Command(
             "SELECT price_per_unit, total_quantity, cheapest_server, cached_at " +
@@ -346,16 +355,16 @@ public sealed class CraftingListRepository : IDisposable
         using var r = cmd.ExecuteReader();
         if (!r.Read())
             return null;
-        return new MarketPrice(
+        return new MarketScopePrice(
             itemId,
-            r.GetInt32(0),
+            worldOrDc,
             r.GetInt32(0),
             r.GetString(2),
             r.GetInt32(1),
             DateTimeOffset.FromUnixTimeSeconds(r.GetInt64(3)).UtcDateTime);
     }
 
-    public void SavePrice(uint itemId, string worldOrDc, int pricePerUnit, int totalQuantity, string cheapestServer)
+    internal void SaveScopePrice(MarketScopePrice price)
     {
         using var cmd = Command("""
             INSERT INTO market_price_cache (item_id, world_or_dc, price_per_unit, total_quantity, cheapest_server, cached_at)
@@ -363,14 +372,39 @@ public sealed class CraftingListRepository : IDisposable
             ON CONFLICT(item_id, world_or_dc) DO UPDATE SET
                 price_per_unit=$price, total_quantity=$qty, cheapest_server=$server, cached_at=$at
             """);
-        cmd.Parameters.AddWithValue("$itemId", (long)itemId);
-        cmd.Parameters.AddWithValue("$wdc", worldOrDc);
-        cmd.Parameters.AddWithValue("$price", pricePerUnit);
-        cmd.Parameters.AddWithValue("$qty", totalQuantity);
-        cmd.Parameters.AddWithValue("$server", cheapestServer);
-        cmd.Parameters.AddWithValue("$at", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        cmd.Parameters.AddWithValue("$itemId", (long)price.ItemId);
+        cmd.Parameters.AddWithValue("$wdc", price.Scope);
+        cmd.Parameters.AddWithValue("$price", price.PricePerUnit);
+        cmd.Parameters.AddWithValue("$qty", price.TotalAvailable);
+        cmd.Parameters.AddWithValue("$server", price.ServerName);
+        cmd.Parameters.AddWithValue("$at", ToUnix(price.CachedAt));
         cmd.ExecuteNonQuery();
     }
+
+    // Transitional compatibility for MarketboardHelper until Tasks 2/3 migrate it to scope snapshots.
+    public MarketPrice? GetCachedPrice(uint itemId, string worldOrDc)
+    {
+        var price = GetCachedScopePrice(itemId, worldOrDc);
+        return price == null
+            ? null
+            : new MarketPrice(
+                price.ItemId,
+                price.PricePerUnit,
+                price.PricePerUnit,
+                price.ServerName,
+                price.TotalAvailable,
+                price.CachedAt);
+    }
+
+    // Transitional compatibility for MarketboardHelper until Tasks 2/3 migrate it to scope snapshots.
+    public void SavePrice(uint itemId, string worldOrDc, int pricePerUnit, int totalQuantity, string cheapestServer) =>
+        SaveScopePrice(new MarketScopePrice(
+            itemId,
+            worldOrDc,
+            pricePerUnit,
+            cheapestServer,
+            totalQuantity,
+            DateTime.UtcNow));
 
     // ── Transactions & helpers ──────────────────────────────────────────────────
 
