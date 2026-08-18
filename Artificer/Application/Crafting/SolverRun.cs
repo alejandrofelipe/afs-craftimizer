@@ -18,13 +18,23 @@ namespace Artificer.Application.Crafting;
 /// </summary>
 public sealed class SolverRun : IDisposable
 {
+    private sealed record ActiveRun(
+        long Generation,
+        SolverEngine Solver,
+        string Algorithm,
+        CancellationTokenSource Cancellation);
+
     private readonly List<ProgressBarComponent.ProgressSnapshot> _snapshots = [];
     private readonly Lock _gate = new();
-    private CancellationTokenSource? _cts;
-    private string _algo = "";
+    private readonly ExecutionGeneration _generation = new();
+    private readonly Lock _stateGate = new();
+    private ActiveRun? _active;
 
     /// <summary>O solver da execução corrente (para SolverProgressBar.FromSolver / cancelamento). Null se nunca rodou.</summary>
-    public SolverEngine? Current { get; private set; }
+    public SolverEngine? Current
+    {
+        get { lock (_stateGate) return _active?.Solver; }
+    }
 
     /// <summary>Cópia independente dos snapshots — segura para enumerar no render.</summary>
     public IReadOnlyList<ProgressBarComponent.ProgressSnapshot> Snapshots
@@ -32,51 +42,136 @@ public sealed class SolverRun : IDisposable
         get { lock (_gate) return _snapshots.ToArray(); }
     }
 
-    private void SetSnapshot(ProgressBarComponent.ProgressSnapshot snap)
+    private bool TrySetSnapshot(long generation, ProgressBarComponent.ProgressSnapshot snap)
     {
-        lock (_gate) { _snapshots.Clear(); _snapshots.Add(snap); }
+        lock (_gate)
+        {
+            if (!_generation.IsCurrent(generation))
+                return false;
+
+            _snapshots.Clear();
+            _snapshots.Add(snap);
+            return true;
+        }
     }
 
     /// <summary>
-    /// Define o snapshot inicial de forma síncrona (UI thread, ANTES de iniciar o BackgroundTask que
-    /// chama Run) — garante loading imediato no 1º frame. null limpa a lista (caso do SynthHelper).
+    /// Inicia uma nova geração e define seu snapshot inicial de forma síncrona (UI thread, ANTES de
+    /// iniciar o BackgroundTask que chama Run). null limpa a lista (caso do SynthHelper).
     /// </summary>
-    public void SetInitialSnapshot(ProgressBarComponent.ProgressSnapshot? snap)
+    public long Begin(ProgressBarComponent.ProgressSnapshot? snap)
     {
-        if (snap is { } s) SetSnapshot(s);
-        else lock (_gate) _snapshots.Clear();
+        long generation;
+        lock (_gate)
+        {
+            generation = _generation.Next();
+            _snapshots.Clear();
+            if (snap is { } initial)
+                _snapshots.Add(initial);
+        }
+
+        ActiveRun? previous;
+        lock (_stateGate)
+        {
+            previous = _active;
+            _active = null;
+        }
+
+        if (previous is not null)
+            TryCancel(previous.Cancellation);
+
+        return generation;
     }
 
     /// <summary>
     /// Roda o solver streaming até completar, parar cedo (onNewAction retornando false) ou cancelar.
     /// onNewAction: retorne true para continuar, false para early-stop (grava Completed antes de parar).
-    /// NÃO mexe no snapshot inicial — use SetInitialSnapshot na UI thread antes de chamar Run.
+    /// NÃO mexe no snapshot inicial — use Begin na UI thread antes de chamar Run.
     /// </summary>
     public void Run(
         SolverConfig config,
         SimulationState state,
+        long generation,
         CancellationToken token,
         Func<ActionType, bool> onNewAction,
         Action<SolverSolution>? onSuggestSolution = null,
         Action<Exception>? onFaulted = null)
     {
-        _algo = config.Algorithm.ToString();
-
         token.ThrowIfCancellationRequested();
 
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var runToken = _cts.Token;
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var runToken = cancellation.Token;
+        var algorithm = config.Algorithm.ToString();
 
-        var solver = new SolverEngine(config, state) { Token = runToken };
-        solver.OnLog += Log.Debug;
-        solver.OnWarn += t => Plugin.Plugin.DisplaySolverWarning(t);
-        solver.OnNewAction += a => { if (!onNewAction(a)) EarlyStop(); };
+        using var solver = new SolverEngine(config, state) { Token = runToken };
+        solver.OnLog += text =>
+        {
+            if (_generation.IsCurrent(generation))
+                Log.Debug(text);
+            else
+                cancellation.Cancel();
+        };
+        solver.OnWarn += text =>
+        {
+            if (_generation.IsCurrent(generation))
+                Plugin.Plugin.DisplaySolverWarning(text);
+            else
+                cancellation.Cancel();
+        };
+        solver.OnNewAction += action =>
+        {
+            if (!_generation.IsCurrent(generation))
+            {
+                cancellation.Cancel();
+                return;
+            }
+
+            if (!onNewAction(action))
+            {
+                TrySetSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
+                {
+                    State = ProgressBarComponent.ProgressState.Completed
+                });
+                cancellation.Cancel();
+            }
+        };
         if (onSuggestSolution is not null)
-            solver.OnSuggestSolution += s => onSuggestSolution(s);
-        Current = solver;
+        {
+            solver.OnSuggestSolution += solution =>
+            {
+                if (_generation.IsCurrent(generation))
+                    onSuggestSolution(solution);
+                else
+                    cancellation.Cancel();
+            };
+        }
+
+        var active = new ActiveRun(generation, solver, algorithm, cancellation);
+        ActiveRun? previous = null;
+        var registered = false;
+        lock (_stateGate)
+        {
+            if (_generation.IsCurrent(generation))
+            {
+                previous = _active;
+                _active = active;
+                registered = true;
+            }
+        }
+
+        if (!registered)
+        {
+            cancellation.Cancel();
+            return;
+        }
+
+        if (previous is not null)
+            TryCancel(previous.Cancellation);
 
         using var pollerCts = CancellationTokenSource.CreateLinkedTokenSource(runToken);
-        var pollerTask = Task.Run(() => PollSnapshots(solver, pollerCts.Token), pollerCts.Token);
+        var pollerTask = Task.Run(
+            () => PollSnapshots(solver, algorithm, generation, cancellation, pollerCts.Token),
+            pollerCts.Token);
 
         var completedNaturally = false;
 
@@ -84,7 +179,6 @@ public sealed class SolverRun : IDisposable
         {
             solver.Start();
             var t = solver.GetTask();
-            _ = t.ContinueWith(f => onFaulted?.Invoke(f.Exception!), TaskContinuationOptions.OnlyOnFaulted);
             _ = t.GetAwaiter().GetResult();
 
             completedNaturally = true;
@@ -93,61 +187,88 @@ public sealed class SolverRun : IDisposable
         {
             // Early-stop (Completed já gravado) ou Cancel do usuário (Cancelled já gravado): não sobrescreve.
         }
+        catch (Exception exception)
+        {
+            if (_generation.IsCurrent(generation))
+                onFaulted?.Invoke(exception);
+            else
+                cancellation.Cancel();
+            throw;
+        }
         finally
         {
             pollerCts.Cancel();
             try { pollerTask.GetAwaiter().GetResult(); }
             catch (OperationCanceledException) { }
+
+            // Poller já parado → seguro gravar o snapshot final sem clobber.
+            if (completedNaturally)
+                TrySetSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
+                {
+                    State = ProgressBarComponent.ProgressState.Completed
+                });
+
+            lock (_stateGate)
+            {
+                if (ReferenceEquals(_active, active))
+                    _active = null;
+            }
+
+            cancellation.Cancel();
         }
 
-        // Poller já parado → seguro gravar o snapshot final sem clobber (espelha a ordem do código original).
-        if (completedNaturally)
-            SetSnapshot(SolverProgressBar.FromSolver(solver, _algo) with
-            {
-                State = ProgressBarComponent.ProgressState.Completed
-            });
-
         token.ThrowIfCancellationRequested();
-    }
-
-    private void EarlyStop()
-    {
-        if (Current is { } s)
-            SetSnapshot(SolverProgressBar.FromSolver(s, _algo) with
-            {
-                State = ProgressBarComponent.ProgressState.Completed
-            });
-        _cts?.Cancel();
     }
 
     /// <summary>Cancela a execução. markCancelled=true grava um snapshot Cancelled (usado pelo SynthHelper).</summary>
     public void Cancel(bool markCancelled = false)
     {
-        if (markCancelled && Current is { } s && _cts is { IsCancellationRequested: false })
-            SetSnapshot(SolverProgressBar.FromSolver(s, _algo) with
+        ActiveRun? active;
+        lock (_stateGate)
+            active = _active;
+
+        if (active is null)
+            return;
+
+        if (markCancelled && !active.Cancellation.IsCancellationRequested)
+            TrySetSnapshot(active.Generation, SolverProgressBar.FromSolver(active.Solver, active.Algorithm) with
             {
                 State = ProgressBarComponent.ProgressState.Cancelled
             });
-        _cts?.Cancel();
+
+        _generation.TryInvalidate(active.Generation);
+        TryCancel(active.Cancellation);
     }
 
-    private async Task PollSnapshots(SolverEngine solver, CancellationToken token)
+    private async Task PollSnapshots(
+        SolverEngine solver,
+        string algorithm,
+        long generation,
+        CancellationTokenSource cancellation,
+        CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
             try
             {
-                var snapshot = SolverProgressBar.FromSolver(solver, _algo);
-                SetSnapshot(snapshot);
+                var snapshot = SolverProgressBar.FromSolver(solver, algorithm);
+                if (!TrySetSnapshot(generation, snapshot))
+                {
+                    cancellation.Cancel();
+                    break;
+                }
+
                 await Task.Delay(100, token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { break; }
         }
     }
 
-    public void Dispose()
+    private static void TryCancel(CancellationTokenSource cancellation)
     {
-        _cts?.Cancel();
-        _cts?.Dispose();
+        try { cancellation.Cancel(); }
+        catch (ObjectDisposedException) { }
     }
+
+    public void Dispose() => Cancel();
 }

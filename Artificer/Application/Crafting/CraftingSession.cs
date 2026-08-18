@@ -267,7 +267,7 @@ public sealed class CraftingSession : IDisposable
     {
         SolverTask?.Cancel();
         _run.Cancel();
-        _run.SetInitialSnapshot(null); // limpa os snapshots (equivalente ao Clear() da lista antiga)
+        var generation = _run.Begin(null); // limpa os snapshots (equivalente ao Clear() da lista antiga)
         Macro.ClearQueue();
         Macro.Clear();
 
@@ -279,16 +279,16 @@ public sealed class CraftingSession : IDisposable
 
         SolverComparisonPending = true;
         var state = _currentState;
-        SolverTask = new(token => CalculateBestMacroTask(state, token, Gearsets.HasDelineations()));
+        SolverTask = new(token => CalculateBestMacroTask(state, generation, token, Gearsets.HasDelineations()));
         SolverTask.Start();
     }
 
-    private int CalculateBestMacroTask(SimulationState state, CancellationToken token, bool hasDelineations)
+    private int CalculateBestMacroTask(SimulationState state, long generation, CancellationToken token, bool hasDelineations)
     {
         var config = _plugin.Configuration.SynthHelperSolverConfig
             .ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
 
-        _run.Run(config, state, token,
+        _run.Run(config, state, generation, token,
             onNewAction: a =>
             {
                 var newSize = Macro.Enqueue(a, _plugin.Configuration.SynthHelperMaxDisplayCount);
