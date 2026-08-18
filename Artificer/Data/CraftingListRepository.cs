@@ -24,8 +24,16 @@ public sealed class CraftingListRepository : IDisposable
     internal CraftingListRepository(string databasePath)
     {
         _db = new SqliteConnection($"Data Source={databasePath}");
-        _db.Open();
-        EnsureSchema();
+        try
+        {
+            _db.Open();
+            EnsureSchema();
+        }
+        catch
+        {
+            _db.Dispose();
+            throw;
+        }
     }
 
     private static string GetDatabasePath(IDalamudPluginInterface pluginInterface)

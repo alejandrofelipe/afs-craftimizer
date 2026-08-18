@@ -11,6 +11,50 @@ namespace Artificer.Test.CraftingLists;
 public class MarketPriceCacheTests
 {
     [TestMethod]
+    public void Constructor_WhenSchemaInitializationFails_ReleasesDatabaseFile()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"artificer-market-prices-{Guid.NewGuid():N}.db");
+
+        try
+        {
+            using (var setup = new SqliteConnection($"Data Source={path};Pooling=False"))
+            {
+                setup.Open();
+                using var command = setup.CreateCommand();
+                command.CommandText = "CREATE TABLE crafting_list_recipes (id TEXT)";
+                command.ExecuteNonQuery();
+            }
+
+            var exception = Assert.ThrowsException<SqliteException>(
+                () => _ = new CraftingListRepository(path));
+
+            Assert.AreEqual(1, exception.SqliteErrorCode);
+            Assert.IsTrue(
+                exception.Message.Contains("no such column: list_id", StringComparison.Ordinal),
+                $"Unexpected SQLite error: {exception.Message}");
+
+            SqliteConnection.ClearAllPools();
+            File.Delete(path);
+            Assert.IsFalse(File.Exists(path));
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            if (File.Exists(path))
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch (IOException)
+                {
+                    // The RED state intentionally leaves the failed constructor's connection open.
+                }
+            }
+        }
+    }
+
+    [TestMethod]
     public void ScopePrices_RoundTripWithoutMixingWorldAndDataCenter()
     {
         var path = Path.Combine(Path.GetTempPath(), $"artificer-market-prices-{Guid.NewGuid():N}.db");
