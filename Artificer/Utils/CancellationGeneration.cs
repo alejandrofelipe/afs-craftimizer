@@ -20,22 +20,31 @@ internal sealed class CancellationGeneration : IDisposable
         CancellationTokenSource? previous;
         CancellationTokenSource current;
         CancellationToken token;
-        long generation;
+        long installedGeneration;
 
         lock (_gate)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            generation = checked(_generation + 1);
+            installedGeneration = checked(_generation + 1);
             current = new CancellationTokenSource();
             token = current.Token;
             previous = _current;
-            _generation = generation;
+            _generation = installedGeneration;
             _current = current;
         }
 
-        CancelAndDispose(previous);
-        return (generation, token);
+        try
+        {
+            CancelAndDispose(previous);
+        }
+        catch
+        {
+            Cancel(installedGeneration);
+            throw;
+        }
+
+        return (installedGeneration, token);
     }
 
     public bool IsCurrent(long generation)

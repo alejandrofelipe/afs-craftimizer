@@ -22,6 +22,56 @@ public class CancellationGenerationTests
     }
 
     [TestMethod]
+    public void Begin_WhenPreviousCancellationCallbackThrows_RollsBackUndeliveredGeneration()
+    {
+        using var coordinator = new CancellationGeneration();
+        var previous = coordinator.Begin();
+        using var previousWaitHandle = previous.Token.WaitHandle;
+        var callbackException = new InvalidOperationException("Expected callback failure.");
+        var installedGeneration = previous.Generation + 1;
+        var callbackSawInstalledGeneration = false;
+
+        using var registration = previous.Token.Register(() =>
+        {
+            callbackSawInstalledGeneration = coordinator.IsCurrent(installedGeneration);
+            throw callbackException;
+        });
+
+        var thrown = Assert.ThrowsException<AggregateException>(() => coordinator.Begin());
+
+        Assert.AreEqual(1, thrown.InnerExceptions.Count);
+        Assert.AreSame(callbackException, thrown.InnerExceptions[0]);
+        Assert.IsTrue(callbackSawInstalledGeneration);
+        Assert.IsTrue(previous.Token.IsCancellationRequested);
+        Assert.IsTrue(previousWaitHandle.SafeWaitHandle.IsClosed);
+        Assert.IsFalse(coordinator.IsCurrent(installedGeneration));
+    }
+
+    [TestMethod]
+    public void Begin_WhenThrowingPreviousCallbackCreatesReentrantGeneration_DoesNotRollItBack()
+    {
+        using var coordinator = new CancellationGeneration();
+        var previous = coordinator.Begin();
+        var callbackException = new InvalidOperationException("Expected callback failure.");
+        (long Generation, CancellationToken Token) reentrant = default;
+
+        using var registration = previous.Token.Register(() =>
+        {
+            reentrant = coordinator.Begin();
+            throw callbackException;
+        });
+
+        var outerBeginTask = Task.Run(() => Assert.ThrowsException<AggregateException>(() => coordinator.Begin()));
+
+        Assert.IsTrue(outerBeginTask.Wait(GateTimeout), "Begin deadlocked while invoking a reentrant cancellation callback.");
+        var thrown = outerBeginTask.GetAwaiter().GetResult();
+        Assert.AreEqual(1, thrown.InnerExceptions.Count);
+        Assert.AreSame(callbackException, thrown.InnerExceptions[0]);
+        Assert.IsTrue(coordinator.IsCurrent(reentrant.Generation));
+        Assert.IsFalse(reentrant.Token.IsCancellationRequested);
+    }
+
+    [TestMethod]
     public void IsCurrent_WithoutActiveGeneration_ReturnsFalse()
     {
         using var coordinator = new CancellationGeneration();
