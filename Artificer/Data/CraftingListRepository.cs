@@ -389,31 +389,6 @@ public sealed class CraftingListRepository : IDisposable
         cmd.ExecuteNonQuery();
     }
 
-    // Transitional compatibility for MarketboardHelper until Tasks 2/3 migrate it to scope snapshots.
-    public MarketPrice? GetCachedPrice(uint itemId, string worldOrDc)
-    {
-        var price = GetCachedScopePrice(itemId, worldOrDc);
-        return price == null
-            ? null
-            : new MarketPrice(
-                price.ItemId,
-                price.PricePerUnit,
-                price.PricePerUnit,
-                price.ServerName,
-                price.TotalAvailable,
-                price.CachedAt);
-    }
-
-    // Transitional compatibility for MarketboardHelper until Tasks 2/3 migrate it to scope snapshots.
-    public void SavePrice(uint itemId, string worldOrDc, int pricePerUnit, int totalQuantity, string cheapestServer) =>
-        SaveScopePrice(new MarketScopePrice(
-            itemId,
-            worldOrDc,
-            pricePerUnit,
-            cheapestServer,
-            totalQuantity,
-            DateTime.UtcNow));
-
     // ── Transactions & helpers ──────────────────────────────────────────────────
 
     public SqliteTransaction BeginTransaction() => _db.BeginTransaction();
