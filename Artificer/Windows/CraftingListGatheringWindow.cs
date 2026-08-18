@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using PluginClass = Artificer.Plugin.Plugin;
 using Service = Artificer.Plugin.Service;
@@ -27,9 +28,11 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
     private Guid? _listId;
     private ResolvedIngredientTree? _tree;
     private Dictionary<uint, MaterialProgress> _progress = new();
-    private readonly Dictionary<uint, MarketPrice?> _prices = new();
+    private Dictionary<uint, MarketPrice?> _prices = new();
+    private readonly CraftingListLoadPolicy _loadPolicy = new();
     private bool _treeLoading;
     private GatheringRoute? _route;
+    private bool _disposed;
 
     public CraftingListGatheringWindow(PluginClass plugin) : base("Rota de Coleta###Artificer-cl-gather",
         ImGuiWindowFlags.NoScrollbar)
@@ -45,59 +48,238 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
 
     public void OpenForList(Guid listId)
     {
+        if (_disposed)
+            return;
+
+        _loadPolicy.InvalidateLifecycle();
+        if (_listId != listId)
+        {
+            _tree = null;
+            _route = null;
+        }
         _listId = listId;
-        _prices.Clear();
-        Refresh();
         IsOpen = true;
+        Refresh();
         BringToFront();
     }
 
     private void Refresh()
     {
-        if (_listId is not { } id)
+        if (_disposed || _listId is not { } id)
             return;
-        _progress = _plugin.CraftingListRepository.GetProgressForList(id).ToDictionary(p => p.ItemId);
-        _ = RefreshTreeAsync(id);
-    }
 
-    private async Task RefreshTreeAsync(Guid id)
-    {
-        _treeLoading = true;
+        if (!TryBeginPriceLoad(out var load))
+            return;
+
+        var (generation, token) = load;
         try
         {
-            _tree = await _plugin.CraftingListManager.ResolveIngredientsAsync(id).ConfigureAwait(false);
-            _route = null;
-            if (_plugin.Configuration.ShowMarketPrices)
-                _ = LoadPricesAsync();
+            _progress = _plugin.CraftingListRepository.GetProgressForList(id).ToDictionary(p => p.ItemId);
+
+            var showMarketPrices = _plugin.Configuration.ShowMarketPrices;
+            var player = showMarketPrices ? Service.Objects.LocalPlayer : null;
+            uint? worldId = null;
+            var dataCenterName = string.Empty;
+            if (player != null)
+            {
+                worldId = player.CurrentWorld.RowId;
+                dataCenterName = player.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
+            }
+            var ttlMinutes = _plugin.Configuration.MarketPriceCacheTtlMinutes;
+            var treeRequest = _plugin.CraftingListManager.ResolveIngredientsAsync(id);
+
+            _ = RefreshTreeAsync(
+                id,
+                treeRequest,
+                generation,
+                token,
+                showMarketPrices,
+                worldId,
+                dataCenterName,
+                ttlMinutes);
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to start gathering-route refresh {id}.");
+            if (_loadPolicy.IsPriceLoadCurrent(generation))
+                CancelPriceLoad();
+        }
+    }
+
+    private async Task RefreshTreeAsync(
+        Guid listId,
+        Task<ResolvedIngredientTree> treeRequest,
+        long generation,
+        CancellationToken token,
+        bool showMarketPrices,
+        uint? worldId,
+        string dataCenterName,
+        int ttlMinutes)
+    {
+        try
+        {
+            var tree = await treeRequest.ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
+
+            var shouldLoadPrices = await Service.Framework.Run(() =>
+            {
+                if (!_loadPolicy.IsPriceLoadCurrent(generation) || _listId != listId)
+                    return false;
+
+                _tree = tree;
+                _treeLoading = false;
+                _route = null;
+                return showMarketPrices && worldId is not null;
+            }, token).ConfigureAwait(false);
+
+            if (shouldLoadPrices)
+            {
+                await LoadPricesAsync(
+                    listId,
+                    tree,
+                    generation,
+                    token,
+                    worldId.GetValueOrDefault(),
+                    dataCenterName,
+                    ttlMinutes).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // A newer refresh, close, or dispose owns the state now.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to refresh gathering-route tree {listId}.");
         }
         finally
         {
-            _treeLoading = false;
+            await FinishTreeLoadingAsync(listId, generation, token).ConfigureAwait(false);
         }
     }
 
-    private async Task LoadPricesAsync()
+    private async Task LoadPricesAsync(
+        Guid listId,
+        ResolvedIngredientTree tree,
+        long generation,
+        CancellationToken token,
+        uint worldId,
+        string dataCenterName,
+        int ttlMinutes)
     {
-        if (_tree == null)
-            return;
-        var player = Service.Objects.LocalPlayer;
-        if (player == null)
-            return;
-        var worldId = player.CurrentWorld.RowId;
-
-        foreach (var itemId in _tree.BaseMaterials.Select(m => m.ItemId).Distinct())
+        try
         {
-            if (_prices.ContainsKey(itemId))
-                continue;
-            _prices[itemId] = await _plugin.MarketboardHelper.GetPriceAsync(
-                itemId, worldId, string.Empty, _plugin.Configuration.MarketPriceCacheTtlMinutes)
-                .ConfigureAwait(false);
-            _route = null;
+            var loadedPrices = new Dictionary<uint, MarketPrice?>();
+            var items = tree.BaseMaterials.Select(material => material.ItemId).Distinct().ToList();
+            foreach (var itemId in items)
+            {
+                token.ThrowIfCancellationRequested();
+                var price = await _plugin.MarketboardHelper.GetPriceAsync(
+                    itemId,
+                    worldId,
+                    dataCenterName,
+                    ttlMinutes,
+                    token).ConfigureAwait(false);
+                loadedPrices.Add(itemId, price);
+            }
+
+            await Service.Framework.Run(() =>
+            {
+                if (!_loadPolicy.IsPriceLoadCurrent(generation) || _listId != listId)
+                    return;
+
+                _prices = loadedPrices;
+                _route = null;
+            }, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // A newer refresh, close, or dispose owns the state now.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to load market prices for gathering route {listId}.");
+        }
+    }
+
+    private bool TryBeginPriceLoad(out (long Generation, CancellationToken Token) load) =>
+        ApplyPriceLoadStart(_loadPolicy.TryBeginPriceLoad(), out load);
+
+    private bool ApplyPriceLoadStart(
+        PriceLoadStartResult start,
+        out (long Generation, CancellationToken Token) load)
+    {
+        if (start.Exception is { } exception)
+            Log.Warning(exception, "Failed to start gathering-route price load.");
+
+        if (!start.Started)
+        {
+            if (start.ShouldClearState)
+                ClearLoadState(clearTreeLoading: true);
+            load = default;
+            return false;
+        }
+
+        _prices = new();
+        _route = null;
+        _treeLoading = true;
+        load = (start.Generation, start.Token);
+        return true;
+    }
+
+    private void CancelPriceLoad()
+    {
+        var stopped = _loadPolicy.CancelPriceLoad();
+        if (stopped.Exception is { } exception)
+            Log.Warning(exception, "Failed to cancel gathering-route price load.");
+        if (stopped.ShouldClearState)
+            ClearLoadState(clearTreeLoading: true);
+    }
+
+    private void ClearLoadState(bool clearTreeLoading)
+    {
+        _prices = new();
+        _route = null;
+        if (clearTreeLoading)
+            _treeLoading = false;
+    }
+
+    private async Task FinishTreeLoadingAsync(Guid listId, long generation, CancellationToken token)
+    {
+        try
+        {
+            await Service.Framework.Run(() =>
+            {
+                if (_loadPolicy.IsPriceLoadCurrent(generation) && _listId == listId)
+                    _treeLoading = false;
+            }, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // The superseding generation already owns the loading state.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to finish gathering-route tree refresh {listId}.");
         }
     }
 
     public override void PreDraw() => Theme.Push();
     public override void PostDraw() { Theme.Pop(); base.PostDraw(); }
+
+    public override void OnClose()
+    {
+        _loadPolicy.InvalidateLifecycle();
+        IsOpen = false;
+        try
+        {
+            CancelPriceLoad();
+        }
+        finally
+        {
+            base.OnClose();
+        }
+    }
 
     public override void Draw()
     {
@@ -223,6 +405,23 @@ public sealed class CraftingListGatheringWindow : Window, IDisposable
 
     public void Dispose()
     {
-        _plugin.WindowSystem.RemoveWindow(this);
+        _disposed = true;
+        IsOpen = false;
+        try
+        {
+            var stopped = _loadPolicy.DisposePriceLoad();
+            if (stopped.Exception is { } exception)
+                Log.Warning(exception, "Failed to dispose gathering-route price load.");
+            if (stopped.ShouldClearState)
+                ClearLoadState(clearTreeLoading: true);
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, "Failed to tear down gathering-route price load.");
+        }
+        finally
+        {
+            _plugin.WindowSystem.RemoveWindow(this);
+        }
     }
 }
