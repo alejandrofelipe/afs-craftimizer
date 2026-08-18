@@ -60,6 +60,18 @@ public class MarketboardHelperTests
     }
 
     [TestMethod]
+    public void ParseScope_WithJsonNull_ReturnsNull()
+    {
+        var result = MarketboardHelper.ParseScope(
+            5333,
+            "WorldA",
+            "null",
+            new DateTime(2026, 8, 18, 12, 30, 0, DateTimeKind.Utc));
+
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
     public void Combine_WithWorldAndDataCenter_UsesEachScopeAndOldestTimestamp()
     {
         var worldCachedAt = new DateTime(2026, 8, 18, 12, 35, 0, DateTimeKind.Utc);
@@ -73,6 +85,23 @@ public class MarketboardHelperTests
 
         Assert.AreEqual(
             new MarketPrice(5333, 120, 80, "WorldB", 14, dataCenterCachedAt),
+            combined);
+    }
+
+    [TestMethod]
+    public void Combine_WithOlderWorldSnapshot_UsesWorldTimestamp()
+    {
+        var worldCachedAt = new DateTime(2026, 8, 18, 12, 25, 0, DateTimeKind.Utc);
+        var dataCenterCachedAt = new DateTime(2026, 8, 18, 12, 30, 0, DateTimeKind.Utc);
+        var currentWorld = new MarketScopePrice(
+            5333, "WorldA", 120, "WorldA", 14, worldCachedAt);
+        var dataCenter = new MarketScopePrice(
+            5333, "Aether", 80, "WorldB", 27, dataCenterCachedAt);
+
+        var combined = MarketboardHelper.Combine(currentWorld, dataCenter);
+
+        Assert.AreEqual(
+            new MarketPrice(5333, 120, 80, "WorldB", 14, worldCachedAt),
             combined);
     }
 
