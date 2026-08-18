@@ -149,12 +149,19 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
     private bool ShouldCalculate => !IsCollapsed && ShouldOpen;
     private bool WasCalculatable { get; set; }
+    private bool WasSuggestMacroAutomatically { get; set; }
 
     public override void Update()
     {
         base.Update();
 
+        var suggestMacroAutomatically = _plugin.Configuration.SuggestMacroAutomatically;
         ShouldOpen = CalculateShouldOpen();
+
+        if (ShouldCalculate
+         && SuggestedMacroCleanupPolicy.ShouldClearWhenAutomaticSuggestionChanges(WasSuggestMacroAutomatically, suggestMacroAutomatically)
+         && SuggestedMacroTask is { Result: null })
+            ClearSuggestedMacro();
 
         if (ShouldCalculate != WasCalculatable)
         {
@@ -176,14 +183,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                     CalculateSuggestedMacro();
                 // If we don't want to suggest automatically, we should cancel and clean out the task
                 else if (!_plugin.Configuration.SuggestMacroAutomatically && SuggestedMacroTask?.Result == null)
-                {
-                    _bestMacroSolver.Invalidate();
-                    SuggestedMacroTask?.Cancel();
-                    SuggestedMacroTask = null;
-                    _prevSuggestedActions = null;
-                    _prevSuggestedState   = null;
-                    _bestShowAlternative  = false;
-                }
+                    ClearSuggestedMacro();
 
                 // If it didn't exist before or it already ran, we need to recalculate
                 if (_plugin.Configuration.ShowCommunityMacros && _plugin.Configuration.SearchCommunityMacroAutomatically && CommunityMacroTask?.Result == null && (CommunityMacroTask?.Completed ?? true))
@@ -206,6 +206,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         WasOpen = ShouldOpen;
         WasCollapsed = IsCollapsed;
         WasCalculatable = ShouldCalculate;
+        WasSuggestMacroAutomatically = suggestMacroAutomatically;
     }
 
     public override bool DrawConditions() =>
@@ -307,7 +308,11 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         if (qualityChanged)
             StartingQuality = startingQuality;
 
-        if ((StatsChanged || qualityChanged) && CraftStatus == CraftableStatus.OK)
+        var inputsChanged = StatsChanged || qualityChanged;
+        if (SuggestedMacroCleanupPolicy.ShouldClearForChangedInputs(inputsChanged, CraftStatus == CraftableStatus.OK))
+            ClearSuggestedMacro();
+
+        if (inputsChanged && CraftStatus == CraftableStatus.OK)
         {
             // Stats changed and we are still craftable, so we need to recalculate
             CalculateSavedMacro();
@@ -317,14 +322,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 CalculateSuggestedMacro();
             // Otherwise, we should cancel and clean out the task
             else
-            {
-                _bestMacroSolver.Invalidate();
-                SuggestedMacroTask?.Cancel();
-                SuggestedMacroTask = null;
-                _prevSuggestedActions = null;
-                _prevSuggestedState   = null;
-                _bestShowAlternative  = false;
-            }
+                ClearSuggestedMacro();
 
             // If we want to search automatically, we should recalculate
             if (_plugin.Configuration.ShowCommunityMacros && _plugin.Configuration.SearchCommunityMacroAutomatically)
@@ -338,6 +336,16 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
         }
 
         return true;
+    }
+
+    private void ClearSuggestedMacro()
+    {
+        _bestMacroSolver.Invalidate();
+        SuggestedMacroTask?.Cancel();
+        SuggestedMacroTask = null;
+        _prevSuggestedActions = null;
+        _prevSuggestedState   = null;
+        _bestShowAlternative  = false;
     }
 
     private IEnumerable<int> CalculateIngredientHqCounts()
