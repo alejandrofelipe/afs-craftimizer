@@ -105,6 +105,57 @@ public class CancellationGenerationTests
     }
 
     [TestMethod]
+    public async Task Begin_StaleCompletionCannotReplaceOrMutateCurrentPublishedSnapshot()
+    {
+        using var coordinator = new CancellationGeneration();
+        var published = new Dictionary<uint, int>();
+        var staleStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseStale = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        async Task<Dictionary<uint, int>> BuildAndPublishAsync(
+            (long Generation, CancellationToken Token) load,
+            uint itemId,
+            int price,
+            TaskCompletionSource<bool>? started,
+            Task release)
+        {
+            var loaded = new Dictionary<uint, int> { [itemId] = price };
+            started?.SetResult(true);
+            await release.WaitAsync(GateTimeout).ConfigureAwait(false);
+            loaded.Add(itemId + 1, price + 1);
+
+            if (coordinator.IsCurrent(load.Generation))
+                published = loaded;
+
+            return loaded;
+        }
+
+        var stale = coordinator.Begin();
+        var staleTask = BuildAndPublishAsync(stale, 10, 100, staleStarted, releaseStale.Task);
+        await staleStarted.Task.WaitAsync(GateTimeout).ConfigureAwait(false);
+
+        var current = coordinator.Begin();
+        var currentSnapshot = await BuildAndPublishAsync(
+            current,
+            20,
+            200,
+            started: null,
+            Task.CompletedTask).ConfigureAwait(false);
+        var publishedSnapshot = published;
+
+        releaseStale.SetResult(true);
+        var staleSnapshot = await staleTask.WaitAsync(GateTimeout).ConfigureAwait(false);
+        staleSnapshot.Add(99, 999);
+
+        Assert.IsTrue(stale.Token.IsCancellationRequested);
+        Assert.AreSame(currentSnapshot, publishedSnapshot);
+        Assert.AreSame(publishedSnapshot, published);
+        Assert.AreEqual(2, published.Count);
+        Assert.AreEqual(200, published[20]);
+        Assert.AreEqual(201, published[21]);
+    }
+
+    [TestMethod]
     public void Dispose_CancelsActiveTokenAndInvalidatesGeneration()
     {
         var coordinator = new CancellationGeneration();

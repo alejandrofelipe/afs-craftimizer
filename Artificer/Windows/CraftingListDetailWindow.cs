@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using PluginClass = Artificer.Plugin.Plugin;
 using Service = Artificer.Plugin.Service;
@@ -29,7 +30,9 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     private List<CraftingListRecipe> _recipes = new();
     private ResolvedIngredientTree? _tree;
     private Dictionary<uint, MaterialProgress> _progress = new();
-    private readonly Dictionary<uint, MarketPrice?> _prices = new();
+    private Dictionary<uint, MarketPrice?> _prices = new();
+    private readonly CancellationGeneration _priceLoad = new();
+    private long _priceLoadGeneration;
     private bool _pricesLoading;
     private bool _treeLoading;
     private DateTime? _lastSyncTime;
@@ -65,6 +68,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     public void OpenList(Guid listId)
     {
+        if (_listId != listId)
+            _tree = null;
         _listId = listId;
         _selectionMode = false;
         _selectedRecipeIds.Clear();
@@ -81,11 +86,43 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     {
         if (_listId is not { } id)
             return;
-        _list = _plugin.CraftingListManager.Lists.FirstOrDefault(l => l.Id == id);
-        _recipes = _plugin.CraftingListRepository.GetRecipesForList(id);
-        var progressList = _plugin.CraftingListRepository.GetProgressForList(id);
-        _progress = progressList.ToDictionary(p => p.ItemId);
-        _ = RefreshTreeAsync();
+
+        var (generation, token) = BeginPriceLoad();
+        _treeLoading = true;
+        try
+        {
+            _list = _plugin.CraftingListManager.Lists.FirstOrDefault(l => l.Id == id);
+            _recipes = _plugin.CraftingListRepository.GetRecipesForList(id);
+            var progressList = _plugin.CraftingListRepository.GetProgressForList(id);
+            _progress = progressList.ToDictionary(p => p.ItemId);
+
+            var showMarketPrices = _plugin.Configuration.ShowMarketPrices;
+            var player = showMarketPrices ? Service.Objects.LocalPlayer : null;
+            uint? worldId = null;
+            var dataCenterName = string.Empty;
+            if (player != null)
+            {
+                worldId = player.CurrentWorld.RowId;
+                dataCenterName = player.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
+            }
+            var ttlMinutes = _plugin.Configuration.MarketPriceCacheTtlMinutes;
+            var treeRequest = _plugin.CraftingListManager.ResolveIngredientsAsync(id);
+
+            _ = RefreshTreeAsync(
+                id,
+                treeRequest,
+                generation,
+                token,
+                showMarketPrices,
+                worldId,
+                dataCenterName,
+                ttlMinutes);
+        }
+        catch (Exception exception)
+        {
+            _treeLoading = false;
+            Log.Warning(exception, $"Failed to start crafting-list tree refresh {id}.");
+        }
     }
 
     private void OnListsChanged()
@@ -95,26 +132,68 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         // Lista deletada externamente → fechar; senão, recarregar (conserta "não atualiza após add").
         if (_plugin.CraftingListManager.Lists.All(l => l.Id != id))
         {
+            CancelPriceLoad();
             IsOpen = false;
             return;
         }
         RefreshData();
     }
 
-    private async Task RefreshTreeAsync()
+    private async Task RefreshTreeAsync(
+        Guid listId,
+        Task<ResolvedIngredientTree> treeRequest,
+        long generation,
+        CancellationToken token,
+        bool showMarketPrices,
+        uint? worldId,
+        string dataCenterName,
+        int ttlMinutes)
     {
-        if (_listId is not { } id)
-            return;
-        _treeLoading = true;
         try
         {
-            _tree = await _plugin.CraftingListManager.ResolveIngredientsAsync(id).ConfigureAwait(false);
-            if (_plugin.Configuration.ShowMarketPrices)
-                _ = LoadPricesAsync();
+            var tree = await treeRequest.ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
+
+            var shouldLoadPrices = await Service.Framework.Run(() =>
+            {
+                if (!_priceLoad.IsCurrent(generation) || _listId != listId)
+                    return false;
+
+                _tree = tree;
+                _treeLoading = false;
+                if (!showMarketPrices || worldId is null)
+                {
+                    _pricesLoading = false;
+                    return false;
+                }
+
+                _pricesLoading = true;
+                return true;
+            }, token).ConfigureAwait(false);
+
+            if (shouldLoadPrices)
+            {
+                await LoadPricesAsync(
+                    listId,
+                    tree,
+                    generation,
+                    token,
+                    worldId.GetValueOrDefault(),
+                    dataCenterName,
+                    ttlMinutes).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // A newer refresh, close, or dispose owns the state now.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to refresh crafting-list tree {listId}.");
         }
         finally
         {
-            _treeLoading = false;
+            await FinishTreeLoadingAsync(listId, generation, token).ConfigureAwait(false);
         }
     }
 
@@ -123,37 +202,155 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         if (_listId is not { } id)
             return;
         await _plugin.CraftingListManager.SyncWithInventoryAsync(id, _plugin.Configuration.IncludeRetainersInSync).ConfigureAwait(false);
-        _lastSyncTime = DateTime.UtcNow;
-        RefreshData();
+        await Service.Framework.Run(() =>
+        {
+            if (_listId != id)
+                return;
+            _lastSyncTime = DateTime.UtcNow;
+            RefreshData();
+        }).ConfigureAwait(false);
     }
 
-    private async Task LoadPricesAsync()
+    private async Task LoadPricesAsync(
+        Guid listId,
+        ResolvedIngredientTree tree,
+        long generation,
+        CancellationToken token,
+        uint worldId,
+        string dataCenterName,
+        int ttlMinutes)
     {
-        if (_tree == null)
-            return;
-        var player = Service.Objects.LocalPlayer;
-        if (player == null)
-            return;
-        var worldId = player.CurrentWorld.RowId;
-        // GetPriceAsync falls back to the player's world when no data-center name is provided.
-        var dcName = string.Empty;
-
-        _pricesLoading = true;
         try
         {
-            var items = _tree.BaseMaterials.Concat(_tree.Crystals).Select(m => m.ItemId).Distinct().ToList();
+            var loadedPrices = new Dictionary<uint, MarketPrice?>();
+            var items = tree.BaseMaterials.Concat(tree.Crystals).Select(m => m.ItemId).Distinct().ToList();
             foreach (var itemId in items)
             {
-                if (_prices.ContainsKey(itemId))
-                    continue;
+                token.ThrowIfCancellationRequested();
                 var price = await _plugin.MarketboardHelper.GetPriceAsync(
-                    itemId, worldId, dcName, _plugin.Configuration.MarketPriceCacheTtlMinutes).ConfigureAwait(false);
-                _prices[itemId] = price;
+                    itemId,
+                    worldId,
+                    dataCenterName,
+                    ttlMinutes,
+                    token).ConfigureAwait(false);
+                loadedPrices.Add(itemId, price);
             }
+
+            await Service.Framework.Run(() =>
+            {
+                if (!_priceLoad.IsCurrent(generation) || _listId != listId)
+                    return;
+
+                _prices = loadedPrices;
+                _pricesLoading = false;
+            }, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // A newer refresh, close, or dispose owns the state now.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to load market prices for crafting list {listId}.");
         }
         finally
         {
-            _pricesLoading = false;
+            await FinishPriceLoadingAsync(listId, generation, token).ConfigureAwait(false);
+        }
+    }
+
+    private void RefreshPrices()
+    {
+        var (generation, token) = BeginPriceLoad();
+        _treeLoading = false;
+
+        if (!_plugin.Configuration.ShowMarketPrices ||
+            _listId is not { } listId ||
+            _tree is not { } tree)
+            return;
+
+        var player = Service.Objects.LocalPlayer;
+        if (player == null)
+            return;
+
+        var worldId = player.CurrentWorld.RowId;
+        var dataCenterName = player.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
+        var ttlMinutes = _plugin.Configuration.MarketPriceCacheTtlMinutes;
+        _pricesLoading = true;
+        _ = LoadPricesAsync(
+            listId,
+            tree,
+            generation,
+            token,
+            worldId,
+            dataCenterName,
+            ttlMinutes);
+    }
+
+    private (long Generation, CancellationToken Token) BeginPriceLoad()
+    {
+        var load = _priceLoad.Begin();
+        _priceLoadGeneration = load.Generation;
+        _prices = new();
+        _pricesLoading = false;
+        return load;
+    }
+
+    private void CancelPriceLoad()
+    {
+        var generation = _priceLoadGeneration;
+        try
+        {
+            _priceLoad.Cancel(generation);
+        }
+        finally
+        {
+            if (_priceLoadGeneration == generation)
+            {
+                _prices = new();
+                _pricesLoading = false;
+                _treeLoading = false;
+            }
+        }
+    }
+
+    private async Task FinishTreeLoadingAsync(Guid listId, long generation, CancellationToken token)
+    {
+        try
+        {
+            await Service.Framework.Run(() =>
+            {
+                if (_priceLoad.IsCurrent(generation) && _listId == listId)
+                    _treeLoading = false;
+            }, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // The superseding generation already owns the loading state.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to finish crafting-list tree refresh {listId}.");
+        }
+    }
+
+    private async Task FinishPriceLoadingAsync(Guid listId, long generation, CancellationToken token)
+    {
+        try
+        {
+            await Service.Framework.Run(() =>
+            {
+                if (_priceLoad.IsCurrent(generation) && _listId == listId)
+                    _pricesLoading = false;
+            }, token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // The superseding generation already owns the loading state.
+        }
+        catch (Exception exception)
+        {
+            Log.Warning(exception, $"Failed to finish market-price refresh for crafting list {listId}.");
         }
     }
 
@@ -178,6 +375,12 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
     }
 
     public override void PostDraw() { Theme.Pop(); base.PostDraw(); }
+
+    public override void OnClose()
+    {
+        base.OnClose();
+        CancelPriceLoad();
+    }
 
     public override void Draw()
     {
@@ -269,10 +472,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
                 if (ImGui.MenuItem("🗺 Abrir Rota de Coleta"))
                     _plugin.CraftingListGatheringWindow.OpenForList(list.Id);
                 if (_plugin.Configuration.ShowMarketPrices && ImGui.MenuItem("Atualizar preços"))
-                {
-                    _prices.Clear();
-                    _ = LoadPricesAsync();
-                }
+                    RefreshPrices();
                 if (ImGui.MenuItem("Renomear"))
                 {
                     _isRenaming = true;
@@ -729,10 +929,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
             using (ImRaii.Disabled(_pricesLoading))
             {
                 if (ImGuiUtils.IconButtonSquare((int)FontAwesomeIcon.Redo))
-                {
-                    _prices.Clear();
-                    _ = LoadPricesAsync();
-                }
+                    RefreshPrices();
                 ImGuiUtils.HoveredTooltip("Atualizar preços", (int)ImGuiHoveredFlags.AllowWhenDisabled);
             }
         }
@@ -779,6 +976,7 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
 
     public void Dispose()
     {
+        _priceLoad.Dispose();
         _plugin.CraftingListManager.ListsChanged -= OnListsChanged;
         _plugin.WindowSystem.RemoveWindow(this);
     }
