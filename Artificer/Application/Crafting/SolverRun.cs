@@ -28,7 +28,32 @@ public sealed class SolverRun : IDisposable
     private readonly Lock _gate = new();
     private readonly ExecutionGeneration _generation = new();
     private readonly Lock _stateGate = new();
+    private readonly Func<SolverEngine, string, ProgressBarComponent.ProgressSnapshot> _pollSnapshotFactory;
+    private readonly Action? _beforeRegistration;
     private ActiveRun? _active;
+
+    public SolverRun()
+        : this(SolverProgressBar.FromSolver, null)
+    {
+    }
+
+    internal SolverRun(Func<SolverEngine, string, ProgressBarComponent.ProgressSnapshot> pollSnapshotFactory)
+        : this(pollSnapshotFactory, null)
+    {
+    }
+
+    internal SolverRun(Action beforeRegistration)
+        : this(SolverProgressBar.FromSolver, beforeRegistration)
+    {
+    }
+
+    private SolverRun(
+        Func<SolverEngine, string, ProgressBarComponent.ProgressSnapshot> pollSnapshotFactory,
+        Action? beforeRegistration)
+    {
+        _pollSnapshotFactory = pollSnapshotFactory;
+        _beforeRegistration = beforeRegistration;
+    }
 
     /// <summary>O solver da execução corrente (para SolverProgressBar.FromSolver / cancelamento). Null se nunca rodou.</summary>
     public SolverEngine? Current
@@ -53,6 +78,26 @@ public sealed class SolverRun : IDisposable
             _snapshots.Add(snap);
             return true;
         }
+    }
+
+    private bool TrySetTerminalSnapshot(long generation, ProgressBarComponent.ProgressSnapshot snap)
+    {
+        lock (_gate)
+        {
+            if (!_generation.IsCurrent(generation))
+                return false;
+
+            _snapshots.Clear();
+            _snapshots.Add(snap);
+            _generation.TryInvalidate(generation);
+            return true;
+        }
+    }
+
+    private void TryInvalidate(long generation)
+    {
+        lock (_gate)
+            _generation.TryInvalidate(generation);
     }
 
     /// <summary>
@@ -128,7 +173,7 @@ public sealed class SolverRun : IDisposable
 
             if (!onNewAction(action))
             {
-                TrySetSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
+                TrySetTerminalSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
                 {
                     State = ProgressBarComponent.ProgressState.Completed
                 });
@@ -147,6 +192,7 @@ public sealed class SolverRun : IDisposable
         }
 
         var active = new ActiveRun(generation, solver, algorithm, cancellation);
+        _beforeRegistration?.Invoke();
         ActiveRun? previous = null;
         var registered = false;
         lock (_stateGate)
@@ -162,6 +208,7 @@ public sealed class SolverRun : IDisposable
         if (!registered)
         {
             cancellation.Cancel();
+            token.ThrowIfCancellationRequested();
             return;
         }
 
@@ -198,23 +245,28 @@ public sealed class SolverRun : IDisposable
         finally
         {
             pollerCts.Cancel();
-            try { pollerTask.GetAwaiter().GetResult(); }
-            catch (OperationCanceledException) { }
-
-            // Poller já parado → seguro gravar o snapshot final sem clobber.
-            if (completedNaturally)
-                TrySetSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
-                {
-                    State = ProgressBarComponent.ProgressState.Completed
-                });
-
-            lock (_stateGate)
+            try
             {
-                if (ReferenceEquals(_active, active))
-                    _active = null;
+                try { pollerTask.GetAwaiter().GetResult(); }
+                catch (OperationCanceledException) { }
             }
+            finally
+            {
+                // Poller já parado → seguro gravar o snapshot final sem clobber.
+                if (completedNaturally)
+                    TrySetTerminalSnapshot(generation, SolverProgressBar.FromSolver(solver, algorithm) with
+                    {
+                        State = ProgressBarComponent.ProgressState.Completed
+                    });
 
-            cancellation.Cancel();
+                lock (_stateGate)
+                {
+                    if (ReferenceEquals(_active, active))
+                        _active = null;
+                }
+
+                cancellation.Cancel();
+            }
         }
 
         token.ThrowIfCancellationRequested();
@@ -231,12 +283,13 @@ public sealed class SolverRun : IDisposable
             return;
 
         if (markCancelled && !active.Cancellation.IsCancellationRequested)
-            TrySetSnapshot(active.Generation, SolverProgressBar.FromSolver(active.Solver, active.Algorithm) with
+            TrySetTerminalSnapshot(active.Generation, SolverProgressBar.FromSolver(active.Solver, active.Algorithm) with
             {
                 State = ProgressBarComponent.ProgressState.Cancelled
             });
+        else
+            TryInvalidate(active.Generation);
 
-        _generation.TryInvalidate(active.Generation);
         TryCancel(active.Cancellation);
     }
 
@@ -251,7 +304,7 @@ public sealed class SolverRun : IDisposable
         {
             try
             {
-                var snapshot = SolverProgressBar.FromSolver(solver, algorithm);
+                var snapshot = _pollSnapshotFactory(solver, algorithm);
                 if (!TrySetSnapshot(generation, snapshot))
                 {
                     cancellation.Cancel();

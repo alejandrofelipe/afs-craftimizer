@@ -199,6 +199,106 @@ public class SolverRunTests
         Assert.AreEqual(ProgressBarComponent.ProgressState.Completed, run.Snapshots.Single().State);
     }
 
+    [TestMethod]
+    public void Run_EarlyStopSealsTerminalSnapshotBeforePausedPollerPublishes()
+    {
+        using var pollerSnapshotComputed = new ManualResetEventSlim();
+        using var releasePollerSnapshot = new ManualResetEventSlim();
+        using var run = new SolverRun(pollSnapshotFactory: (_, _) =>
+        {
+            var snapshot = new ProgressBarComponent.ProgressSnapshot(
+                "stale poller", 1, 2, ProgressBarComponent.ProgressState.InProgress);
+            pollerSnapshotComputed.Set();
+            Assert.IsTrue(releasePollerSnapshot.Wait(GateTimeout));
+            return snapshot;
+        });
+        Task? task = null;
+
+        try
+        {
+            var generation = run.Begin(Indeterminate("running"));
+            task = Task.Run(() => run.Run(
+                FastConfig(SolverAlgorithm.Stepwise),
+                new SimulationState(EasyInput()),
+                generation,
+                CancellationToken.None,
+                _ =>
+                {
+                    Assert.IsTrue(pollerSnapshotComputed.Wait(GateTimeout));
+                    return false;
+                }));
+
+            Assert.IsTrue(pollerSnapshotComputed.Wait(GateTimeout));
+            Assert.IsTrue(SpinWait.SpinUntil(
+                () => run.Snapshots.Single().State == ProgressBarComponent.ProgressState.Completed,
+                GateTimeout));
+
+            releasePollerSnapshot.Set();
+            task.GetAwaiter().GetResult();
+
+            Assert.AreEqual(ProgressBarComponent.ProgressState.Completed, run.Snapshots.Single().State);
+        }
+        finally
+        {
+            releasePollerSnapshot.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
+    public void Run_PollerFault_StillClearsActiveRunAndCancelsLocalToken()
+    {
+        using var pollerEntered = new ManualResetEventSlim();
+        using var releasePoller = new ManualResetEventSlim();
+        using var run = new SolverRun(pollSnapshotFactory: (_, _) =>
+        {
+            pollerEntered.Set();
+            Assert.IsTrue(releasePoller.Wait(GateTimeout));
+            throw new InvalidOperationException("poller failed");
+        });
+        Task? task = null;
+
+        try
+        {
+            var generation = run.Begin(Indeterminate("running"));
+            task = Task.Run(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput()),
+                generation,
+                CancellationToken.None,
+                _ => true));
+
+            Assert.IsTrue(pollerEntered.Wait(GateTimeout));
+            var activeSolver = run.Current;
+            Assert.IsNotNull(activeSolver);
+
+            releasePoller.Set();
+            var exception = Assert.ThrowsException<InvalidOperationException>(task.GetAwaiter().GetResult);
+
+            Assert.AreEqual("poller failed", exception.Message);
+            Assert.IsNull(run.Current);
+            Assert.IsTrue(activeSolver.Token.IsCancellationRequested);
+        }
+        finally
+        {
+            releasePoller.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
+    public void Run_StaleRegistration_ObservesExternalCancellationDuringSetup()
+    {
+        using var tokenSource = new CancellationTokenSource();
+        using var run = new SolverRun(beforeRegistration: tokenSource.Cancel);
+        var staleGeneration = run.Begin(Indeterminate("first"));
+        _ = run.Begin(Indeterminate("second"));
+
+        Assert.ThrowsException<OperationCanceledException>(() =>
+            run.Run(FastConfig(), new SimulationState(EasyInput()), staleGeneration,
+                tokenSource.Token, _ => true));
+    }
+
     private static ProgressBarComponent.ProgressSnapshot Indeterminate(string name) =>
         new(name, 0, 1, ProgressBarComponent.ProgressState.Indeterminate);
 
