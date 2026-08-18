@@ -149,6 +149,37 @@ public class SolverRunTests
     }
 
     [TestMethod]
+    public void Run_ReplacedGeneration_DoesNotDeliverStaleExternalCallbacks()
+    {
+        using var run = new SolverRun();
+        var newActionCallbacks = 0;
+        var suggestSolutionCallbacks = 0;
+        var firstGeneration = run.Begin(Indeterminate("first"));
+
+        run.Run(FastConfig(), new SimulationState(EasyInput(maxProgress: 10_000)), firstGeneration,
+            CancellationToken.None,
+            _ =>
+            {
+                if (Interlocked.Increment(ref newActionCallbacks) == 1)
+                    run.Begin(Indeterminate("second"));
+                return true;
+            });
+
+        var suggestionGeneration = run.Begin(Indeterminate("suggestion"));
+        run.Run(FastConfig(SolverAlgorithm.NextActionForked), new SimulationState(EasyInput()), suggestionGeneration,
+            CancellationToken.None,
+            _ =>
+            {
+                run.Begin(Indeterminate("current"));
+                return true;
+            },
+            _ => Interlocked.Increment(ref suggestSolutionCallbacks));
+
+        Assert.AreEqual(1, Volatile.Read(ref newActionCallbacks));
+        Assert.AreEqual(0, Volatile.Read(ref suggestSolutionCallbacks));
+    }
+
+    [TestMethod]
     public void Cancel_MarkCancelled_PreservesCancelledSnapshotAfterRunFinishes()
     {
         using var run = new SolverRun();
@@ -302,7 +333,7 @@ public class SolverRunTests
     private static ProgressBarComponent.ProgressSnapshot Indeterminate(string name) =>
         new(name, 0, 1, ProgressBarComponent.ProgressState.Indeterminate);
 
-    private static SimulationInput EasyInput() =>
+    private static SimulationInput EasyInput(int maxProgress = 50) =>
         new(new CharacterStats
         {
             Craftsmanship = 3304,
@@ -315,7 +346,7 @@ public class SolverRunTests
             ClassJobLevel = 90,
             MaxDurability = 60,
             MaxQuality = 0,
-            MaxProgress = 50,
+            MaxProgress = maxProgress,
             QualityModifier = 0,
             QualityDivider = 115,
             ProgressModifier = 90,

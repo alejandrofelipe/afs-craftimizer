@@ -279,11 +279,23 @@ public sealed class CraftingSession : IDisposable
 
         SolverComparisonPending = true;
         var state = _currentState;
-        SolverTask = new(token => CalculateBestMacroTask(state, generation, token, Gearsets.HasDelineations()));
-        SolverTask.Start();
+        BackgroundTask<int>? task = null;
+        task = new(token => CalculateBestMacroTask(
+            generation,
+            state,
+            token,
+            Gearsets.HasDelineations(),
+            () => task!.Cancel()));
+        SolverTask = task;
+        task.Start();
     }
 
-    private int CalculateBestMacroTask(SimulationState state, long generation, CancellationToken token, bool hasDelineations)
+    private int CalculateBestMacroTask(
+        long generation,
+        SimulationState state,
+        CancellationToken token,
+        bool hasDelineations,
+        Action cancelCurrentTask)
     {
         var config = _plugin.Configuration.SynthHelperSolverConfig
             .ForDelineations(_plugin.Configuration.CheckDelineations, hasDelineations);
@@ -295,7 +307,7 @@ public sealed class CraftingSession : IDisposable
                 var shouldContinue = newSize < _plugin.Configuration.SynthHelperStepCount
                     && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount;
                 if (!shouldContinue)
-                    SolverTask?.Cancel(); // restaura o comportamento antigo: cancela o BackgroundTask (SolverCancelling=true, task Canceled)
+                    cancelCurrentTask(); // restaura o comportamento antigo: cancela o BackgroundTask (SolverCancelling=true, task Canceled)
                 return shouldContinue;
             });
 
