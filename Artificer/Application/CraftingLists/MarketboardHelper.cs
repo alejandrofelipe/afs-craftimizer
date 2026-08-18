@@ -4,6 +4,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -57,19 +58,19 @@ public sealed class MarketboardHelper : IDisposable
 
         var worldOrDc = string.IsNullOrEmpty(dcName) ? worldId.ToString() : dcName;
 
-        var cached = _repo.GetCachedPrice(itemId, worldOrDc);
+        var cached = _repo.GetCachedScopePrice(itemId, worldOrDc);
         if (cached != null && !cached.IsStale(ttlMinutes))
-            return cached;
+            return Combine(cached, null);
 
         var fetched = await Fetch(itemId, worldId, worldOrDc).ConfigureAwait(false);
         if (fetched == null)
-            return cached;
+            return Combine(cached, null);
 
-        _repo.SavePrice(itemId, worldOrDc, fetched.PriceCheapestServer, fetched.TotalAvailable, fetched.CheapestServerName);
-        return fetched;
+        _repo.SaveScopePrice(fetched);
+        return Combine(fetched, null);
     }
 
-    private async Task<MarketPrice?> Fetch(uint itemId, uint worldId, string worldOrDc)
+    private async Task<MarketScopePrice?> Fetch(uint itemId, uint worldId, string worldOrDc)
     {
         // Try IPC first.
         if (_ipc != null)
@@ -79,7 +80,7 @@ public sealed class MarketboardHelper : IDisposable
                 var json = _ipc.InvokeFunc(itemId, worldId);
                 if (!string.IsNullOrEmpty(json))
                 {
-                    var parsed = Parse(itemId, json);
+                    var parsed = ParseScope(itemId, worldOrDc, json, DateTime.UtcNow);
                     if (parsed != null)
                         return parsed;
                 }
@@ -96,7 +97,7 @@ public sealed class MarketboardHelper : IDisposable
         {
             var url = $"https://universalis.app/api/v2/{Uri.EscapeDataString(worldOrDc)}/{itemId}?listings=5&entries=0";
             var json = await _http.GetStringAsync(url).ConfigureAwait(false);
-            return Parse(itemId, json);
+            return ParseScope(itemId, worldOrDc, json, DateTime.UtcNow);
         }
         catch
         {
@@ -104,7 +105,11 @@ public sealed class MarketboardHelper : IDisposable
         }
     }
 
-    private static MarketPrice? Parse(uint itemId, string json)
+    internal static MarketScopePrice? ParseScope(
+        uint itemId,
+        string scope,
+        string json,
+        DateTime cachedAt)
     {
         UniversalisResponse? resp;
         try
@@ -119,7 +124,7 @@ public sealed class MarketboardHelper : IDisposable
             return null;
 
         var listings = resp.Listings ?? new List<UniversalisListing>();
-        var cheapest = listings.Count > 0 ? listings[0] : null;
+        var cheapest = listings.MinBy(listing => listing.PricePerUnit);
         var cheapestPrice = cheapest?.PricePerUnit ?? resp.MinPrice;
         var cheapestServer = cheapest?.WorldName ?? string.Empty;
 
@@ -127,13 +132,34 @@ public sealed class MarketboardHelper : IDisposable
         foreach (var l in listings)
             total += l.Quantity;
 
-        return new MarketPrice(
+        return new MarketScopePrice(
             itemId,
-            cheapestPrice,
+            scope,
             cheapestPrice,
             cheapestServer,
             total,
-            DateTime.UtcNow);
+            cachedAt);
+    }
+
+    internal static MarketPrice? Combine(
+        MarketScopePrice? currentWorld,
+        MarketScopePrice? dataCenter)
+    {
+        if (currentWorld == null)
+            return null;
+
+        var cheapest = dataCenter ?? currentWorld;
+        var cachedAt = currentWorld.CachedAt <= cheapest.CachedAt
+            ? currentWorld.CachedAt
+            : cheapest.CachedAt;
+
+        return new MarketPrice(
+            currentWorld.ItemId,
+            currentWorld.PricePerUnit,
+            cheapest.PricePerUnit,
+            cheapest.ServerName,
+            currentWorld.TotalAvailable,
+            cachedAt);
     }
 
     public void Dispose() => _ipc = null;
