@@ -62,6 +62,7 @@ public sealed class CraftingSession : IDisposable
     private List<ActionType> PlayedActions { get; } = [];
     private bool CraftAutoSaved { get; set; }
     private readonly SolverRun _run = new();
+    private readonly SolverGenerationCommitGate _solverCommits = new();
 
     private readonly global::Artificer.Plugin.Plugin _plugin;
 
@@ -248,8 +249,11 @@ public sealed class CraftingSession : IDisposable
     /// <summary>Cancels any running solver task.</summary>
     public void CancelSolver()
     {
-        _run.Cancel(markCancelled: SolverRunning);
-        SolverTask?.Cancel();
+        _solverCommits.Invalidate(() =>
+        {
+            _run.Cancel(markCancelled: SolverRunning);
+            SolverTask?.Cancel();
+        });
     }
 
     /// <summary>Triggers a new solver run (same as starting a fresh calculation).</summary>
@@ -257,28 +261,41 @@ public sealed class CraftingSession : IDisposable
 
     public void Dispose()
     {
-        SolverTask?.Cancel();
-        _run.Dispose();
+        _solverCommits.Invalidate(() =>
+        {
+            SolverTask?.Cancel();
+            _run.Dispose();
+        });
     }
 
     // ── Private solver/state logic ─────────────────────────────────────────────
 
     private void CalculateBestMacro()
     {
-        SolverTask?.Cancel();
-        _run.Cancel();
-        var generation = _run.Begin(null); // limpa os snapshots (equivalente ao Clear() da lista antiga)
-        Macro.ClearQueue();
-        Macro.Clear();
-
-        if (_plugin.Configuration.ConditionRandomness)
+        _solverCommits.Invalidate(() =>
         {
-            _plugin.Configuration.ConditionRandomness = false;
-            Macro.RecalculateState();
-        }
+            SolverTask?.Cancel();
+            _run.Cancel();
+        });
 
-        SolverComparisonPending = true;
         var state = _currentState;
+        var generation = _solverCommits.Begin(
+            reset: () =>
+            {
+                Macro.ClearQueue();
+                Macro.Clear();
+
+                if (_plugin.Configuration.ConditionRandomness)
+                {
+                    _plugin.Configuration.ConditionRandomness = false;
+                    Macro.RecalculateState();
+                }
+
+                SolverComparisonPending = true;
+                state = _currentState;
+            },
+            beginGeneration: () => _run.Begin(null)); // limpa os snapshots (equivalente ao Clear() da lista antiga)
+
         BackgroundTask<int>? task = null;
         task = new(token => CalculateBestMacroTask(
             generation,
@@ -303,9 +320,17 @@ public sealed class CraftingSession : IDisposable
         _run.Run(config, state, generation, token,
             onNewAction: a =>
             {
-                var newSize = Macro.Enqueue(a, _plugin.Configuration.SynthHelperMaxDisplayCount);
-                var shouldContinue = newSize < _plugin.Configuration.SynthHelperStepCount
-                    && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount;
+                var shouldContinue = false;
+                var committed = _solverCommits.TryCommit(generation, () =>
+                {
+                    var newSize = Macro.Enqueue(a, _plugin.Configuration.SynthHelperMaxDisplayCount);
+                    shouldContinue = newSize < _plugin.Configuration.SynthHelperStepCount
+                        && newSize < _plugin.Configuration.SynthHelperMaxDisplayCount;
+                });
+
+                if (!committed)
+                    return false;
+
                 if (!shouldContinue)
                     cancelCurrentTask(); // restaura o comportamento antigo: cancela o BackgroundTask (SolverCancelling=true, task Canceled)
                 return shouldContinue;

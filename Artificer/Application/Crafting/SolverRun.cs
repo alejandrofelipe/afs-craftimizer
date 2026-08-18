@@ -31,6 +31,8 @@ public sealed class SolverRun : IDisposable
     private readonly Func<SolverEngine, string, ProgressBarComponent.ProgressSnapshot> _pollSnapshotFactory;
     private readonly Action? _beforeRegistration;
     private ActiveRun? _active;
+    private long? _currentGeneration;
+    private bool _disposed;
 
     public SolverRun()
         : this(SolverProgressBar.FromSolver, null)
@@ -69,36 +71,53 @@ public sealed class SolverRun : IDisposable
 
     private bool TrySetSnapshot(long generation, ProgressBarComponent.ProgressSnapshot snap)
     {
-        lock (_gate)
+        lock (_stateGate)
         {
-            if (!_generation.IsCurrent(generation))
+            if (!IsCurrentGenerationLocked(generation))
                 return false;
 
-            _snapshots.Clear();
-            _snapshots.Add(snap);
+            lock (_gate)
+            {
+                _snapshots.Clear();
+                _snapshots.Add(snap);
+            }
+
             return true;
         }
     }
 
     private bool TrySetTerminalSnapshot(long generation, ProgressBarComponent.ProgressSnapshot snap)
     {
+        lock (_stateGate)
+            return TrySetTerminalSnapshotLocked(generation, snap);
+    }
+
+    private bool TrySetTerminalSnapshotLocked(long generation, ProgressBarComponent.ProgressSnapshot snap)
+    {
+        if (!IsCurrentGenerationLocked(generation))
+            return false;
+
         lock (_gate)
         {
-            if (!_generation.IsCurrent(generation))
-                return false;
-
             _snapshots.Clear();
             _snapshots.Add(snap);
-            _generation.TryInvalidate(generation);
-            return true;
         }
+
+        _currentGeneration = null;
+        _generation.TryInvalidate(generation);
+        return true;
     }
 
-    private void TryInvalidate(long generation)
+    private bool IsCurrentGeneration(long generation)
     {
-        lock (_gate)
-            _generation.TryInvalidate(generation);
+        lock (_stateGate)
+            return IsCurrentGenerationLocked(generation);
     }
+
+    private bool IsCurrentGenerationLocked(long generation) =>
+        !_disposed
+     && _currentGeneration == generation
+     && _generation.IsCurrent(generation);
 
     /// <summary>
     /// Inicia uma nova geração e define seu snapshot inicial de forma síncrona (UI thread, ANTES de
@@ -106,20 +125,23 @@ public sealed class SolverRun : IDisposable
     /// </summary>
     public long Begin(ProgressBarComponent.ProgressSnapshot? snap)
     {
-        long generation;
-        lock (_gate)
-        {
-            generation = _generation.Next();
-            _snapshots.Clear();
-            if (snap is { } initial)
-                _snapshots.Add(initial);
-        }
-
         ActiveRun? previous;
+        long generation;
         lock (_stateGate)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            generation = _generation.Next();
+            _currentGeneration = generation;
             previous = _active;
             _active = null;
+
+            lock (_gate)
+            {
+                _snapshots.Clear();
+                if (snap is { } initial)
+                    _snapshots.Add(initial);
+            }
         }
 
         if (previous is not null)
@@ -142,6 +164,9 @@ public sealed class SolverRun : IDisposable
         Action<SolverSolution>? onSuggestSolution = null,
         Action<Exception>? onFaulted = null)
     {
+        lock (_stateGate)
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
         token.ThrowIfCancellationRequested();
 
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -151,21 +176,21 @@ public sealed class SolverRun : IDisposable
         using var solver = new SolverEngine(config, state) { Token = runToken };
         solver.OnLog += text =>
         {
-            if (_generation.IsCurrent(generation))
+            if (IsCurrentGeneration(generation))
                 Log.Debug(text);
             else
                 cancellation.Cancel();
         };
         solver.OnWarn += text =>
         {
-            if (_generation.IsCurrent(generation))
+            if (IsCurrentGeneration(generation))
                 Plugin.Plugin.DisplaySolverWarning(text);
             else
                 cancellation.Cancel();
         };
         solver.OnNewAction += action =>
         {
-            if (!_generation.IsCurrent(generation))
+            if (!IsCurrentGeneration(generation))
             {
                 cancellation.Cancel();
                 return;
@@ -184,7 +209,7 @@ public sealed class SolverRun : IDisposable
         {
             solver.OnSuggestSolution += solution =>
             {
-                if (_generation.IsCurrent(generation))
+                if (IsCurrentGeneration(generation))
                     onSuggestSolution(solution);
                 else
                     cancellation.Cancel();
@@ -197,7 +222,7 @@ public sealed class SolverRun : IDisposable
         var registered = false;
         lock (_stateGate)
         {
-            if (_generation.IsCurrent(generation))
+            if (IsCurrentGenerationLocked(generation))
             {
                 previous = _active;
                 _active = active;
@@ -236,7 +261,7 @@ public sealed class SolverRun : IDisposable
         }
         catch (Exception exception)
         {
-            if (_generation.IsCurrent(generation))
+            if (IsCurrentGeneration(generation))
                 onFaulted?.Invoke(exception);
             else
                 cancellation.Cancel();
@@ -277,20 +302,33 @@ public sealed class SolverRun : IDisposable
     {
         ActiveRun? active;
         lock (_stateGate)
+        {
+            if (_disposed)
+                return;
+
             active = _active;
 
-        if (active is null)
-            return;
-
-        if (markCancelled && !active.Cancellation.IsCancellationRequested)
-            TrySetTerminalSnapshot(active.Generation, SolverProgressBar.FromSolver(active.Solver, active.Algorithm) with
+            if (markCancelled && active is not null)
             {
-                State = ProgressBarComponent.ProgressState.Cancelled
-            });
-        else
-            TryInvalidate(active.Generation);
+                TrySetTerminalSnapshotLocked(
+                    active.Generation,
+                    SolverProgressBar.FromSolver(active.Solver, active.Algorithm) with
+                    {
+                        State = ProgressBarComponent.ProgressState.Cancelled
+                    });
+            }
+            else
+            {
+                if (_currentGeneration is { } generation)
+                {
+                    _currentGeneration = null;
+                    _generation.TryInvalidate(generation);
+                }
+            }
+        }
 
-        TryCancel(active.Cancellation);
+        if (active is not null)
+            TryCancel(active.Cancellation);
     }
 
     private async Task PollSnapshots(
@@ -323,5 +361,26 @@ public sealed class SolverRun : IDisposable
         catch (ObjectDisposedException) { }
     }
 
-    public void Dispose() => Cancel();
+    public void Dispose()
+    {
+        ActiveRun? active;
+        lock (_stateGate)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            active = _active;
+            _active = null;
+
+            if (_currentGeneration is { } generation)
+            {
+                _currentGeneration = null;
+                _generation.TryInvalidate(generation);
+            }
+        }
+
+        if (active is not null)
+            TryCancel(active.Cancellation);
+    }
 }

@@ -9,28 +9,36 @@ public sealed partial class MacroEditor
 {
     private void CalculateBestMacro()
     {
-        SolverTask?.Cancel();
-        _run.Cancel();
-
-        Macro.ClearQueue();
-        RevertPreviousMacro();
-
-        if (_plugin.Configuration.ConditionRandomness)
+        _solverCommits.Invalidate(() =>
         {
-            _plugin.Configuration.ConditionRandomness = false;
-            _plugin.Configuration.Save();
-            RecalculateState();
-        }
-
-        SolverStartStepCount = Macro.Count;
+            SolverTask?.Cancel();
+            _run.Cancel();
+        });
 
         // Snapshot inicial na UI thread (loading imediato no 1º frame — preserva o comportamento atual).
-        var generation = _run.Begin(new ProgressBarComponent.ProgressSnapshot(
+        var initialSnapshot = new ProgressBarComponent.ProgressSnapshot(
             Name: _plugin.Configuration.EditorSolverConfig.Algorithm.ToString(),
             CurrentValue: 0, MaxValue: 1,
-            State: ProgressBarComponent.ProgressState.Indeterminate));
-
+            State: ProgressBarComponent.ProgressState.Indeterminate);
         var state = State;
+        var generation = _solverCommits.Begin(
+            reset: () =>
+            {
+                Macro.ClearQueue();
+                RevertPreviousMacro();
+
+                if (_plugin.Configuration.ConditionRandomness)
+                {
+                    _plugin.Configuration.ConditionRandomness = false;
+                    _plugin.Configuration.Save();
+                    RecalculateState();
+                }
+
+                SolverStartStepCount = Macro.Count;
+                state = State;
+            },
+            beginGeneration: () => _run.Begin(initialSnapshot));
+
         SolverTask = new(token => CalculateBestMacroTask(state, generation, token, Gearsets.HasDelineations()));
         SolverTask.Start();
     }
@@ -43,16 +51,24 @@ public sealed partial class MacroEditor
         try
         {
             _run.Run(config, state, generation, token,
-                onNewAction: a => { Macro.Enqueue(a); return true; },
-                onSuggestSolution: a => Macro.EnqueueEphemeral(a.Actions),
-                onFaulted: ex => Log.Error(ex, "Solver task faulted"));
+                onNewAction: a => _solverCommits.TryCommit(generation, () =>
+                {
+                    Macro.Enqueue(a);
+                    return true;
+                }),
+                onSuggestSolution: a => _solverCommits.TryCommit(
+                    generation,
+                    () => Macro.EnqueueEphemeral(a.Actions)),
+                onFaulted: ex => _solverCommits.TryCommit(
+                    generation,
+                    () => Log.Error(ex, "Solver task faulted")));
         }
         finally
         {
             // Remove ephemeral em conclusão OU falha (não em cancelamento) — espelha o antigo
             // ContinueWith(..., TaskContinuationOptions.NotOnCanceled).
             if (!token.IsCancellationRequested)
-                Macro.RemoveEphemeral();
+                _solverCommits.TryCommit(generation, Macro.RemoveEphemeral);
         }
 
         return 0;

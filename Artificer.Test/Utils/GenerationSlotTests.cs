@@ -44,6 +44,23 @@ public class GenerationSlotTests
     }
 
     [TestMethod]
+    public void Invalidate_ClosesGenerationBeforeRunningCancellationSideEffect()
+    {
+        var slot = new GenerationSlot<string>();
+        var generation = slot.Begin();
+        Assert.IsTrue(slot.TryPublish(generation, "current"));
+        var stalePublicationDuringCancellation = true;
+
+        slot.Invalidate(() =>
+        {
+            stalePublicationDuringCancellation = slot.TryPublish(generation, "stale");
+        });
+
+        Assert.IsFalse(stalePublicationDuringCancellation);
+        Assert.IsNull(slot.Value);
+    }
+
+    [TestMethod]
     public async Task TryPublish_PreviousGenerationAfterNewBegin_DoesNotOverwriteCurrentValue()
     {
         var slot = new GenerationSlot<string>();

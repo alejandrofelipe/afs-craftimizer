@@ -180,6 +180,102 @@ public class SolverRunTests
     }
 
     [TestMethod]
+    public void Run_OnNewActionPausedBeforeHostCommit_DoesNotMutateAfterNewBegin()
+    {
+        using var callbackAuthorized = new ManualResetEventSlim();
+        using var releaseCommit = new ManualResetEventSlim();
+        using var run = new SolverRun();
+        var host = new SolverGenerationCommitGate();
+        var mutations = 0;
+        Task? task = null;
+
+        try
+        {
+            var generation = host.Begin(
+                reset: () => { },
+                beginGeneration: () => run.Begin(Indeterminate("first")));
+            task = Task.Run(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput(maxProgress: 10_000)),
+                generation,
+                CancellationToken.None,
+                action =>
+                {
+                    callbackAuthorized.Set();
+                    Assert.IsTrue(releaseCommit.Wait(GateTimeout));
+                    return host.TryCommit(generation, () =>
+                    {
+                        Interlocked.Increment(ref mutations);
+                        return true;
+                    });
+                }));
+
+            Assert.IsTrue(callbackAuthorized.Wait(GateTimeout));
+            _ = host.Begin(
+                reset: () => { },
+                beginGeneration: () => run.Begin(Indeterminate("second")));
+            releaseCommit.Set();
+            task.GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, Volatile.Read(ref mutations));
+            Assert.AreEqual("second", run.Snapshots.Single().Name);
+        }
+        finally
+        {
+            releaseCommit.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
+    public void Run_OnSuggestSolutionPausedBeforeHostCommit_DoesNotMutateAfterNewBegin()
+    {
+        using var callbackAuthorized = new ManualResetEventSlim();
+        using var releaseCommit = new ManualResetEventSlim();
+        using var run = new SolverRun();
+        var host = new SolverGenerationCommitGate();
+        var mutations = 0;
+        Task? task = null;
+
+        try
+        {
+            var generation = host.Begin(
+                reset: () => { },
+                beginGeneration: () => run.Begin(Indeterminate("first")));
+            task = Task.Run(() => run.Run(
+                FastConfig(SolverAlgorithm.NextActionForked),
+                new SimulationState(EasyInput(maxProgress: 10_000)),
+                generation,
+                CancellationToken.None,
+                _ => true,
+                solution =>
+                {
+                    callbackAuthorized.Set();
+                    Assert.IsTrue(releaseCommit.Wait(GateTimeout));
+                    host.TryCommit(generation, () =>
+                    {
+                        Interlocked.Increment(ref mutations);
+                    });
+                }));
+
+            Assert.IsTrue(callbackAuthorized.Wait(GateTimeout));
+            _ = host.Begin(
+                reset: () => { },
+                beginGeneration: () => run.Begin(Indeterminate("second")));
+            releaseCommit.Set();
+            task.GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, Volatile.Read(ref mutations));
+            Assert.AreEqual("second", run.Snapshots.Single().Name);
+        }
+        finally
+        {
+            releaseCommit.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
     public void Cancel_MarkCancelled_PreservesCancelledSnapshotAfterRunFinishes()
     {
         using var run = new SolverRun();
@@ -219,6 +315,145 @@ public class SolverRunTests
     }
 
     [TestMethod]
+    public void Cancel_MarkCancelled_SealsCancelledWhenLinkedTokenIsAlreadyCancelled()
+    {
+        using var tokenSource = new CancellationTokenSource();
+        using var callbackEntered = new ManualResetEventSlim();
+        using var releaseCallback = new ManualResetEventSlim();
+        using var run = new SolverRun();
+        Task? task = null;
+
+        try
+        {
+            var generation = run.Begin(Indeterminate("running"));
+            task = Task.Run(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput()),
+                generation,
+                tokenSource.Token,
+                _ =>
+                {
+                    callbackEntered.Set();
+                    Assert.IsTrue(releaseCallback.Wait(GateTimeout));
+                    return true;
+                }));
+
+            Assert.IsTrue(callbackEntered.Wait(GateTimeout));
+            var activeSolver = run.Current;
+            Assert.IsNotNull(activeSolver);
+
+            tokenSource.Cancel();
+            Assert.IsTrue(activeSolver.Token.IsCancellationRequested);
+            run.Cancel(markCancelled: true);
+
+            Assert.AreEqual(
+                ProgressBarComponent.ProgressState.Cancelled,
+                run.Snapshots.Single().State);
+
+            releaseCallback.Set();
+            Assert.ThrowsException<OperationCanceledException>(task.GetAwaiter().GetResult);
+        }
+        finally
+        {
+            releaseCallback.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
+    public void Cancel_BeforeRegistration_InvalidatesPendingGeneration()
+    {
+        using var beforeRegistration = new ManualResetEventSlim();
+        using var releaseRegistration = new ManualResetEventSlim();
+        using var run = new SolverRun(beforeRegistration: () =>
+        {
+            beforeRegistration.Set();
+            Assert.IsTrue(releaseRegistration.Wait(GateTimeout));
+        });
+        var callbacks = 0;
+        Task? task = null;
+
+        try
+        {
+            var generation = run.Begin(Indeterminate("pending"));
+            task = Task.Run(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput()),
+                generation,
+                CancellationToken.None,
+                _ =>
+                {
+                    Interlocked.Increment(ref callbacks);
+                    return true;
+                }));
+
+            Assert.IsTrue(beforeRegistration.Wait(GateTimeout));
+            run.Cancel();
+            releaseRegistration.Set();
+            task.GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, Volatile.Read(ref callbacks));
+            Assert.IsNull(run.Current);
+            Assert.AreEqual("pending", run.Snapshots.Single().Name);
+        }
+        finally
+        {
+            releaseRegistration.Set();
+            WaitForCleanup(task);
+        }
+    }
+
+    [TestMethod]
+    public void Dispose_BeforeRegistration_InvalidatesPendingGenerationAndPreventsLaterUse()
+    {
+        using var beforeRegistration = new ManualResetEventSlim();
+        using var releaseRegistration = new ManualResetEventSlim();
+        var run = new SolverRun(beforeRegistration: () =>
+        {
+            beforeRegistration.Set();
+            Assert.IsTrue(releaseRegistration.Wait(GateTimeout));
+        });
+        var callbacks = 0;
+        Task? task = null;
+
+        try
+        {
+            var generation = run.Begin(Indeterminate("pending"));
+            task = Task.Run(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput()),
+                generation,
+                CancellationToken.None,
+                _ =>
+                {
+                    Interlocked.Increment(ref callbacks);
+                    return true;
+                }));
+
+            Assert.IsTrue(beforeRegistration.Wait(GateTimeout));
+            run.Dispose();
+            releaseRegistration.Set();
+            task.GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, Volatile.Read(ref callbacks));
+            Assert.IsNull(run.Current);
+            Assert.ThrowsException<ObjectDisposedException>(() => run.Begin(Indeterminate("later")));
+            Assert.ThrowsException<ObjectDisposedException>(() => run.Run(
+                FastConfig(),
+                new SimulationState(EasyInput()),
+                generation,
+                CancellationToken.None,
+                _ => true));
+        }
+        finally
+        {
+            releaseRegistration.Set();
+            WaitForCleanup(task);
+            run.Dispose();
+        }
+    }
+
+    [TestMethod]
     public void Run_CurrentEarlyStop_ProducesCompletedSnapshot()
     {
         using var run = new SolverRun();
@@ -228,6 +463,63 @@ public class SolverRunTests
             CancellationToken.None, _ => false);
 
         Assert.AreEqual(ProgressBarComponent.ProgressState.Completed, run.Snapshots.Single().State);
+    }
+
+    [TestMethod]
+    public void Run_NaturalCompletion_ProducesCompletedSnapshot()
+    {
+        using var run = new SolverRun();
+        var generation = run.Begin(Indeterminate("running"));
+
+        run.Run(FastConfig(), new SimulationState(EasyInput()), generation,
+            CancellationToken.None, _ => true);
+
+        Assert.AreEqual(ProgressBarComponent.ProgressState.Completed, run.Snapshots.Single().State);
+    }
+
+    [TestMethod]
+    public void Run_CurrentFault_DeliversOnFaulted()
+    {
+        using var run = new SolverRun();
+        var expected = new InvalidOperationException("host callback failed");
+        Exception? observed = null;
+        var generation = run.Begin(Indeterminate("running"));
+
+        var thrown = Assert.ThrowsException<InvalidOperationException>(() => run.Run(
+            FastConfig(),
+            new SimulationState(EasyInput()),
+            generation,
+            CancellationToken.None,
+            _ => throw expected,
+            onFaulted: exception => observed = exception));
+
+        Assert.AreSame(expected, thrown);
+        Assert.AreSame(expected, observed);
+    }
+
+    [TestMethod]
+    public void Run_StaleFault_DoesNotDeliverOnFaulted()
+    {
+        using var run = new SolverRun();
+        var expected = new InvalidOperationException("stale host callback failed");
+        var faultCallbacks = 0;
+        var generation = run.Begin(Indeterminate("running"));
+
+        var thrown = Assert.ThrowsException<InvalidOperationException>(() => run.Run(
+            FastConfig(),
+            new SimulationState(EasyInput()),
+            generation,
+            CancellationToken.None,
+            _ =>
+            {
+                run.Begin(Indeterminate("current"));
+                throw expected;
+            },
+            onFaulted: _ => Interlocked.Increment(ref faultCallbacks)));
+
+        Assert.AreSame(expected, thrown);
+        Assert.AreEqual(0, Volatile.Read(ref faultCallbacks));
+        Assert.AreEqual("current", run.Snapshots.Single().Name);
     }
 
     [TestMethod]

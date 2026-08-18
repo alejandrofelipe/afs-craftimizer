@@ -90,6 +90,7 @@ public sealed partial class MacroEditor : Window, IDisposable
     private bool SolverRunning => (!SolverTask?.Completed) ?? false;
     private int? SolverStartStepCount { get; set; }
     private readonly Application.Crafting.SolverRun _run = new();
+    private readonly SolverGenerationCommitGate _solverCommits = new();
 
     private CosmicToolTracker.ToolProgress? _cosmicProgress;
     private readonly TitleBarButton _cosmicButton;
@@ -230,7 +231,11 @@ public sealed partial class MacroEditor : Window, IDisposable
     public override void OnClose()
     {
         base.OnClose();
-        SolverTask?.Cancel();
+        _solverCommits.Invalidate(() =>
+        {
+            SolverTask?.Cancel();
+            _run.Cancel();
+        });
     }
 
     public override void Update()
@@ -319,7 +324,11 @@ public sealed partial class MacroEditor : Window, IDisposable
 
     public void Dispose()
     {
-        _run.Dispose();
+        _solverCommits.Invalidate(() =>
+        {
+            SolverTask?.Cancel();
+            _run.Dispose();
+        });
         _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         _plugin.WindowSystem.RemoveWindow(this);
 

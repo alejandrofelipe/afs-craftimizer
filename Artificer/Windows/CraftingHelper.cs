@@ -168,8 +168,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
             if (WasCalculatable)
             {
                 SavedMacroTask?.Cancel();
-                _bestMacroSolver.Invalidate();
-                SuggestedMacroTask?.Cancel();
+                _bestMacroSolver.Invalidate(() => SuggestedMacroTask?.Cancel());
                 CommunityMacroTask?.Cancel();
             }
             else if (CraftStatus == CraftableStatus.OK && !StatsChanged)
@@ -340,8 +339,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
 
     private void ClearSuggestedMacro()
     {
-        _bestMacroSolver.Invalidate();
-        SuggestedMacroTask?.Cancel();
+        _bestMacroSolver.Invalidate(() => SuggestedMacroTask?.Cancel());
         SuggestedMacroTask = null;
         _prevSuggestedActions = null;
         _prevSuggestedState   = null;
@@ -668,10 +666,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
                 else
                 {
                     if (ImGui.Button("Stop", new(availWidth, 0)))
-                    {
-                        _bestMacroSolver.Invalidate();
-                        task.Cancel();
-                    }
+                        _bestMacroSolver.Invalidate(task.Cancel);
                 }
             }
             else
@@ -1685,8 +1680,7 @@ public sealed unsafe class CraftingHelper : Window, IDisposable
     {
         _plugin.CosmicToolTracker.OnProgressChanged -= OnCosmicProgressChanged;
         SavedMacroTask?.Dispose();
-        _bestMacroSolver.Invalidate();
-        SuggestedMacroTask?.Dispose();
+        _bestMacroSolver.Invalidate(() => SuggestedMacroTask?.Dispose());
         CommunityMacroTask?.Dispose();
         _plugin.WindowSystem.RemoveWindow(this);
         AxisFont?.Dispose();

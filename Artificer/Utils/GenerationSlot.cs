@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 
 namespace Artificer.Utils;
@@ -38,12 +39,15 @@ internal sealed class GenerationSlot<T> where T : class
         }
     }
 
-    public void Invalidate()
+    public void Invalidate() => Invalidate(static () => { });
+
+    public void Invalidate(Action afterInvalidation)
     {
         lock (_gate)
         {
             _value = null;
             _generation++;
+            afterInvalidation();
         }
     }
 }
