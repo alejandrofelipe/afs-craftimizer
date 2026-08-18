@@ -334,30 +334,120 @@ public class MarketboardHelperTests
     }
 
     [TestMethod]
-    public async Task GetPriceAsync_WhenTransportThrowsOperationCanceledException_DoesNotReturnStaleCache()
+    public async Task GetPriceAsync_WhenTransportTimesOut_ReturnsEachScopesOwnStaleSnapshot()
     {
         using var fixture = new RepositoryFixture();
         var staleAt = StaleUtc();
-        fixture.Repository.SaveScopePrice(
-            new MarketScopePrice(ItemId, "42", 120, "WorldA", 14, staleAt));
-        fixture.Repository.SaveScopePrice(
-            new MarketScopePrice(ItemId, "Aether", 80, "WorldB", 27, staleAt));
-        var cancellation = new OperationCanceledException("transport cancelled");
+        var staleWorld = new MarketScopePrice(ItemId, "42", 120, "WorldA", 14, staleAt);
+        var staleDataCenter = new MarketScopePrice(ItemId, "Aether", 80, "WorldB", 27, staleAt);
+        fixture.Repository.SaveScopePrice(staleWorld);
+        fixture.Repository.SaveScopePrice(staleDataCenter);
+        var timeout = new OperationCanceledException("transport timed out");
         var transport = new FakeMarketboardTransport
         {
-            OnFetchWorld = (_, _, _) => Task.FromException<MarketScopePrice?>(cancellation),
-            OnFetchScope = (_, _, _) => Task.FromException<MarketScopePrice?>(cancellation)
+            OnFetchWorld = (_, _, _) => Task.FromException<MarketScopePrice?>(timeout),
+            OnFetchScope = (_, _, _) => Task.FromException<MarketScopePrice?>(timeout)
         };
         var dispatcher = new RecordingFrameworkDispatcher();
         using var helper = CreateHelper(fixture.Repository, transport, dispatcher);
 
-        var thrown = await Assert.ThrowsExceptionAsync<OperationCanceledException>(() =>
-            helper.GetPriceAsync(ItemId, WorldId, "Aether", ttlMinutes: 10));
+        var result = await helper.GetPriceAsync(
+            ItemId,
+            WorldId,
+            "Aether",
+            ttlMinutes: 10,
+            CancellationToken.None);
 
-        Assert.AreSame(cancellation, thrown);
-        Assert.AreEqual(1, transport.Calls.Count);
+        Assert.AreEqual(
+            new MarketPrice(ItemId, 120, 80, "WorldB", 14, staleAt),
+            result);
+        Assert.AreEqual(
+            "world:42,scope:Aether",
+            string.Join(',', transport.Calls.Select(call => $"{call.Kind}:{call.Scope}")));
+        Assert.AreEqual(
+            "CacheRead,CacheRead",
+            string.Join(',', dispatcher.Calls.Select(call => call.Operation)));
+    }
+
+    [TestMethod]
+    public async Task GetPriceAsync_WhenRestTimesOut_ReturnsStaleWorldSnapshot()
+    {
+        using var fixture = new RepositoryFixture();
+        var staleAt = StaleUtc();
+        var staleWorld = new MarketScopePrice(ItemId, "42", 120, "WorldA", 14, staleAt);
+        fixture.Repository.SaveScopePrice(staleWorld);
+        var dispatcher = new RecordingFrameworkDispatcher();
+        using var http = new HttpClient(new CancellationThrowingHttpMessageHandler());
+        using var transport = new UniversalisMarketboardTransport(
+            invokeIpc: null,
+            http,
+            dispatcher);
+        using var helper = CreateHelper(fixture.Repository, transport, dispatcher);
+
+        var result = await helper.GetPriceAsync(
+            ItemId,
+            WorldId,
+            dataCenterName: string.Empty,
+            ttlMinutes: 10,
+            CancellationToken.None);
+
+        Assert.AreEqual(
+            new MarketPrice(ItemId, 120, 120, "WorldA", 14, staleAt),
+            result);
         Assert.AreEqual(
             "CacheRead",
+            string.Join(',', dispatcher.Calls.Select(call => call.Operation)));
+    }
+
+    [TestMethod]
+    public async Task GetPriceAsync_WhenCallerCancelsDuringDataCenterFailure_PropagatesCancellation()
+    {
+        using var fixture = new RepositoryFixture();
+        var worldCachedAt = RecentUtc();
+        var staleDataCenterAt = StaleUtc();
+        var cachedWorld = new MarketScopePrice(
+            ItemId, "42", 120, "WorldA", 14, worldCachedAt);
+        var staleDataCenter = new MarketScopePrice(
+            ItemId, "Aether", 80, "WorldB", 27, staleDataCenterAt);
+        fixture.Repository.SaveScopePrice(cachedWorld);
+        fixture.Repository.SaveScopePrice(staleDataCenter);
+        var requestStarted = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var failRequest = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        var transport = new FakeMarketboardTransport
+        {
+            OnFetchWorld = (_, _, _) =>
+                throw new AssertFailedException("Fresh world cache should avoid transport."),
+            OnFetchScope = async (_, _, _) =>
+            {
+                requestStarted.TrySetResult(true);
+                await failRequest.Task.ConfigureAwait(false);
+                throw new HttpRequestException("DC request failed after cancellation.");
+            }
+        };
+        var dispatcher = new RecordingFrameworkDispatcher();
+        using var helper = CreateHelper(fixture.Repository, transport, dispatcher);
+        using var tokenSource = new CancellationTokenSource();
+
+        var requestTask = helper.GetPriceAsync(
+            ItemId, WorldId, "Aether", ttlMinutes: 10, tokenSource.Token);
+        await requestStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.IsFalse(requestTask.IsCompleted);
+
+        tokenSource.Cancel();
+        failRequest.TrySetResult(true);
+
+        await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => requestTask);
+        Assert.AreEqual(cachedWorld, fixture.Repository.GetCachedScopePrice(ItemId, "42"));
+        Assert.AreEqual(
+            staleDataCenter,
+            fixture.Repository.GetCachedScopePrice(ItemId, "Aether"));
+        Assert.AreEqual(
+            "scope:Aether",
+            string.Join(',', transport.Calls.Select(call => $"{call.Kind}:{call.Scope}")));
+        Assert.AreEqual(
+            "CacheRead,CacheRead",
             string.Join(',', dispatcher.Calls.Select(call => call.Operation)));
     }
 
@@ -422,7 +512,7 @@ public class MarketboardHelperTests
     }
 
     [TestMethod]
-    public async Task UniversalisTransport_WhenWorldIpcFails_FallsBackToRestOutsideDispatcher()
+    public async Task UniversalisTransport_WhenWorldIpcTimesOut_FallsBackToRestOutsideDispatcher()
     {
         var dispatcher = new RecordingFrameworkDispatcher();
         var handler = new RecordingHttpMessageHandler(
@@ -430,7 +520,7 @@ public class MarketboardHelperTests
             ResponseJson(120, "WorldA", 14));
         using var http = new HttpClient(handler);
         using var transport = new UniversalisMarketboardTransport(
-            (_, _) => throw new InvalidOperationException("IPC unavailable"),
+            (_, _) => throw new OperationCanceledException("IPC timed out"),
             http,
             dispatcher);
         using var tokenSource = new CancellationTokenSource();
@@ -445,7 +535,6 @@ public class MarketboardHelperTests
         Assert.IsFalse(transport.IsIpcAvailable);
         Assert.AreEqual(1, handler.Calls.Count);
         Assert.IsFalse(handler.Calls.Single().ExecutedInsideDispatcher);
-        Assert.IsTrue(handler.Calls.Single().Token.CanBeCanceled);
         Assert.AreEqual(
             "https://universalis.app/api/v2/42/5333?listings=5&entries=0",
             handler.Calls.Single().Uri.ToString());
@@ -455,8 +544,9 @@ public class MarketboardHelperTests
     }
 
     [TestMethod]
-    public async Task UniversalisTransport_DataCenter_UsesRestWithoutIpcAndForwardsToken()
+    public async Task UniversalisTransport_DataCenter_UsesRestAndEscapesScopePath()
     {
+        const string scope = "Aether Prime/Test";
         var dispatcher = new RecordingFrameworkDispatcher();
         var handler = new RecordingHttpMessageHandler(
             dispatcher,
@@ -468,21 +558,51 @@ public class MarketboardHelperTests
             dispatcher);
         using var tokenSource = new CancellationTokenSource();
 
-        var result = await transport.FetchScopeAsync(ItemId, "Aether", tokenSource.Token);
+        var result = await transport.FetchScopeAsync(ItemId, scope, tokenSource.Token);
 
         Assert.AreEqual(80, result!.PricePerUnit);
-        Assert.AreEqual("Aether", result.Scope);
+        Assert.AreEqual(scope, result.Scope);
         Assert.AreEqual(0, dispatcher.Calls.Count);
         Assert.AreEqual(1, handler.Calls.Count);
         Assert.IsFalse(handler.Calls.Single().ExecutedInsideDispatcher);
-        Assert.IsTrue(handler.Calls.Single().Token.CanBeCanceled);
         Assert.AreEqual(
-            "https://universalis.app/api/v2/Aether/5333?listings=5&entries=0",
-            handler.Calls.Single().Uri.ToString());
+            "api/v2/Aether%20Prime%2FTest/5333",
+            handler.Calls.Single().Uri.GetComponents(UriComponents.Path, UriFormat.UriEscaped));
+        Assert.AreEqual("?listings=5&entries=0", handler.Calls.Single().Uri.Query);
     }
 
     [TestMethod]
-    public async Task UniversalisTransport_WhenRestThrowsOperationCanceledException_DoesNotReturnNetworkFailure()
+    public async Task UniversalisTransport_DataCenter_ForwardsCallerCancellationToHttpRequest()
+    {
+        var dispatcher = new RecordingFrameworkDispatcher();
+        var handler = new BlockingCancellationHttpMessageHandler();
+        using var http = new HttpClient(handler);
+        using var transport = new UniversalisMarketboardTransport(
+            invokeIpc: null,
+            http,
+            dispatcher);
+        using var tokenSource = new CancellationTokenSource();
+
+        var requestTask = transport.FetchScopeAsync(ItemId, "Aether", tokenSource.Token);
+        await handler.RequestStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.IsFalse(handler.CapturedToken.IsCancellationRequested);
+
+        tokenSource.Cancel();
+
+        Assert.IsTrue(handler.CapturedToken.IsCancellationRequested);
+        try
+        {
+            await requestTask;
+            Assert.Fail("Caller cancellation should cancel the REST request.");
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        Assert.IsTrue(requestTask.IsCanceled);
+    }
+
+    [TestMethod]
+    public async Task UniversalisTransport_WhenRestTimesOut_ReturnsNetworkFailure()
     {
         var dispatcher = new RecordingFrameworkDispatcher();
         using var http = new HttpClient(new CancellationThrowingHttpMessageHandler());
@@ -491,8 +611,12 @@ public class MarketboardHelperTests
             http,
             dispatcher);
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(() =>
-            transport.FetchScopeAsync(ItemId, "Aether", CancellationToken.None));
+        var result = await transport.FetchScopeAsync(
+            ItemId,
+            "Aether",
+            CancellationToken.None);
+
+        Assert.IsNull(result);
     }
 
     private static MarketboardHelper CreateHelper(
@@ -610,7 +734,6 @@ public class MarketboardHelperTests
 
     private sealed record HttpCall(
         Uri Uri,
-        CancellationToken Token,
         bool ExecutedInsideDispatcher);
 
     private sealed class RecordingHttpMessageHandler(
@@ -625,7 +748,6 @@ public class MarketboardHelperTests
         {
             Calls.Add(new HttpCall(
                 request.RequestUri!,
-                cancellationToken,
                 dispatcher.IsExecuting));
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -649,5 +771,26 @@ public class MarketboardHelperTests
             CancellationToken cancellationToken) =>
             Task.FromException<HttpResponseMessage>(
                 new OperationCanceledException("HTTP operation cancelled."));
+    }
+
+    private sealed class BlockingCancellationHttpMessageHandler : HttpMessageHandler
+    {
+        public TaskCompletionSource<bool> RequestStarted { get; } = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public CancellationToken CapturedToken { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            CapturedToken = cancellationToken;
+            RequestStarted.TrySetResult(true);
+            var completion = new TaskCompletionSource<HttpResponseMessage>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            using var registration = cancellationToken.Register(
+                () => completion.TrySetCanceled(cancellationToken));
+            return await completion.Task.ConfigureAwait(false);
+        }
     }
 }

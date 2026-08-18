@@ -113,12 +113,13 @@ internal sealed class UniversalisMarketboardTransport : IMarketboardTransport, I
                         return parsed;
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 throw;
             }
             catch
             {
+                token.ThrowIfCancellationRequested();
                 _invokeIpc = null;
             }
         }
@@ -141,12 +142,13 @@ internal sealed class UniversalisMarketboardTransport : IMarketboardTransport, I
             var cachedAt = DateTime.UtcNow;
             return MarketboardHelper.ParseScope(itemId, scope, json, cachedAt);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             throw;
         }
         catch
         {
+            token.ThrowIfCancellationRequested();
             return null;
         }
     }
@@ -237,6 +239,7 @@ public sealed class MarketboardHelper : IDisposable
                     fetchToken)).ConfigureAwait(false);
         }
 
+        token.ThrowIfCancellationRequested();
         return Combine(currentWorld, dataCenter);
     }
 
@@ -261,12 +264,13 @@ public sealed class MarketboardHelper : IDisposable
         {
             fetched = await fetchAsync(token).ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
             throw;
         }
         catch
         {
+            token.ThrowIfCancellationRequested();
             return cached;
         }
 
