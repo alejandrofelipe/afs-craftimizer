@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.1.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -156,6 +156,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🗑 Removida a janela **`/meldguide`** (guia de melding) do fork
 - 🐛 Fix: o **auto-save** da macro de craft não ficava com o nome do item — o fallback só tratava `null`, então um nome vazio do item deixava a macro sem nome. Agora usa `MacroSelection.ResolveMacroName` (vazio/whitespace → `"Recipe {id}"`) e **auto-cura** o nome no overwrite quando o item resolve e o nome atual é um fallback ruim (sem sobrescrever um nome renomeado à mão)
 - 🐛 Fix: o card **"Best Macro"** mostrava `"AI Suggestion"` no lugar do nome do item quando a sugestão viva do solver vencia (macro ainda não salva). Agora exibe o **nome do item craftado**; o badge **`✦ Suggested`** no topo do card continua marcando que é uma sugestão
+- 🐛 Fix (P1): **reentrância entre gerações do solver** — cancelar um cálculo e iniciar outro imediatamente não deixa mais a execução antiga cancelar, marcar como concluída ou sobrescrever o estado visível da nova (ações efêmeras no MacroEditor, progresso no Recipe Note). Isolamento por **geração monotônica**: CTS local por `Run` (capturado pelos callbacks), sealing do snapshot terminal, guards de publicação de `Current`/snapshots/`BestMacroSolver`, e descarte determinístico de cada CTS. Contrato de geração testado sem `Thread.Sleep`
+- 🐛 Fix (P1): **concorrência e comparação de preços de mercado** — fim da corrida entre a carga de preços (retomada em thread pool após `ConfigureAwait(false)`) e o `Draw()`/`SqliteConnection`: pipeline **por geração** com publicação **atômica na framework thread** e cancelamento no refresh, troca de lista e dispose. Além disso, a **economia no data center** volta a aparecer — `PriceCurrentServer` (menor no mundo atual) vs `PriceCheapestServer` (menor no DC), que antes recebiam o mesmo valor e escondiam a comparação
 
 ---
 
