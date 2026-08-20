@@ -77,6 +77,49 @@ public class MCTSSolverTests
             mcts.Search(100_000, 100_000, ref progress, cts.Token));
     }
 
+    [TestMethod]
+    public void MCTS_Search_MoreThan32EligibleActions_DoesNotCrash()
+    {
+        // Pool completo + StrictActions=false pode oferecer mais de 32 ações elegíveis; antes do fix
+        // dos buffers, a expansão do 33º filho estourava IndexOutOfRangeException durante o Search.
+        var input = new SimulationInput(
+            new CharacterStats { Craftsmanship = 5000, Control = 5000, CP = 10000, Level = 100, IsSpecialist = true, CanUseManipulation = true },
+            new RecipeInfo
+            {
+                ClassJobLevel = 100, MaxDurability = 1000, MaxQuality = 1_000_000, MaxProgress = 1_000_000,
+                QualityModifier = 80, QualityDivider = 115, ProgressModifier = 90, ProgressDivider = 130,
+            });
+
+        var state = new SimulationState(input);
+        state.ActionCount = 1;
+        state.StepCount = 1;
+        state.Condition = Condition.Good;
+        state.ActiveEffects.InnerQuiet = 10;
+
+        var config = new SolverConfig
+        {
+            ActionPool = Enum.GetValues<ActionType>(),
+            StrictActions = false,
+            MaxStepCount = 5,
+            MaxRolloutStepCount = 5,
+            Iterations = 64,
+            MaxIterations = 64,
+        };
+
+        // Pré-condição: garante que o cenário realmente ultrapassa a capacidade inicial (senão o
+        // teste passaria verde sem nunca exercitar o crescimento do buffer).
+        var simulator = new Artificer.Solver.Simulator(config.ActionPool, config.MaxStepCount, state);
+        var available = simulator.AvailableActionsHeuristic(false);
+        Assert.IsTrue(available.Count > ArenaBuffer.InitialCapacity,
+            $"Pré-condição: esperava > {ArenaBuffer.InitialCapacity} ações elegíveis, veio {available.Count}");
+
+        var mcts = new MCTS(new MCTSConfig(config, input.Recipe), state);
+        var progress = 0;
+        mcts.Search(64, 64, ref progress, CancellationToken.None);
+
+        Assert.IsNotNull(mcts.Solution());
+    }
+
     // ---- MCTSConfig.MaxThreadCount ----
 
     [TestMethod]
