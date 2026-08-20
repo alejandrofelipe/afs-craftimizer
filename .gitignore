@@ -57,6 +57,9 @@ logs/
 # Claude conversation assets (images pasted inline)
 .claude/commands/image/
 
+# Claude skills (local tooling, not shipped in the repo)
+.claude/skills/
+
 # Node (caso ferramentas JS sejam adicionadas)
 node_modules/
 
