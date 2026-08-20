@@ -22,9 +22,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.8.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
-    <!-- Security override do SQLite nativo (CVE-2025-6965): mesmo pin do Artificer.csproj para o
-         binário lib.e_sqlite3 patched. Ver Artificer.csproj. -->
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
   </ItemGroup>
 
   <ItemGroup>

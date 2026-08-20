@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
     <Authors>alejandrofelipe (fork de Asriel Camora)</Authors>
-    <Version>2.30.4.0</Version>
+    <Version>2.30.4.1</Version>
     <PackageProjectUrl>https://github.com/WorkingRobot/Craftimizer.git</PackageProjectUrl>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
@@ -33,12 +33,10 @@
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
-    <!-- Security override do SQLite nativo (CVE-2025-6965 / CVE-2025-70873): força o binário
-         lib.e_sqlite3 patched (SQLite 3.53.x), sobrepondo o 2.1.10 transitivo do Microsoft.Data.Sqlite.
-         O pacote nativo não tem dependência gerenciada, então pareia com o core 2.x. Remover quando o
-         Microsoft.Data.Sqlite empacotar SQLite 3.5x (11.x estável). -->
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+    <!-- 10.0.11 alinha com o TFM net10.0 e puxa SQLitePCLRaw.bundle_e_sqlite3 2.1.12, que já embala
+         o SQLite 3.53.3 (fora do range afetado por CVE-2025-6965 / CVE-2025-70873). Por isso o antigo
+         security override de SQLitePCLRaw.lib.e_sqlite3 3.53.3 foi removido em 2026-08-20. -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.264">
       <PrivateAssets>all</PrivateAssets>
