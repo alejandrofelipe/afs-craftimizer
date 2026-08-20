@@ -60,6 +60,10 @@ logs/
 # Claude skills (local tooling, not shipped in the repo)
 .claude/skills/
 
+# Codex agent tooling (local skills + context guide)
+.agents/
+AGENTS.md
+
 # Node (caso ferramentas JS sejam adicionadas)
 node_modules/
 
