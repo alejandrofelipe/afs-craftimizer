@@ -36,6 +36,12 @@ public struct NodeScoresBuffer
     public void Add()
     {
         EnsureCapacityForNext();
+        AddReserved();
+    }
+
+    // Inicializa o batch na fronteira e incrementa Count, assumindo capacidade já reservada.
+    internal void AddReserved()
+    {
         var count = Count;
         if ((count & ArenaBuffer.BatchSizeMask) == 0)
             Data![count >> ArenaBuffer.BatchSizeBits] = new();

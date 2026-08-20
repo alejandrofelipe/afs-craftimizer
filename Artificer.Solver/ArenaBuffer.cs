@@ -45,7 +45,13 @@ public struct ArenaBuffer<T> where T : struct
     public void Add(ArenaNode<T> node)
     {
         EnsureCapacityForNext();
+        AddReserved(node);
+    }
 
+    // Grava o nó no próximo slot assumindo que EnsureCapacityForNext já reservou a capacidade.
+    // Evita repetir o preflight no hot path do MCTS (ArenaNode.Add já reservou o par).
+    internal void AddReserved(ArenaNode<T> node)
+    {
         var (arrayIdx, subIdx) = GetArrayIndex(Count);
         node.ChildIdx = (arrayIdx, subIdx);
         Data[arrayIdx][subIdx] = node;

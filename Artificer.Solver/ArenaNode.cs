@@ -24,8 +24,8 @@ public sealed class ArenaNode<T>(in T state, ArenaNode<T>? parent = null) where 
         ChildScores.EnsureCapacityForNext();
 
         var node = new ArenaNode<T>(in state, this);
-        ChildScores.Add();
-        Children.Add(node);
+        ChildScores.AddReserved();
+        Children.AddReserved(node);
         return node;
     }
 }
