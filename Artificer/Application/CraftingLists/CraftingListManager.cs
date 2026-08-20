@@ -308,6 +308,11 @@ public sealed class CraftingListManager : IDisposable
         SetListUpdatedInMemory(sourceListId, now);
         SetListUpdatedInMemory(destinationListId, now);
         ListsChanged?.Invoke();
+
+        // Requirements changed on both lists (completed_at was cleared) — re-evaluate completion so a
+        // still-complete source keeps its state and a now-complete destination fires its events.
+        CheckListCompletion(sourceListId);
+        CheckListCompletion(destinationListId);
         return Task.CompletedTask;
     }
 

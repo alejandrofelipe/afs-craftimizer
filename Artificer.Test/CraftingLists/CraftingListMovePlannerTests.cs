@@ -101,4 +101,21 @@ public class CraftingListMovePlannerTests
         Assert.AreEqual(5, destination[0].Quantity);  // destino de entrada inalterado
         Assert.AreEqual(1, ids.Count);
     }
+
+    [TestMethod]
+    public void Plan_DestinationHasDuplicateRecipeId_MergesWithFirstWithoutThrowing()
+    {
+        var src = Recipe(Src, recipeId: 10, qty: 3);
+        var dup1 = Recipe(Dst, recipeId: 10, qty: 5);
+        var dup2 = Recipe(Dst, recipeId: 10, qty: 1);  // destino com RecipeId duplicado (dado legado)
+
+        var plan = CraftingListMovePlanner.Plan(Src, Dst, [src], [dup1, dup2], [src.Id]);
+
+        Assert.AreEqual(0, plan.SourceRecipes.Count);
+        Assert.AreEqual(2, plan.DestinationRecipes.Count);
+        Assert.AreEqual(dup1.Id, plan.DestinationRecipes[0].Id);
+        Assert.AreEqual(8, plan.DestinationRecipes[0].Quantity);  // soma no primeiro (5+3)
+        Assert.AreEqual(dup2.Id, plan.DestinationRecipes[1].Id);
+        Assert.AreEqual(1, plan.DestinationRecipes[1].Quantity);  // segundo inalterado
+    }
 }

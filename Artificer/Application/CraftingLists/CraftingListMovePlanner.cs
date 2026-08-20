@@ -28,7 +28,8 @@ internal static class CraftingListMovePlanner
             throw new ArgumentException("Source and destination lists must differ.", nameof(destinationListId));
         if (selectedRecipeIds.Count == 0)
             throw new ArgumentException("No recipes selected to move.", nameof(selectedRecipeIds));
-        if (selectedRecipeIds.Distinct().Count() != selectedRecipeIds.Count)
+        var movedIds = new HashSet<Guid>(selectedRecipeIds);
+        if (movedIds.Count != selectedRecipeIds.Count)
             throw new ArgumentException("Selected recipe ids contain duplicates.", nameof(selectedRecipeIds));
 
         var sourceById = source.ToDictionary(r => r.Id);
@@ -40,11 +41,14 @@ internal static class CraftingListMovePlanner
             moved.Add(recipe);
         }
 
-        var movedIds = selectedRecipeIds.ToHashSet();
         var remainingSource = source.Where(r => !movedIds.Contains(r.Id)).ToList();
 
         // Fold moved recipes into the destination, grouping by RecipeId so duplicates merge into one.
-        var destByRecipeId = destination.ToDictionary(r => r.RecipeId);
+        // Group the destination by RecipeId too (there is no UNIQUE(list_id, recipe_id) constraint):
+        // if a list ever holds duplicate RecipeIds, collide with the first rather than throwing.
+        var destByRecipeId = destination
+            .GroupBy(r => r.RecipeId)
+            .ToDictionary(g => g.Key, g => g.First());
         var addedQuantityByDestId = new Dictionary<Guid, int>();
         var appended = new List<CraftingListRecipe>();
         foreach (var group in moved.GroupBy(r => r.RecipeId))
