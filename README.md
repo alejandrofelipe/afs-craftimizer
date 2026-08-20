@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.2.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.3.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -158,6 +158,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix: o card **"Best Macro"** mostrava `"AI Suggestion"` no lugar do nome do item quando a sugestão viva do solver vencia (macro ainda não salva). Agora exibe o **nome do item craftado**; o badge **`✦ Suggested`** no topo do card continua marcando que é uma sugestão
 - 🐛 Fix (P1): **reentrância entre gerações do solver** — cancelar um cálculo e iniciar outro imediatamente não deixa mais a execução antiga cancelar, marcar como concluída ou sobrescrever o estado visível da nova (ações efêmeras no MacroEditor, progresso no Recipe Note). Isolamento por **geração monotônica**: CTS local por `Run` (capturado pelos callbacks), sealing do snapshot terminal, guards de publicação de `Current`/snapshots/`BestMacroSolver`, e descarte determinístico de cada CTS. Contrato de geração testado sem `Thread.Sleep`
 - 🐛 Fix (P1): **concorrência e comparação de preços de mercado** — fim da corrida entre a carga de preços (retomada em thread pool após `ConfigureAwait(false)`) e o `Draw()`/`SqliteConnection`: pipeline **por geração** com publicação **atômica na framework thread** e cancelamento no refresh, troca de lista e dispose. Além disso, a **economia no data center** volta a aparecer — `PriceCurrentServer` (menor no mundo atual) vs `PriceCheapestServer` (menor no DC), que antes recebiam o mesmo valor e escondiam a comparação
+- 🐛 Fix (P2): **crash do solver com pool completo de ações** — `ArenaBuffer`/`NodeScoresBuffer` alocavam capacidade fixa (32) sem validar; com o pool completo (40 ações) e `StrictActions` desligado, a expansão do 33º filho no MCTS estourava `IndexOutOfRangeException`. Agora os buffers **crescem dinamicamente** (batches de 8 preservados pro caminho SIMD), com a capacidade reservada antes de qualquer incremento (filhos e scores nunca divergem). Coberto por testes nas fronteiras 32/33/40/65 + integração MCTS
 
 ---
 
