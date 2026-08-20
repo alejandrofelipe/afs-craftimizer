@@ -224,14 +224,6 @@ public sealed class CraftingListRepository : IDisposable
         cmd.ExecuteNonQuery();
     }
 
-    public void MoveRecipe(Guid recipeId, Guid newListId)
-    {
-        using var cmd = Command("UPDATE crafting_list_recipes SET list_id=$newList WHERE id=$id");
-        cmd.Parameters.AddWithValue("$newList", newListId.ToString());
-        cmd.Parameters.AddWithValue("$id", recipeId.ToString());
-        cmd.ExecuteNonQuery();
-    }
-
     private static CraftingListRecipe ReadRecipe(SqliteDataReader r) =>
         new(
             Guid.Parse(r.GetString(0)),
@@ -296,6 +288,26 @@ public sealed class CraftingListRepository : IDisposable
         catch { tx.Rollback(); throw; }
     }
 
+    /// <summary>
+    /// Replaces the entire progress set of a list with the supplied rows in one transaction: deletes the
+    /// existing rows (removing any no longer needed) and inserts the new set. Rolls back on any failure.
+    /// </summary>
+    public void ReplaceProgressForList(Guid listId, IReadOnlyList<MaterialProgress> progress)
+    {
+        if (progress.Any(p => p.ListId != listId))
+            throw new ArgumentException("Progress rows must belong to the list.", nameof(progress));
+
+        using var tx = _db.BeginTransaction();
+        try
+        {
+            DeleteProgressForList(listId, tx);
+            foreach (var p in progress)
+                InsertProgress(p, tx);
+            tx.Commit();
+        }
+        catch { tx.Rollback(); throw; }
+    }
+
     public void DeleteProgressForList(Guid listId) => DeleteProgressForList(listId, null);
 
     private void DeleteProgressForList(Guid listId, SqliteTransaction? tx)
@@ -303,40 +315,6 @@ public sealed class CraftingListRepository : IDisposable
         using var cmd = Command("DELETE FROM material_progress WHERE list_id=$id", tx);
         cmd.Parameters.AddWithValue("$id", listId.ToString());
         cmd.ExecuteNonQuery();
-    }
-
-    /// <summary>
-    /// Moves the progress rows for the supplied item ids from one list to another.
-    /// Existing destination rows for the same item are overwritten (UNIQUE constraint).
-    /// </summary>
-    public void MoveProgress(Guid sourceListId, Guid destListId, IReadOnlyList<uint> itemIds)
-    {
-        if (itemIds.Count == 0)
-            return;
-
-        using var tx = _db.BeginTransaction();
-        try
-        {
-            foreach (var itemId in itemIds)
-            {
-                // Remove any conflicting destination row first.
-                using (var del = Command("DELETE FROM material_progress WHERE list_id=$dst AND item_id=$item", tx))
-                {
-                    del.Parameters.AddWithValue("$dst", destListId.ToString());
-                    del.Parameters.AddWithValue("$item", itemId);
-                    del.ExecuteNonQuery();
-                }
-                using (var upd = Command("UPDATE material_progress SET list_id=$dst WHERE list_id=$src AND item_id=$item", tx))
-                {
-                    upd.Parameters.AddWithValue("$dst", destListId.ToString());
-                    upd.Parameters.AddWithValue("$src", sourceListId.ToString());
-                    upd.Parameters.AddWithValue("$item", itemId);
-                    upd.ExecuteNonQuery();
-                }
-            }
-            tx.Commit();
-        }
-        catch { tx.Rollback(); throw; }
     }
 
     /// <summary>

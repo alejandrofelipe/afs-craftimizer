@@ -161,4 +161,32 @@ public class CraftingListMoveRepositoryTests
         }
         finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
     }
+
+    [TestMethod]
+    public void ReplaceProgressForList_RemovesOrphansAndKeepsOnlyGivenRows()
+    {
+        var path = TempDb();
+        var list = Guid.NewGuid();
+        try
+        {
+            using (var repo = new CraftingListRepository(path))
+            {
+                repo.InsertList(MakeList(list, "l"));
+                repo.UpsertProgress(Progress(list, 100, 4, 1));
+                repo.UpsertProgress(Progress(list, 200, 3, 2));  // vira órfão
+
+                repo.ReplaceProgressForList(list, [Progress(list, 100, 5, 3), Progress(list, 300, 2, 0)]);
+            }
+            using (var repo = new CraftingListRepository(path))
+            {
+                var progress = repo.GetProgressForList(list);
+                CollectionAssert.AreEquivalent(new uint[] { 100, 300 }, progress.Select(p => p.ItemId).ToArray());
+                var item100 = progress.First(p => p.ItemId == 100);
+                Assert.AreEqual(5, item100.QuantityNeeded);
+                Assert.AreEqual(3, item100.QuantityCollected);
+                Assert.IsFalse(progress.Any(p => p.ItemId == 200));  // órfão removido
+            }
+        }
+        finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
+    }
 }

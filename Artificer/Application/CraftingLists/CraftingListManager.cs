@@ -138,34 +138,14 @@ public sealed class CraftingListManager : IDisposable
         var recipes = _repo.GetRecipesForList(listId);
         var snapshot = InventoryScanner.Read();
 
-        // For "what is needed", resolve without deducting current inventory (owned = empty),
-        // then compare needed against owned via the snapshot's totals.
+        // Resolve what the list needs (owned = empty), then reconcile progress against the snapshot.
+        // Reconcile replaces the persisted set, dropping rows for ingredients no longer needed.
         var tree = _resolver.ResolveAll(recipes, new Dictionary<uint, int>());
+        var existing = _repo.GetProgressForList(listId);
+        var progress = MaterialProgressReconciler.Reconcile(
+            listId, tree, snapshot, includeRetainers, existing, DateTime.UtcNow);
 
-        var now = DateTime.UtcNow;
-        var existing = _repo.GetProgressForList(listId).ToDictionary(p => p.ItemId, p => p.Id);
-        var allProgress = new List<MaterialProgress>();
-
-        foreach (var ingredient in tree.BaseMaterials.Concat(tree.Crystals).Concat(tree.PreCrafts))
-        {
-            var owned = includeRetainers
-                ? snapshot.GetTotal(ingredient.ItemId)
-                : snapshot.MainBags.GetValueOrDefault(ingredient.ItemId)
-                  + snapshot.Crystals.GetValueOrDefault(ingredient.ItemId)
-                  + snapshot.SaddleBag.GetValueOrDefault(ingredient.ItemId);
-
-            var collected = Math.Min(owned, ingredient.Quantity);
-            var id = existing.GetValueOrDefault(ingredient.ItemId, Guid.NewGuid());
-            allProgress.Add(new MaterialProgress(
-                id,
-                listId,
-                ingredient.ItemId,
-                ingredient.Quantity,
-                collected,
-                now));
-        }
-
-        _repo.UpsertProgressBatch(allProgress);
+        _repo.ReplaceProgressForList(listId, progress);
         TouchList(listId);
         CheckListCompletion(listId);
         return Task.CompletedTask;
@@ -301,20 +281,32 @@ public sealed class CraftingListManager : IDisposable
         if (recipeIds.Count == 0)
             return Task.CompletedTask;
 
-        var srcRecipes = _repo.GetRecipesForList(sourceListId);
-        var movedItemIds = srcRecipes
-            .Where(r => recipeIds.Contains(r.Id))
-            .Select(r => r.ItemId)
-            .Distinct()
-            .ToList();
+        var source = _repo.GetRecipesForList(sourceListId);
+        var destination = _repo.GetRecipesForList(destinationListId);
+        var plan = CraftingListMovePlanner.Plan(sourceListId, destinationListId, source, destination, recipeIds);
 
-        foreach (var recipeId in recipeIds)
-            _repo.MoveRecipe(recipeId, destinationListId);
+        // Reconcile each list's progress against its FINAL recipe tree (never inferred from the moved
+        // product ids), then persist recipes, progress and timestamps atomically.
+        var snapshot = InventoryScanner.Read();
+        var emptyOwned = new Dictionary<uint, int>();
+        var sourceTree = _resolver.ResolveAll(plan.SourceRecipes, emptyOwned);
+        var destinationTree = _resolver.ResolveAll(plan.DestinationRecipes, emptyOwned);
+        var now = DateTime.UtcNow;
+        var includeRetainers = _plugin.Configuration.IncludeRetainersInSync;
 
-        _repo.MoveProgress(sourceListId, destinationListId, movedItemIds);
+        var sourceProgress = MaterialProgressReconciler.Reconcile(
+            sourceListId, sourceTree, snapshot, includeRetainers, _repo.GetProgressForList(sourceListId), now);
+        var destinationProgress = MaterialProgressReconciler.Reconcile(
+            destinationListId, destinationTree, snapshot, includeRetainers, _repo.GetProgressForList(destinationListId), now);
 
-        TouchList(sourceListId);
-        TouchList(destinationListId);
+        _repo.ApplyRecipeMove(new CraftingListMoveWriteSet(
+            sourceListId, destinationListId,
+            plan.SourceRecipes, plan.DestinationRecipes,
+            sourceProgress, destinationProgress, now));
+
+        // In-memory state + events only after the commit succeeds (ApplyRecipeMove already stamped the DB).
+        SetListUpdatedInMemory(sourceListId, now);
+        SetListUpdatedInMemory(destinationListId, now);
         ListsChanged?.Invoke();
         return Task.CompletedTask;
     }
@@ -332,6 +324,15 @@ public sealed class CraftingListManager : IDisposable
         var index = _lists.FindIndex(l => l.Id == listId);
         if (index >= 0)
             _lists[index] = updated;
+    }
+
+    /// <summary>Updates only the in-memory list entry after a write that already persisted the change
+    /// (e.g. ApplyRecipeMove). Does not touch the database.</summary>
+    private void SetListUpdatedInMemory(Guid listId, DateTime updatedAt)
+    {
+        var index = _lists.FindIndex(l => l.Id == listId);
+        if (index >= 0)
+            _lists[index] = _lists[index] with { UpdatedAt = updatedAt, CompletedAt = null };
     }
 
     public void Dispose()
