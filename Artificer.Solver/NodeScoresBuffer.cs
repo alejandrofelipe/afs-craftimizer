@@ -17,12 +17,29 @@ public struct NodeScoresBuffer
     public ScoresBatch[]? Data;
     public int Count { get; private set; }
 
+    // Garante o batch do próximo Add (índice atual Count), crescendo o array geometricamente.
+    // Idempotente; chamado antes de incrementar Count para manter o par filhos/scores alinhado
+    // mesmo se uma alocação falhar.
+    internal void EnsureCapacityForNext()
+    {
+        var arrayIdx = Count >> ArenaBuffer.BatchSizeBits;
+        Data ??= new ScoresBatch[ArenaBuffer.InitialBatchCount];
+
+        if (arrayIdx >= Data.Length)
+        {
+            var required = checked(arrayIdx + 1);
+            var doubled = checked(Data.Length * 2);
+            Array.Resize(ref Data, Math.Max(required, doubled));
+        }
+    }
+
     public void Add()
     {
-        Data ??= new ScoresBatch[ArenaBuffer.BatchCount];
-        var count = Count++;
+        EnsureCapacityForNext();
+        var count = Count;
         if ((count & ArenaBuffer.BatchSizeMask) == 0)
-            Data[count >> ArenaBuffer.BatchSizeBits] = new();
+            Data![count >> ArenaBuffer.BatchSizeBits] = new();
+        Count++;
     }
 
     public readonly void Visit((int arrayIdx, int subIdx) at, float score)

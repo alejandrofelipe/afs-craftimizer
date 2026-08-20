@@ -18,6 +18,11 @@ public sealed class ArenaNode<T>(in T state, ArenaNode<T>? parent = null) where 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ArenaNode<T> Add(in T state)
     {
+        // Reserva a capacidade dos dois buffers ANTES de qualquer incremento de Count, para que
+        // uma falha de alocação não deixe Children.Count e ChildScores.Count divergentes.
+        Children.EnsureCapacityForNext();
+        ChildScores.EnsureCapacityForNext();
+
         var node = new ArenaNode<T>(in state, this);
         ChildScores.Add();
         Children.Add(node);

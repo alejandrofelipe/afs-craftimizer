@@ -128,6 +128,28 @@ public class ArenaTests
         Assert.AreEqual(parent.ChildScores.Count, child.ParentScores!.Value.Count);
     }
 
+    [DataTestMethod]
+    [DataRow(32)]
+    [DataRow(33)]
+    [DataRow(40)]
+    [DataRow(65)]
+    public void ArenaNode_Add_GrowsPastInitialCapacity(int count)
+    {
+        var parent = new ArenaNode<SimulationNode>(MakeNode());
+        var children = new List<ArenaNode<SimulationNode>>();
+
+        for (var i = 0; i < count; i++)
+            children.Add(parent.Add(MakeNode()));
+
+        Assert.AreEqual(count, parent.Children.Count);
+        Assert.AreEqual(count, parent.ChildScores.Count);
+        for (var i = 0; i < count; i++)
+        {
+            Assert.AreEqual((i >> ArenaBuffer.BatchSizeBits, i & ArenaBuffer.BatchSizeMask), children[i].ChildIdx);
+            Assert.AreSame(children[i], parent.ChildAt(children[i].ChildIdx));
+        }
+    }
+
     // ---- NodeScoresBuffer ----
 
     [TestMethod]
@@ -201,6 +223,32 @@ public class ArenaTests
         for (var i = 0; i <= ArenaBuffer.BatchSize; i++) buf.Add();
         buf.Visit((1, 0), 0.7f);
         Assert.AreEqual(1, buf.GetVisits((1, 0)));
+    }
+
+    [TestMethod]
+    public void NodeScoresBuffer_Add40_VisitEachSlot_TracksPerSlotAcrossBatches()
+    {
+        var buf = new NodeScoresBuffer();
+        for (var i = 0; i < 40; i++) buf.Add();
+        Assert.AreEqual(40, buf.Count);
+
+        for (var i = 0; i < 40; i++)
+            buf.Visit((i >> ArenaBuffer.BatchSizeBits, i & ArenaBuffer.BatchSizeMask), i + 0.5f);
+
+        for (var i = 0; i < 40; i++)
+        {
+            var at = (i >> ArenaBuffer.BatchSizeBits, i & ArenaBuffer.BatchSizeMask);
+            Assert.AreEqual(1, buf.GetVisits(at));
+            Assert.AreEqual(i + 0.5f, buf.Data![at.Item1].ScoreSum[at.Item2], 1e-3f);
+            Assert.AreEqual(i + 0.5f, buf.Data![at.Item1].MaxScore[at.Item2], 1e-3f);
+        }
+
+        // Re-visitar o slot 32 (2º batch) acumula a soma e mantém o max.
+        var at32 = (32 >> ArenaBuffer.BatchSizeBits, 32 & ArenaBuffer.BatchSizeMask);
+        buf.Visit(at32, 100f);
+        Assert.AreEqual(2, buf.GetVisits(at32));
+        Assert.AreEqual(32.5f + 100f, buf.Data![at32.Item1].ScoreSum[at32.Item2], 1e-3f);
+        Assert.AreEqual(100f, buf.Data![at32.Item1].MaxScore[at32.Item2], 1e-3f);
     }
 
     // ---- VectorUtils.At ----
