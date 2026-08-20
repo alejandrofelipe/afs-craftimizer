@@ -189,4 +189,67 @@ public class CraftingListMoveRepositoryTests
         }
         finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
     }
+
+    [TestMethod]
+    public void ApplyRecipeMove_ComposedMove_ConsolidatesAndReconcilesEachListIndependently()
+    {
+        var path = TempDb();
+        var src = Guid.NewGuid();
+        var dst = Guid.NewGuid();
+        try
+        {
+            using (var repo = new CraftingListRepository(path))
+            {
+                repo.InsertList(MakeList(src, "src"));
+                repo.InsertList(MakeList(dst, "dst"));
+
+                // Origem: R10 e R20 serão movidas (R10 colide no destino, R20 é nova), R30 fica.
+                repo.InsertRecipe(Recipe(src, 10, 1));
+                repo.InsertRecipe(Recipe(src, 20, 2));
+                repo.InsertRecipe(Recipe(src, 30, 1));
+                repo.InsertRecipe(Recipe(dst, 10, 5));
+
+                // Progresso inicial da origem inclui item 999 que só as receitas movidas usavam → órfão.
+                repo.UpsertProgress(Progress(src, itemId: 500, needed: 9, collected: 4));
+                repo.UpsertProgress(Progress(src, itemId: 999, needed: 2, collected: 2));
+
+                // Write-set final composto (o que o manager montaria): item 500 fica nas DUAS listas
+                // com quantidades independentes; 999 é órfão e some.
+                var writeSet = new CraftingListMoveWriteSet(
+                    src, dst,
+                    SourceRecipes: [Recipe(src, 30, 1)],
+                    DestinationRecipes: [Recipe(dst, 10, 6), Recipe(dst, 20, 2)],
+                    SourceProgress: [Progress(src, 500, 3, 1)],
+                    DestinationProgress: [Progress(dst, 500, 7, 2)],
+                    UpdatedAt: MoveTime);
+
+                repo.ApplyRecipeMove(writeSet);
+            }
+
+            using (var repo = new CraftingListRepository(path))
+            {
+                var srcRecipes = repo.GetRecipesForList(src);
+                var dstRecipes = repo.GetRecipesForList(dst);
+                CollectionAssert.AreEquivalent(new uint[] { 30 }, srcRecipes.Select(r => r.RecipeId).ToArray());
+                CollectionAssert.AreEquivalent(new uint[] { 10, 20 }, dstRecipes.Select(r => r.RecipeId).ToArray());
+                Assert.AreEqual(6, dstRecipes.First(r => r.RecipeId == 10).Quantity);  // 5 + 1 (consolidado)
+                Assert.AreEqual(2, dstRecipes.First(r => r.RecipeId == 20).Quantity);  // nova
+
+                var srcProgress = repo.GetProgressForList(src);
+                var dstProgress = repo.GetProgressForList(dst);
+
+                // Item 500 nas duas listas, reconciliado de forma independente:
+                var src500 = srcProgress.Single(p => p.ItemId == 500);
+                var dst500 = dstProgress.Single(p => p.ItemId == 500);
+                Assert.AreEqual((3, 1), (src500.QuantityNeeded, src500.QuantityCollected));
+                Assert.AreEqual((7, 2), (dst500.QuantityNeeded, dst500.QuantityCollected));
+
+                // Zero órfãos.
+                Assert.AreEqual(1, srcProgress.Count);
+                Assert.AreEqual(1, dstProgress.Count);
+                Assert.IsFalse(srcProgress.Any(p => p.ItemId == 999));
+            }
+        }
+        finally { SqliteConnection.ClearAllPools(); File.Delete(path); }
+    }
 }
