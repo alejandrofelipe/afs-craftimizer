@@ -38,6 +38,19 @@ public sealed record MaterialProgress(
         QuantityNeeded > 0 ? Math.Clamp((float)QuantityCollected / QuantityNeeded, 0f, 1f) : 1f;
 }
 
+/// <summary>
+/// The complete write-set for an atomic recipe move: the final recipe and progress rows for both the
+/// source and destination lists, applied in a single transaction (see CraftingListRepository.ApplyRecipeMove).
+/// </summary>
+internal sealed record CraftingListMoveWriteSet(
+    Guid SourceListId,
+    Guid DestinationListId,
+    IReadOnlyList<CraftingListRecipe> SourceRecipes,
+    IReadOnlyList<CraftingListRecipe> DestinationRecipes,
+    IReadOnlyList<MaterialProgress> SourceProgress,
+    IReadOnlyList<MaterialProgress> DestinationProgress,
+    DateTime UpdatedAt);
+
 /// <summary>The category an ingredient falls into when resolving a crafting list.</summary>
 public enum IngredientKind
 {

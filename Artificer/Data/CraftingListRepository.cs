@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Artificer.Data;
 
@@ -183,10 +184,12 @@ public sealed class CraftingListRepository : IDisposable
         return Convert.ToInt32(cmd.ExecuteScalar());
     }
 
-    public void InsertRecipe(CraftingListRecipe recipe)
+    public void InsertRecipe(CraftingListRecipe recipe) => InsertRecipe(recipe, null);
+
+    private void InsertRecipe(CraftingListRecipe recipe, SqliteTransaction? tx)
     {
         using var cmd = Command(
-            "INSERT INTO crafting_list_recipes (id, list_id, recipe_id, item_id, quantity, added_at, sort_order) VALUES ($id, $list, $recipe, $item, $qty, $added, $order)");
+            "INSERT INTO crafting_list_recipes (id, list_id, recipe_id, item_id, quantity, added_at, sort_order) VALUES ($id, $list, $recipe, $item, $qty, $added, $order)", tx);
         cmd.Parameters.AddWithValue("$id", recipe.Id.ToString());
         cmd.Parameters.AddWithValue("$list", recipe.ListId.ToString());
         cmd.Parameters.AddWithValue("$recipe", recipe.RecipeId);
@@ -212,9 +215,11 @@ public sealed class CraftingListRepository : IDisposable
         cmd.ExecuteNonQuery();
     }
 
-    public void DeleteRecipesForList(Guid listId)
+    public void DeleteRecipesForList(Guid listId) => DeleteRecipesForList(listId, null);
+
+    private void DeleteRecipesForList(Guid listId, SqliteTransaction? tx)
     {
-        using var cmd = Command("DELETE FROM crafting_list_recipes WHERE list_id=$id");
+        using var cmd = Command("DELETE FROM crafting_list_recipes WHERE list_id=$id", tx);
         cmd.Parameters.AddWithValue("$id", listId.ToString());
         cmd.ExecuteNonQuery();
     }
@@ -291,9 +296,11 @@ public sealed class CraftingListRepository : IDisposable
         catch { tx.Rollback(); throw; }
     }
 
-    public void DeleteProgressForList(Guid listId)
+    public void DeleteProgressForList(Guid listId) => DeleteProgressForList(listId, null);
+
+    private void DeleteProgressForList(Guid listId, SqliteTransaction? tx)
     {
-        using var cmd = Command("DELETE FROM material_progress WHERE list_id=$id");
+        using var cmd = Command("DELETE FROM material_progress WHERE list_id=$id", tx);
         cmd.Parameters.AddWithValue("$id", listId.ToString());
         cmd.ExecuteNonQuery();
     }
@@ -330,6 +337,57 @@ public sealed class CraftingListRepository : IDisposable
             tx.Commit();
         }
         catch { tx.Rollback(); throw; }
+    }
+
+    /// <summary>
+    /// Applies a recipe move atomically: replaces the recipe and progress rows of both the source and
+    /// destination lists with the supplied sets and stamps updated_at (clearing completed_at) — all in
+    /// a single transaction. On any failure the transaction rolls back and nothing changes.
+    /// </summary>
+    internal void ApplyRecipeMove(CraftingListMoveWriteSet writeSet)
+    {
+        if (writeSet.SourceRecipes.Any(r => r.ListId != writeSet.SourceListId) ||
+            writeSet.SourceProgress.Any(p => p.ListId != writeSet.SourceListId))
+            throw new ArgumentException("Source rows must belong to the source list.", nameof(writeSet));
+        if (writeSet.DestinationRecipes.Any(r => r.ListId != writeSet.DestinationListId) ||
+            writeSet.DestinationProgress.Any(p => p.ListId != writeSet.DestinationListId))
+            throw new ArgumentException("Destination rows must belong to the destination list.", nameof(writeSet));
+
+        using var tx = _db.BeginTransaction();
+        try
+        {
+            DeleteRecipesForList(writeSet.SourceListId, tx);
+            DeleteRecipesForList(writeSet.DestinationListId, tx);
+            foreach (var recipe in writeSet.SourceRecipes) InsertRecipe(recipe, tx);
+            foreach (var recipe in writeSet.DestinationRecipes) InsertRecipe(recipe, tx);
+
+            DeleteProgressForList(writeSet.SourceListId, tx);
+            DeleteProgressForList(writeSet.DestinationListId, tx);
+            foreach (var progress in writeSet.SourceProgress) InsertProgress(progress, tx);
+            foreach (var progress in writeSet.DestinationProgress) InsertProgress(progress, tx);
+
+            ResetListForMove(writeSet.SourceListId, writeSet.UpdatedAt, tx);
+            ResetListForMove(writeSet.DestinationListId, writeSet.UpdatedAt, tx);
+
+            tx.Commit();
+        }
+        catch { tx.Rollback(); throw; }
+    }
+
+    private void InsertProgress(MaterialProgress progress, SqliteTransaction? tx)
+    {
+        using var cmd = Command(
+            "INSERT INTO material_progress (id, list_id, item_id, quantity_needed, quantity_collected, updated_at) VALUES ($id, $list, $item, $needed, $collected, $updated)", tx);
+        BindProgress(cmd, progress);
+        cmd.ExecuteNonQuery();
+    }
+
+    private void ResetListForMove(Guid listId, DateTime updatedAt, SqliteTransaction? tx)
+    {
+        using var cmd = Command("UPDATE crafting_lists SET updated_at=$updated, completed_at=NULL WHERE id=$id", tx);
+        cmd.Parameters.AddWithValue("$updated", ToUnix(updatedAt));
+        cmd.Parameters.AddWithValue("$id", listId.ToString());
+        cmd.ExecuteNonQuery();
     }
 
     private static void BindProgress(SqliteCommand cmd, MaterialProgress progress)
