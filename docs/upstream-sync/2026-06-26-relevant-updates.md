@@ -19,6 +19,14 @@ Comparação dos commits recentes do **Craftimizer** (`WorkingRobot/Craftimizer`
 > **#4 (pruning) rejeitado** — YAGNI confirmado por benchmark: o `NextActionForked` é ~5-8× mais rápido/passo
 > mas entrega qualidade menor e mais ruidosa que o `StepwiseGenetic` que o Synthesis Helper do fork já usa
 > (ver `backlog/feat-synthhelper-pruning.md`). **Paridade funcional completa; nada a portar.**
+>
+> **Re-verificado (2026-08-20):** upstream **ainda sem atividade** — `main` parado no `1d4a2c6` de
+> 2026-06-10 e o repo inteiro (`pushed_at`) sem push desde então; **sem PRs abertos**; última tag
+> **2.11.0.2**. As 8 branches de dev ou já estão mergeadas no `main` (`action-pool`,
+> `condition-furcation`, `micro-optimizations` = ahead 0) ou são **experimentos abandonados de
+> 2023–2024** (`experts`/`bug-fixes`/`crash-hotfix`/`manifest-patch`/`no-virtual-sim` — à frente por
+> poucos commits antigos e **200–363 commits atrás** do `main`; ex.: `experts` = "wip expert solver
+> things" de jul–ago/2023). **Paridade mantida; nada a portar.**
 
 ## Resumo
 
