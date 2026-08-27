@@ -8,9 +8,12 @@ Este documento detalha onde as coisas estão na pasta base do projeto e suas fun
 * **`backlog/`**: Documentação e acompanhamento de bugs conhecidos e *feature requests*. Pasta gitignored — local only.
 * **`scripts/`**: Scripts PowerShell para build local, bump de versão e deploy. Pasta gitignored — local only.
 * **`Artificer/`**: C# Project do plugin Dalamud (entry point, janelas, hooks, serviços).
-  * `Windows/`: Controllers das janelas ImGui (`MacroEditor.cs`, `RecipeNote.cs`, `Settings.cs`, `CosmicTracker.cs`, etc.).
+  * `Windows/`: Controllers das janelas ImGui (`MacroEditor.cs`, `RecipeNote.cs`, `Settings.cs`, `CosmicTracker.cs`, etc.). Janelas grandes são divididas em **partials por domínio** — `Windows/<Janela>.<Domínio>.cs` (ex.: `MacroEditor.Character/.Solver/.Recipe`, `CraftingHelper.BestMacro/.Stats/.CraftStatus`, `CraftingListDetailWindow.DataLoading/.Rendering`, `SynthesisHelper.Rendering/.Execution`); os campos/estado ficam no arquivo shell.
   * `Utils/`: Hooks de jogo (`ActionUsed`), leitura de memória, IPC, e utilitários de UI específicos do plugin (`PluginImGuiUtils.*.cs`).
   * `Application/`: Regras de negócio restritas ao plugin (copy/paste de macros, `MacroRepository`, `CosmicToolTracker`).
+    * `Application/Crafting/`: ciclo de execução do solver compartilhado (`SolverRun`, `CraftingSession`) e decisões puras de macro (`MacroSelection`, `MacroScoring`).
+    * `Application/CraftingLists/`: subsistema da **Lista de Coleta** — `CraftingListManager`, componentes puros (`CraftingListMovePlanner`, `MaterialProgressReconciler`, `IngredientResolver`) e `MarketboardHelper` (preços Universalis).
+  * `Data/`: `CraftingListRepository` — persistência SQLite das listas/receitas/progresso/preços, com operações transacionais.
 * **`Artificer.UI/`**: Biblioteca de UI compartilhada, sem dependência do Dalamud SDK. Usa somente ImGui.NET.
   * `Colors.cs`, `Theme.cs`: tokens de cor e temas.
   * `ImGuiUtils*.cs`, `ImRaiiShim.cs`, `ImRaii2.cs`: componentes reutilizáveis e helpers RAII.
@@ -20,11 +23,11 @@ Este documento detalha onde as coisas estão na pasta base do projeto e suas fun
 * **`Artificer.Simulator/`**: C# Project que modela as mecânicas matemáticas de crafting puramente, sem dependências externas.
   * `Actions/`: Cada habilidade do jogo como uma classe, derivada de `BaseAction.cs`.
 * **`Artificer.Solver/`**: C# Project com a IA de recomendação. `MCTS.cs`, `RaphaelUtils.cs`, integração com `Raphael.Net`.
-* **`Artificer.Test/`**: C# Project de testes unitários (MSTest) para Simulator, Solver e componentes de UI. 215 testes.
+* **`Artificer.Test/`**: C# Project de testes unitários (MSTest) para Simulator, Solver, listas de coleta e componentes de UI. 385 testes.
 * **`Artificer.Benchmark/`**: C# Project de benchmarks de performance (BenchmarkDotNet) para o Simulator e Solver.
 * **`dist/`**: Gerado automaticamente após compilar em Release. Contém o ZIP final para importação no XIVLauncher.
 
 ### Configurações na Raiz:
 - **`Artificer.sln`**: Solução Visual Studio ligando todos os projetos.
 - **`.editorconfig`**: Mantém consistência de tabs, indentações e lint rules (Meziantou analyzer).
-- **`.gitignore`**: Inclui `scripts/`, `backlog/`, `dist/`, `docs/superpowers/` e artefatos de build.
+- **`.gitignore`**: Inclui artefatos de build (`obj/`, `bin/`, `dist/`, `*.zip`), pastas locais (`scripts/`, `backlog/`, `design/`, `mockup/`, `graphify-out/`), tooling de IA local (`.claude/skills/`, `.claude/commands/image/`, `.agents/`, `AGENTS.md`, `.superpowers/`, `docs/superpowers/`) e o layout local do ImGui (`imgui.ini`).

@@ -24,7 +24,8 @@ O projeto divide-se em componentes fortemente desacoplados para focar em testes 
 ## 3. Tech Stack
 
 - **Linguagem Principal:** C# (.NET 10.0, com `AllowUnsafeBlocks` habilitado).
-- **Injeção e UI:** Dalamud API + ImGui.Net.
-- **Solver Backend:** Integrado ao pacote nuget `Raphael.Net` que expõe *bindings* Rust via FFI de alto desempenho.
+- **SDK / Plataforma:** `Dalamud.NET.Sdk 15.0.0`, target `net10.0-windows` (x64).
+- **Injeção e UI:** Dalamud API + ImGui.NET.
+- **Solver Backend:** Integrado ao pacote nuget `Raphael.Net 5.0.0` que expõe *bindings* Rust via FFI de alto desempenho.
 - **Performance:** Amplo uso de ponteiros (`unsafe`), structs alocados e controle restrito de heap para MCTS.
-- **Config & DB:** SQLite e arquivos locais json para gerenciar o repositório de macros do usuário.
+- **Config & DB:** `Microsoft.Data.Sqlite 10.0.11` (bundle nativo já patched — sem override de segurança manual) para as listas de coleta + JSON da API de configuração Dalamud para o repositório de macros do usuário.

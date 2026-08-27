@@ -8,7 +8,7 @@ O projeto principal expõe a inicialização via `IDalamudPlugin` (`Plugin.cs`).
 
 Responsabilidades técnicas:
 - **Hooking & Memória:** `Hooks.cs` intercepta chamadas nativas do FFXIV (`UseAction`, `IsActionHighlighted`) via delegates `Hook<T>`, permitindo que o plugin sugira ações brilhando botões na hotbar.
-- **Render de Interface:** Todas as janelas em `Windows/*.cs` usam ImGui via Dalamud WindowSystem. A inicialização de tema ocorre via `Theme.ConfigureForDalamud()` em `PreDraw()`.
+- **Render de Interface:** Todas as janelas em `Windows/*.cs` usam ImGui via Dalamud WindowSystem. A inicialização de tema ocorre via `Theme.ConfigureForDalamud()` em `PreDraw()`. Janelas grandes seguem a convenção **partial-by-domain** (`Windows/<Janela>.<Domínio>.cs`), mantendo cada arquivo focado.
 - **DB e Configuração:** Persistência via API Dalamud com SQLite (`MacroRepository`) e JSON de configuração. Migrações gerenciadas manualmente.
 - **CosmicTracker:** Janela flutuante que sobrepõe a tela do jogo durante Stellar Missions.
 
@@ -49,5 +49,13 @@ Responsabilidades técnicas:
 
 ## 6. Artificer.Test e Artificer.Benchmark
 
-- **Test (MSTest):** 215 testes cobrindo Simulator (mecânicas de cada habilidade), Solver (integridade do MCTS e Raphael), e componentes de UI (`ImRaiiShim`, `GearMessage`, `UIServices`).
+- **Test (MSTest):** 385 testes cobrindo Simulator (mecânicas de cada habilidade), Solver (integridade do MCTS e Raphael), listas de coleta (planner/reconciler + repositório transacional) e componentes de UI (`ImRaiiShim`, `GearMessage`, `UIServices`).
 - **Benchmark (BenchmarkDotNet):** Mede latência do Simulator e Solver no *hot path*. Rodar em modo `Release` é obrigatório para resultados realistas.
+
+## 7. Subsistema Lista de Coleta (dentro de Artificer)
+
+Feature de listas de craft, isolada em componentes testáveis:
+- `Application/CraftingLists/CraftingListManager.cs`: orquestra listas, resolução de ingredientes (`IngredientResolver`) e sync de inventário; **mover receitas** entre listas reconcilia o progresso e persiste tudo numa única transação (`BeginTransaction`).
+- `Data/CraftingListRepository.cs`: persistência SQLite — tabelas `crafting_lists`, `crafting_list_recipes`, `material_progress` e `market_price_cache` — com operações transacionais (`ReplaceProgressForList`, `DeleteRecipesForList`, `UpsertProgressBatch`).
+- Componentes puros, sem I/O e cobertos por testes: `CraftingListMovePlanner.Plan` (estado final das receitas ao mover) e `MaterialProgressReconciler.Reconcile` (progresso por ingrediente, remove órfãos).
+- `MarketboardHelper.cs`: preços via **Universalis** (mundo atual vs. data center) com cache por escopo.
