@@ -5,7 +5,7 @@
 - .NET 10.0 SDK (instalado via Scoop em `C:\Users\aleja\scoop\apps\dotnet-sdk\current\`).
 - PowerShell (Windows).
 - XIVLauncher/Dalamud configurado em modo desenvolvedor.
-- Scripts locais em `scripts/` (gitignored — não estão no repositório, apenas na máquina de desenvolvimento).
+- Scripts locais em `scripts/` (gitignored — não estão no repositório, apenas na máquina de desenvolvimento). Contribuidores sem esses scripts usam `dotnet build` / `dotnet test` diretamente.
 
 > **Nota:** `dotnet` via Scoop não está no PATH do Bash. Usar sempre PowerShell com o caminho completo: `"C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe"`.
 
@@ -17,13 +17,13 @@
 .\scripts\build.ps1
 ```
 
-Faz restore e gera `.dll` e `.json` em `Artificer/bin/Debug/x64/`. Para deploy automático no Dalamud local:
+Faz restore e gera `.dll` e `.json` em `Artificer/bin/Debug/` (o csproj usa `AppendRuntimeIdentifierToOutputPath=false`, então **não** há subpasta `x64/`). Para deploy automático no Dalamud local:
 
 ```powershell
 .\scripts\build.ps1 -Deploy
 ```
 
-**Dica Dalamud:** Nas configurações experimentais do Dalamud, aponte "DevPlugins" para `Artificer\bin\Debug\x64\` para testar via hot-reload sem reinstalar.
+**Dica Dalamud:** Nas configurações experimentais do Dalamud, aponte "DevPlugins" para `Artificer\bin\Debug\` para testar via hot-reload sem reinstalar.
 
 ---
 
@@ -58,7 +58,7 @@ O script atualiza `Artificer/Artificer.csproj` e exibe `Version bumped: X.Y.Z.W 
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
 
-Esperado: `Passed! - Failed: 0, Passed: 215, Skipped: 0`
+Esperado: `Passed! - Failed: 0, Passed: 385, Skipped: 0`
 
 ---
 
@@ -69,3 +69,17 @@ Esperado: `Passed! - Failed: 0, Passed: 215, Skipped: 0`
 ```
 
 Abre uma janela desktop com todas as Stories de componentes — não requer o FFXIV rodando.
+
+---
+
+## 6. CI/CD — Release Automatizado
+
+O push de uma tag `v*.*.*.*` dispara o workflow `.github/workflows/release.yml` (GitHub Actions, `ubuntu-latest`, .NET `10.x`):
+
+1. Baixa o Dalamud (`stg/latest.zip`), faz `dotnet restore` + `dotnet build -c Release` do `Artificer.csproj`.
+2. Cria o **GitHub Release** (`softprops/action-gh-release`) com o asset `Artificer/bin/Release/Artificer/latest.zip` (pacote gerado pelo `Dalamud.NET.Sdk`); o nome do release é a própria tag.
+3. Atualiza o `repo.json` (`AssemblyVersion` + `LastUpdate`) e o commita/push na `main` como `github-actions[bot]`.
+
+**Fluxo de publicar:** depois de cortar o commit de release + a tag localmente, basta `git push origin main` seguido de `git push origin vX.Y.Z.W`. **Não** criar o release nem editar o `repo.json` na mão — a CI faz. O `repo.json` aponta para o link fixo `releases/latest/download/latest.zip`, então cada tag nova é distribuída automaticamente pelo Plugin Installer.
+
+> Como a CI commita o `repo.json` de volta na `main`, após o push da tag rode `git pull --ff-only` (ou `git fetch` + `git merge --ff-only origin/main`) para trazer esse commit do bot.

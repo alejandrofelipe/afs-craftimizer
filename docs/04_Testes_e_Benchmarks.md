@@ -4,19 +4,21 @@ A estabilidade do Artificer recai sobre dois projetos de QA. Rodar os testes loc
 
 ## 1. Artificer.Test (MSTest)
 
-Usa MSTest V3 via `Microsoft.Testing.Platform`. 215 testes no total.
+Usa MSTest V3 via `Microsoft.Testing.Platform`. 385 testes no total.
 
 ```powershell
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
 
-Esperado: `Passed! - Failed: 0, Passed: 215, Skipped: 0`
+Esperado: `Passed! - Failed: 0, Passed: 385, Skipped: 0`
 
 ### Estrutura
 
 - **`Artificer.Test/Simulator/`**: Instancia um `SimulationState` com buffs iniciais (ex: Great Strides ativo), executa uma Action e valida o resultado matemático. Previne regressões quando a Square Enix altera fórmulas em patches menores.
 - **`Artificer.Test/Solver/`**: `MCTSSolverTests.cs` valida a integridade do retorno nativo do Rust via `Raphael.Net`. Confirma que o MCTS gera a árvore e devolve um resultado sem estourar ponteiros de heap.
 - **`Artificer.Test/UI/`**: Testes de componentes de UI como `ImRaiiShim`, `GearMessage` e serviços de UI.
+- **`Artificer.Test/CraftingLists/`**: planner de move (`CraftingListMovePlannerTests`), reconciliador de progresso (`MaterialProgressReconcilerTests`), repositório transacional (`CraftingListMoveRepositoryTests`, SQLite temporário) e `MarketboardHelper`/cache de preços — sem cliente FFXIV.
+- **`Artificer.Test/Application/`**: `SolverRunTests` (isolamento por geração do solver) e decisões puras de macro (`MacroSelectionTests`, `MacroScoringTests`).
 
 ### Quando adicionar testes
 
