@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.4.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.4.2 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -162,6 +162,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix (P2): **progresso incorreto ao mover receitas entre listas** — o move inferia o progresso pelos IDs de **produto** das receitas, mas `material_progress` é indexado por **ingrediente**, então o destino perdia o progresso e a origem ficava com linhas órfãs (e mover pra uma lista que já tinha a receita duplicava). Agora o move **planeja** o estado final das receitas, **reconcilia** o progresso das duas listas pela árvore de ingredientes de cada uma (soma duplicatas, remove órfãos) e **persiste tudo numa única transação** (rollback em falha); a conclusão é re-avaliada após o move. `SyncWithInventoryAsync` também passou a remover órfãos. Componentes puros (`CraftingListMovePlanner`, `MaterialProgressReconciler`) + repositório transacional cobertos por testes
 - 🔒 Deps/segurança: **`Microsoft.Data.Sqlite` 9.0.5 → 10.0.11** — alinha com o TFM net10.0 e já embala `SQLitePCLRaw.bundle_e_sqlite3 2.1.12` com SQLite **3.53.3** (fora do range de CVE-2025-6965/70873), então o **override manual** de `SQLitePCLRaw.lib.e_sqlite3 3.53.3` foi **removido** dos dois csproj (NU1903 resolvido de forma limpa)
 - 🐛 Fix: o refresh do **detalhe da lista de crafting** não cancelava a carga de preço em andamento no caminho de erro (ao contrário da janela de Rota de Coleta) — agora cancela a geração no `catch`, sem CTS pendurado
+- 🔒 Deps: **`Microsoft.Extensions.Caching.Memory` 9.0.0 → 10.0.11** — alinha com o TFM net10 e com o `Microsoft.Data.Sqlite 10.0.11`
+- ♻️ Refactor: os dois maiores arquivos do projeto foram divididos em **partials por domínio** (seguindo a convenção do `MacroEditor`) — `CraftingHelper.cs` (1690 → 692 linhas: `.BestMacro`/`.Stats`/`.CraftStatus`) e `CraftingListDetailWindow.cs` (1064 → 219: `.DataLoading`/`.Rendering`). **Move puro, sem mudança de comportamento** (verificado por build 0-warnings + 385 testes; cada método movido byte-idêntico)
 
 ---
 
