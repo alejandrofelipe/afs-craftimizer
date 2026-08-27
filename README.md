@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.4.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.30.4.1 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -160,6 +160,8 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix (P1): **concorrência e comparação de preços de mercado** — fim da corrida entre a carga de preços (retomada em thread pool após `ConfigureAwait(false)`) e o `Draw()`/`SqliteConnection`: pipeline **por geração** com publicação **atômica na framework thread** e cancelamento no refresh, troca de lista e dispose. Além disso, a **economia no data center** volta a aparecer — `PriceCurrentServer` (menor no mundo atual) vs `PriceCheapestServer` (menor no DC), que antes recebiam o mesmo valor e escondiam a comparação
 - 🐛 Fix (P2): **crash do solver com pool completo de ações** — `ArenaBuffer`/`NodeScoresBuffer` alocavam capacidade fixa (32) sem validar; com o pool completo (40 ações) e `StrictActions` desligado, a expansão do 33º filho no MCTS estourava `IndexOutOfRangeException`. Agora os buffers **crescem dinamicamente** (batches de 8 preservados pro caminho SIMD), com a capacidade reservada antes de qualquer incremento (filhos e scores nunca divergem). Coberto por testes nas fronteiras 32/33/40/65 + integração MCTS
 - 🐛 Fix (P2): **progresso incorreto ao mover receitas entre listas** — o move inferia o progresso pelos IDs de **produto** das receitas, mas `material_progress` é indexado por **ingrediente**, então o destino perdia o progresso e a origem ficava com linhas órfãs (e mover pra uma lista que já tinha a receita duplicava). Agora o move **planeja** o estado final das receitas, **reconcilia** o progresso das duas listas pela árvore de ingredientes de cada uma (soma duplicatas, remove órfãos) e **persiste tudo numa única transação** (rollback em falha); a conclusão é re-avaliada após o move. `SyncWithInventoryAsync` também passou a remover órfãos. Componentes puros (`CraftingListMovePlanner`, `MaterialProgressReconciler`) + repositório transacional cobertos por testes
+- 🔒 Deps/segurança: **`Microsoft.Data.Sqlite` 9.0.5 → 10.0.11** — alinha com o TFM net10.0 e já embala `SQLitePCLRaw.bundle_e_sqlite3 2.1.12` com SQLite **3.53.3** (fora do range de CVE-2025-6965/70873), então o **override manual** de `SQLitePCLRaw.lib.e_sqlite3 3.53.3` foi **removido** dos dois csproj (NU1903 resolvido de forma limpa)
+- 🐛 Fix: o refresh do **detalhe da lista de crafting** não cancelava a carga de preço em andamento no caminho de erro (ao contrário da janela de Rota de Coleta) — agora cancela a geração no `catch`, sem CTS pendurado
 
 ---
 
