@@ -37,7 +37,7 @@
          o SQLite 3.53.3 (fora do range afetado por CVE-2025-6965 / CVE-2025-70873). Por isso o antigo
          security override de SQLitePCLRaw.lib.e_sqlite3 3.53.3 foi removido em 2026-08-20. -->
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.11" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.264">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
