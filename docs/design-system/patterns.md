@@ -107,10 +107,10 @@ Usado em: `SynthHelper` — mostra a condição do step atual
 
 ```csharp
 // No Draw() do SynthHelper, após calcular a condição do step
-ImGuiUtils.DrawConditionIndicator(currentCondition, spacing: 8f * scale);
+PluginImGuiUtils.DrawConditionIndicator(currentCondition, spacing: 8f * scale);
 
 // Se quiser mostrar condição com tooltip de probabilidade:
-ImGuiUtils.DrawConditionIndicator(currentCondition, 8f * scale);
+PluginImGuiUtils.DrawConditionIndicator(currentCondition, 8f * scale);
 if (ImGui.IsItemHovered())
     ImGuiUtils.TooltipWrapped($"Chance: {conditionChance:P0}");
 ```

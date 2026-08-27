@@ -2,7 +2,7 @@
 
 Fundação visual: superfícies, espaçamento, raios e anatomia das janelas.
 
-Fonte de verdade: `Artificer/Utils/UI/Theme.cs`
+Fonte de verdade: `Artificer.UI/Theme.cs`
 
 ---
 

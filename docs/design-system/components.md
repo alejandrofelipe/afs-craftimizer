@@ -2,7 +2,9 @@
 
 Catálogo de todos os componentes reutilizáveis, com assinatura C#, comportamento e exemplo de uso.
 
-Fonte de verdade: `Artificer/Utils/UI/ImGuiUtils.cs`, `ImGuiUtils.Progress.cs`, `ImGuiUtils.Cosmic.cs`
+Fontes de verdade:
+- **Reutilizáveis (sem Dalamud):** `Artificer.UI/ImGuiUtils*.cs` (`.cs`, `.Progress.cs`, `.Cosmic.cs`, `.Layout.cs`, `.EmptyState.cs`, `.Alert.cs`, `.Charts.cs`, `.SearchableCombo.cs`), `Artificer.UI/ProgressBarComponent.cs`, `Artificer.UI/ImRaii2.cs`.
+- **Plugin-side (usam Dalamud):** `Artificer/Utils/UI/PluginImGuiUtils.*.cs`.
 
 ---
 
@@ -16,9 +18,15 @@ A label usa `Colors.ActionBuff` (`#4AB8FF`) quando `accentLabel = true` (default
 ### Assinatura
 
 ```csharp
-float width = ImGuiUtils.BeginGroupPanel(string name, float width, bool accentLabel = true);
+float width = ImGuiUtils.BeginGroupPanel(string name, float width, bool accentLabel = true, Action? titleSuffix = null);
 // ... conteúdo ...
 ImGuiUtils.EndGroupPanel();
+
+// Variante RAII (preferida) — fecha o painel automaticamente:
+using (ImRaii2.GroupPanel(string name, float width, out float internalWidth, bool accentLabel = true, Action? titleSuffix = null))
+{
+    // ... conteúdo ...
+}
 ```
 
 Parâmetro `width`:
@@ -89,7 +97,7 @@ var dotAlpha = state == SolverState.Solving
 
 ## DrawConditionIndicator
 
-**Arquivo:** `ImGuiUtils.Progress.cs` → `DrawConditionIndicator`
+**Arquivo:** `Artificer/Utils/UI/PluginImGuiUtils.*.cs` → `PluginImGuiUtils.DrawConditionIndicator` (plugin-side — usa `Artificer.Simulator.Condition` e o extension `GetColor` de `Artificer/Utils/SimulatorUtils.cs`, por isso não fica em `Artificer.UI/`)
 
 Círculo colorido animado seguido do nome da condição. A cor anima ao longo do tempo
 para simular a transição de cor in-game.
@@ -97,7 +105,7 @@ para simular a transição de cor in-game.
 ### Assinatura
 
 ```csharp
-ImGuiUtils.DrawConditionIndicator(Condition condition, float spacing);
+PluginImGuiUtils.DrawConditionIndicator(Condition condition, float spacing);
 ```
 
 - `condition`: valor do enum `Artificer.Simulator.Condition`
@@ -173,7 +181,8 @@ Badge de imagem (ícone/texture) com tooltip no hover.
 ### Assinatura
 
 ```csharp
-ImGuiUtils.DrawBadge(ImTextureID handle, Vector2 size, string tooltip, Vector4? tint = null);
+ImGuiUtils.DrawBadge(nint handle,  Vector2 size, string tooltip, Vector4? tint = null);
+ImGuiUtils.DrawBadge(ulong handle, Vector2 size, string tooltip, Vector4? tint = null);
 ```
 
 Usar para badges de job, ícones de recipe, e ícones de status.
@@ -211,6 +220,7 @@ ImGuiUtils.ProgressBar(qualityPct, new Vector2(-1, 14 * scale), $"{quality} / {m
 **Arquivo:** `ImGuiUtils.Cosmic.cs` → `DrawResearchTypeRow`
 
 Row completa do Cosmic Tracker com header (label + valores), barra de progresso e sub-labels.
+Em modo minimizado, renderiza internamente uma variante compacta (helper privado `DrawResearchTypeRowMinimized`: `label 60px + barra`, valores no tooltip).
 
 ### Assinatura
 
@@ -243,26 +253,6 @@ public enum ResearchTypeState { Locked, Active, Complete, Maxed }
 
 Se `delta != null`, desenha `Colors.CosmicChanged` (amber 12%) como background da row.
 O chamador deve controlar a janela de tempo de 10 segundos e passar `delta = null` após expirar.
-
----
-
-## DrawResearchTypeRowMinimized
-
-**Arquivo:** `ImGuiUtils.Cosmic.cs` → `DrawResearchTypeRowMinimized`
-
-Versão compacta da row Cosmic para modo minimizado: `label (60px) + barra (resto)`.
-Os valores numéricos aparecem no tooltip ao hover.
-
-### Assinatura
-
-```csharp
-ImGuiUtils.DrawResearchTypeRowMinimized(
-    string label, int current, int needed, int max,
-    ResearchTypeState state, float barWidth
-);
-```
-
-Barra tem altura `8px * scale` (vs 6px no modo normal).
 
 ---
 
@@ -391,6 +381,144 @@ ImGuiUtils.TextWrappedTo(string text, float wrapPosX = default, float basePosX =
 ```
 
 Usar quando o texto precisa quebrar em coluna específica (ex: valor alinhado à direita de uma label).
+
+---
+
+## DrawSectionHeader
+
+**Arquivo:** `ImGuiUtils.Layout.cs` → `DrawSectionHeader`
+
+`Separator` + label em `Colors.ActionBuff`, com conteúdo opcional à direita (mesma linha).
+
+```csharp
+ImGuiUtils.DrawSectionHeader(string label, Action? rightContent = null);
+```
+
+---
+
+## DrawStatRow
+
+**Arquivo:** `ImGuiUtils.Layout.cs` → `DrawStatRow`
+
+Label à esquerda + valor alinhado à direita, com cor opcional no valor.
+
+```csharp
+ImGuiUtils.DrawStatRow(string label, string value, Vector4? valueColor = null, float availWidth = 0);
+```
+
+---
+
+## DrawEmptyState
+
+**Arquivo:** `ImGuiUtils.EmptyState.cs` → `DrawEmptyState`
+
+Estado vazio centralizado na vertical: ícone grande (muted) + título + subtítulo opcional + até 2 botões
+(com dois botões, o primário usa `Theme.PushPrimaryButton()`). Há overload `int icon` para uso cross-assembly.
+
+```csharp
+ImGuiUtils.DrawEmptyState(
+    FontAwesomeIcon icon,
+    string title,
+    string? subtitle = null,
+    (string Label, Action Clicked)? primaryButton = null,
+    (string Label, Action Clicked)? secondaryButton = null,
+    float buttonWidth = 200f);
+```
+
+---
+
+## DrawAlert
+
+**Arquivo:** `ImGuiUtils.Alert.cs` → `DrawAlert`
+
+Alerta compacto: barra colorida de 3px à esquerda + fundo tingido + título em maiúsculas + mensagem.
+Todo o texto é desenhado via DrawList (o único item de layout é um `Dummy`), então **nunca** causa
+crescimento horizontal da janela. Não referencia Dalamud — passar `ImGuiHelpers.GlobalScale` como `scale`.
+
+```csharp
+public enum AlertVariant { Info, Success, Warning, Danger }
+
+ImGuiUtils.DrawAlert(AlertVariant variant, string title, string message, float scale = 1f, float width = -1f);
+```
+
+| Variante | Cor da barra |
+|---|---|
+| Info | azul `#3B82F5` |
+| Success | `Colors.Good` (`#52E5A0`) |
+| Warning | `Colors.ActionBuff` (`#4AB8FF`) |
+| Danger | `Colors.Bad` (`#FF5C6E`) |
+
+---
+
+## IconButtonWithTooltip
+
+**Arquivo:** `ImGuiUtils.cs` → `IconButtonWithTooltip`
+
+`IconButtonSquare` + `HoveredTooltip` numa chamada. Overload `int icon` para uso cross-assembly.
+
+```csharp
+bool clicked = ImGuiUtils.IconButtonWithTooltip(FontAwesomeIcon icon, string tooltip, float size = -1, int flags = 0);
+```
+
+---
+
+## HoveredTooltip
+
+**Arquivo:** `ImGuiUtils.cs` → `HoveredTooltip`
+
+`IsItemHovered(flags)` + `Tooltip` numa linha — o jeito preferido de anexar tooltip ao último item.
+
+```csharp
+ImGuiUtils.HoveredTooltip(string text, int flags = 0, float? wrapWidth = null);
+```
+
+---
+
+## ProgressBarComponent
+
+**Arquivo:** `Artificer.UI/ProgressBarComponent.cs`
+
+Componente standalone da barra de progresso do solver, separado de `ImGuiUtils`. Consome
+`ProgressSnapshot` + `VisualConfig` (`DisplayMode`, `ColorTheme`, `Width`, `ShowPercentage`).
+
+```csharp
+// Uma barra a partir de um snapshot:
+ProgressBarComponent.DrawSingle(ProgressSnapshot snapshot, VisualConfig? config = null);
+
+// Barra agregada: cada snapshot completo contribui 1/N ao total; tooltip lista todos:
+ProgressBarComponent.DrawAggregated(IReadOnlyList<ProgressSnapshot> snapshots, VisualConfig? config = null);
+```
+
+---
+
+## SearchableCombo
+
+**Arquivo:** `ImGuiUtils.SearchableCombo.cs` → `SearchableCombo<T>`
+
+Combo com campo de busca embutido (filtra os itens por `getString`).
+
+```csharp
+bool changed = ImGuiUtils.SearchableCombo<T>(
+    string id, ref T selectedItem, IEnumerable<T> items,
+    ImFontPtr selectableFont, float width,
+    Func<T,string> getString, Func<T,string> getId, Action<T> draw) where T : IEquatable<T>;
+```
+
+---
+
+## Charts — DrawStatArc / DrawBarRow
+
+**Arquivo:** `ImGuiUtils.Charts.cs`
+
+Primitivas de gráfico desenhadas via DrawList:
+
+```csharp
+// Arco de stat (gauge parcial) num DrawList:
+ImGuiUtils.DrawStatArc(ImDrawListPtr drawList, Vector2 screenPos, float size, float frac, Vector4 color);
+
+// Linha de barras horizontais a partir de uma lista de BarData:
+ImGuiUtils.DrawBarRow(IReadOnlyList<BarData> bars, float? totalWidth = null);
+```
 
 ---
 

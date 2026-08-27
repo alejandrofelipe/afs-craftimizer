@@ -91,8 +91,9 @@ var condColor = condition switch {
     Condition.Primed    => Colors.ConditionPrimed,
     _                   => Colors.ConditionNormal,
 };
-// Dot com glow
-ImGuiUtils.DrawConditionDot(condColor);
+// O switch acima é ilustrativo do mapeamento; na prática o indicador recebe a Condition
+// e resolve a cor internamente (plugin-side):
+PluginImGuiUtils.DrawConditionIndicator(condition, spacing: 6f);
 ```
 
 ---
@@ -153,6 +154,22 @@ Estados genéricos de UI. Usados em qualquer janela para comunicar resultado/sta
 // Stat abaixo do mínimo → vermelho
 var statColor = craftsmanship >= minCraftsmanship ? Colors.Good : Colors.Bad;
 ImGui.TextColored(statColor, craftsmanship.ToString());
+```
+
+---
+
+## Helper: ContrastText
+
+**Método:** `Colors.ContrastText(Vector4 background)`
+
+Retorna a cor de texto legível sobre um fundo: escura em fundo claro, clara em fundo escuro
+(luminância Rec. 601 ponderada pelo alpha). Usar ao desenhar texto sobre um fill de cor dinâmica
+(badge, barra) em vez de fixar preto/branco.
+
+```csharp
+var fill = Colors.ActionSynth;
+using (ImRaii.PushColor(ImGuiCol.Text, Colors.ContrastText(fill)))
+    ImGui.TextUnformatted("HQ");
 ```
 
 ---
