@@ -125,6 +125,8 @@ public sealed class CraftingListDetailWindow : Window, IDisposable
         {
             _treeLoading = false;
             Log.Warning(exception, $"Failed to start crafting-list tree refresh {id}.");
+            if (_loadPolicy.IsPriceLoadCurrent(generation))
+                CancelPriceLoad();
         }
     }
 
