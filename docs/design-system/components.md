@@ -4,7 +4,7 @@ Catálogo de todos os componentes reutilizáveis, com assinatura C#, comportamen
 
 Fontes de verdade:
 - **Reutilizáveis (sem Dalamud):** `Artificer.UI/ImGuiUtils*.cs` (`.cs`, `.Progress.cs`, `.Cosmic.cs`, `.Layout.cs`, `.EmptyState.cs`, `.Alert.cs`, `.Charts.cs`, `.SearchableCombo.cs`), `Artificer.UI/ProgressBarComponent.cs`, `Artificer.UI/ImRaii2.cs`.
-- **Plugin-side (usam Dalamud):** `Artificer/Utils/UI/PluginImGuiUtils.*.cs`.
+- **Plugin-side (usam Dalamud):** `Artificer/Utils/UI/*.cs` — classe `PluginImGuiUtils` (partial espalhada em `PluginImGuiUtils.*.cs` **e** `ImGuiUtils.*.cs`, ex.: `ImGuiUtils.Progress.cs`, `ImGuiUtils.Charts.cs`).
 
 ---
 
@@ -97,7 +97,7 @@ var dotAlpha = state == SolverState.Solving
 
 ## DrawConditionIndicator
 
-**Arquivo:** `Artificer/Utils/UI/PluginImGuiUtils.*.cs` → `PluginImGuiUtils.DrawConditionIndicator` (plugin-side — usa `Artificer.Simulator.Condition` e o extension `GetColor` de `Artificer/Utils/SimulatorUtils.cs`, por isso não fica em `Artificer.UI/`)
+**Arquivo:** `Artificer/Utils/UI/ImGuiUtils.Progress.cs` → `PluginImGuiUtils.DrawConditionIndicator` (plugin-side — usa `Artificer.Simulator.Condition` e o extension `GetColor` de `Artificer/Utils/SimulatorUtils.cs`, por isso não fica em `Artificer.UI/`)
 
 Círculo colorido animado seguido do nome da condição. A cor anima ao longo do tempo
 para simular a transição de cor in-game.
@@ -230,6 +230,7 @@ ImGuiUtils.DrawResearchTypeRow(
     int current, int needed, int max,
     ResearchTypeState state,
     float barWidth,
+    ResearchTypeRowMode mode = ResearchTypeRowMode.Full,  // .Minimized → variante compacta
     int? delta = null   // se não-null: mostra "+delta" em Colors.CosmicMission e ativa o highlight
 );
 ```
@@ -479,7 +480,7 @@ ImGuiUtils.HoveredTooltip(string text, int flags = 0, float? wrapWidth = null);
 **Arquivo:** `Artificer.UI/ProgressBarComponent.cs`
 
 Componente standalone da barra de progresso do solver, separado de `ImGuiUtils`. Consome
-`ProgressSnapshot` + `VisualConfig` (`DisplayMode`, `ColorTheme`, `Width`, `ShowPercentage`).
+`ProgressSnapshot` + `VisualConfig` (`Mode`, `ColorTheme`, `Width`, `ShowPercentage`).
 
 ```csharp
 // Uma barra a partir de um snapshot:

@@ -28,4 +28,4 @@ O projeto divide-se em componentes fortemente desacoplados para focar em testes 
 - **Injeção e UI:** Dalamud API + ImGui.NET.
 - **Solver Backend:** Integrado ao pacote nuget `Raphael.Net 5.0.0` que expõe *bindings* Rust via FFI de alto desempenho.
 - **Performance:** Amplo uso de ponteiros (`unsafe`), structs alocados e controle restrito de heap para MCTS.
-- **Config & DB:** `Microsoft.Data.Sqlite 10.0.11` (bundle nativo já patched — sem override de segurança manual) para as listas de coleta + JSON da API de configuração Dalamud para o repositório de macros do usuário.
+- **Config & DB:** `Microsoft.Data.Sqlite 10.0.11` (bundle nativo já patched — sem override de segurança manual) para o repositório de macros (`macros.db`) e para as listas de coleta; JSON via API de configuração Dalamud para as preferências gerais do plugin (`Configuration`).

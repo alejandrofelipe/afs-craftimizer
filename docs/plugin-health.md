@@ -162,7 +162,7 @@ C:\Users\aleja\.nuget\packages\imgui.net\1.90.9.1\lib\net6.0\ImGuiNET.xml
 ### 5.2 Camadas de Teste Recomendadas
 
 #### Camada 1 — Lógica pura (já implementado ✓)
-`Artificer.Test/` cobre Simulator + Solver com MSTest. Nenhuma dependência Dalamud. 215 testes. Continuar expandindo aqui.
+`Artificer.Test/` cobre Simulator + Solver com MSTest. Nenhuma dependência Dalamud. 385 testes. Continuar expandindo aqui.
 
 #### Camada 2 — Serviços com mocks (a implementar)
 

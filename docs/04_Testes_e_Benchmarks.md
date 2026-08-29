@@ -18,7 +18,7 @@ Esperado: `Passed! - Failed: 0, Passed: 385, Skipped: 0`
 - **`Artificer.Test/Solver/`**: `MCTSSolverTests.cs` valida a integridade do retorno nativo do Rust via `Raphael.Net`. Confirma que o MCTS gera a árvore e devolve um resultado sem estourar ponteiros de heap.
 - **`Artificer.Test/UI/`**: Testes de componentes de UI como `ImRaiiShim`, `GearMessage` e serviços de UI.
 - **`Artificer.Test/CraftingLists/`**: planner de move (`CraftingListMovePlannerTests`), reconciliador de progresso (`MaterialProgressReconcilerTests`), repositório transacional (`CraftingListMoveRepositoryTests`, SQLite temporário) e `MarketboardHelper`/cache de preços — sem cliente FFXIV.
-- **`Artificer.Test/Application/`**: `SolverRunTests` (isolamento por geração do solver) e decisões puras de macro (`MacroSelectionTests`, `MacroScoringTests`).
+- **`Artificer.Test/Application/Crafting/`**: `SolverRunTests` (isolamento por geração do solver) e decisões puras de macro (`MacroSelectionTests`, `MacroScoringTests`).
 
 ### Quando adicionar testes
 
