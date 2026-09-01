@@ -8,18 +8,41 @@ public sealed record CosmicFishingMission(ushort MissionId, string Name, IReadOn
 
 public static class CosmicFishingMissions
 {
+    private static ushort _cachedId;
     private static CosmicFishingMission? _cached;
 
-    /// <summary>Resolve os peixes exigidos por uma missão cosmic. Cache pela última missão vista.</summary>
+    /// <summary>Resolve os peixes exigidos por uma missão cosmic. Cache pela última missão vista (inclui misses).</summary>
     public static CosmicFishingMission? Resolve(ushort missionUnitRowId)
     {
         if (missionUnitRowId == 0)
             return null;
-        if (_cached?.MissionId == missionUnitRowId)
+        if (_cachedId == missionUnitRowId)
             return _cached;
 
         if (!LuminaSheets.WKSMissionUnitSheet.TryGetRow(missionUnitRowId, out var unit))
+        {
+            _cachedId = missionUnitRowId;
             return _cached = null;
+        }
+
+        // Gate: só é missão de Fisher. Sem isso, uma missão crafter residual (ex: troca de job
+        // após o Update anterior) abriria a janela mostrando itens craftados como se fossem peixe.
+        var isFishingMission = false;
+        foreach (var categoryRef in unit.ClassJobCategory)   // até 2 links, per EXDSchema
+        {
+            if (categoryRef.ValueNullable is not { } category)
+                continue;
+            if (category.FSH)
+            {
+                isFishingMission = true;
+                break;
+            }
+        }
+        if (!isFishingMission)
+        {
+            _cachedId = missionUnitRowId;
+            return _cached = null;
+        }
 
         var fish = new List<RequiredFish>();
         var seen = new HashSet<uint>();
@@ -40,6 +63,7 @@ public static class CosmicFishingMissions
             }
         }
 
+        _cachedId = missionUnitRowId;
         return _cached = fish.Count == 0
             ? null
             : new CosmicFishingMission(missionUnitRowId, unit.Name.ExtractText(), fish);

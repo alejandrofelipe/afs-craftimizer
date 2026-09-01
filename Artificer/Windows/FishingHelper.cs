@@ -96,11 +96,13 @@ public sealed unsafe class FishingHelper : Window, IDisposable
 
         // Linha 1: ícone + nome + xN
         DrawItemIcon(fish.IconId, iconSize, fish.Name);
-        ImGui.SameLine();
+        ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+        ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted(fish.Name);
         if (fish.Quantity > 0)
         {
-            ImGui.SameLine();
+            ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+            ImGui.AlignTextToFramePadding();
             using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                 ImGui.TextUnformatted($"x{fish.Quantity}");
         }
@@ -115,7 +117,7 @@ public sealed unsafe class FishingHelper : Window, IDisposable
         // BaitItemId == 0 = sentinela "isca desconhecida na fonte" (decisão 2026-08-31):
         // nesse caso, em vez da cadeia, desenhar pill muted "isca desconhecida" (Colors.TextMuted).
         if (info.BaitItemId != 0)
-            DrawBaitChain(info, fish, iconSize);
+            DrawBaitChain(info, iconSize);
         else
             ImGuiUtils.DrawBadgePill("isca desconhecida", Colors.TextMuted);
 
@@ -129,7 +131,6 @@ public sealed unsafe class FishingHelper : Window, IDisposable
         using (ImRaii.PushColor(ImGuiCol.Text, tugColor))
             ImGui.TextUnformatted($"({CosmicFishFormat.TugText(info.Tug)})");
         ImGuiUtils.HoveredTooltip($"{info.Tug} bite");
-        ImGui.SameLine();
         // FishHookset.Unknown (sentinela, 3 peixes) → NÃO desenhar a pill de hookset.
         if (info.Hookset != FishHookset.Unknown)
         {
@@ -140,6 +141,7 @@ public sealed unsafe class FishingHelper : Window, IDisposable
                 FishHookset.Stellar  => Colors.CosmicActive,
                 _                    => Colors.ConditionNormal,
             };
+            ImGui.SameLine();
             ImGuiUtils.DrawBadgePill(CosmicFishFormat.HooksetName(info.Hookset), hooksetColor);
         }
 
@@ -165,19 +167,19 @@ public sealed unsafe class FishingHelper : Window, IDisposable
     }
 
     // Isca + cada peixe da mooch chain, um ícone por vez, na mesma linha (SameLine).
-    // O alvo (fish) já foi desenhado na linha 1 do card, então a cadeia não repete o ícone
-    // dele aqui — fish só documenta o destino implícito ao final da cadeia.
-    private void DrawBaitChain(FishCatchInfo info, RequiredFish fish, Vector2 iconSize)
+    // O alvo já foi desenhado na linha 1 do card, então a cadeia não repete o ícone dele aqui.
+    private void DrawBaitChain(FishCatchInfo info, Vector2 iconSize)
     {
         var baitItem = LuminaSheets.ItemSheet.GetRowOrDefault(info.BaitItemId);
         DrawItemIcon(baitItem?.Icon ?? 0, iconSize, baitItem?.Name.ExtractText() ?? $"#{info.BaitItemId}");
 
         for (var i = 0; i < info.MoochChain.Length; i++)
         {
-            ImGui.SameLine();
+            ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
+            ImGui.AlignTextToFramePadding();
             using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
                 ImGui.TextUnformatted("→");
-            ImGui.SameLine();
+            ImGui.SameLine(0, 6 * ImGuiHelpers.GlobalScale);
 
             var moochId = info.MoochChain[i];
             var moochItem = LuminaSheets.ItemSheet.GetRowOrDefault(moochId);

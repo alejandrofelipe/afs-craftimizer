@@ -45,4 +45,21 @@ public sealed class CosmicFishCatchDataTests
                     $"Peixe {id}: predator {fishId} sem entry própria");
             }
     }
+
+    [TestMethod]
+    public void MoochChains_AreFullyFlattened()
+    {
+        // Cadeia flattened: o 1º elo não pode ter cadeia própria (é pescado direto na isca),
+        // e a cadeia própria de cada elo seguinte deve ser exatamente o prefixo anterior.
+        foreach (var (id, e) in CosmicFishCatchData.Entries)
+        {
+            for (var i = 0; i < e.MoochChain.Length; i++)
+            {
+                Assert.IsTrue(CosmicFishCatchData.Entries.TryGetValue(e.MoochChain[i], out var link),
+                    $"Peixe {id}: mooch {e.MoochChain[i]} sem entry própria");
+                CollectionAssert.AreEqual(e.MoochChain[..i], link!.MoochChain,
+                    $"Peixe {id}: cadeia não flattened no elo {e.MoochChain[i]}");
+            }
+        }
+    }
 }

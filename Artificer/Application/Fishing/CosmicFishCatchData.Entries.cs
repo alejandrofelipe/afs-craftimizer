@@ -167,7 +167,7 @@ public static partial class CosmicFishCatchData
     [45843] = new(45959, [], FishTug.Weak, FishHookset.Precise), // Moonlit Snakehead (mission 484)
     [45844] = new(45959, [], FishTug.Weak, FishHookset.Precise), // Moonbeam (mission 484)
     [45845] = new(45959, [45844], FishTug.Strong, FishHookset.Powerful), // Moongate Cod (mission 484)
-    [45846] = new(45959, [45845], FishTug.Legendary, FishHookset.Powerful), // Lunar Sturgeon (mission 484)
+    [45846] = new(45959, [45844, 45845], FishTug.Legendary, FishHookset.Powerful), // Lunar Sturgeon (mission 484)
     [45810] = new(45959, [], FishTug.Weak, FishHookset.Precise), // Bluemoon Loach (mission 485)
     [45811] = new(45959, [], FishTug.Strong, FishHookset.Powerful), // Lunar Raiamas (mission 485)
     [45812] = new(45959, [], FishTug.Weak, FishHookset.Precise), // Preceptor Betta (mission 485)
