@@ -28,6 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     public Settings SettingsWindow { get; }
     public CraftingHelper RecipeNoteWindow { get; }
     public SynthesisHelper SynthHelperWindow { get; }
+    public FishingHelper FishingHelperWindow { get; }
     public MacroLibrary ListWindow { get; private set; }
     public MacroEditor? EditorWindow { get; private set; }
     public MacroClipboard? ClipboardWindow { get; private set; }
@@ -98,6 +99,7 @@ public sealed class Plugin : IDalamudPlugin
         SettingsWindow = new(this);
         RecipeNoteWindow = new(this);
         SynthHelperWindow = new(this);
+        FishingHelperWindow = new(this);
         ListWindow = new(this);
         CosmicTrackerWindow = new(this);
         CraftingListWindow = new(this);
@@ -239,6 +241,7 @@ public sealed class Plugin : IDalamudPlugin
         SettingsWindow.Dispose();
         RecipeNoteWindow.Dispose();
         SynthHelperWindow.Dispose();
+        FishingHelperWindow.Dispose();
         ListWindow.Dispose();
         EditorWindow?.Dispose();
         ClipboardWindow?.Dispose();

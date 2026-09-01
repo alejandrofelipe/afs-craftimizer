@@ -99,6 +99,14 @@ public sealed partial class Settings
             "Cosmic Tool Progress Tracking\n\n• Research data atual / necessário exibido inline\n• Atualiza ao entregar collectables (Stellar Missions)\n• Funciona em Sinus Ardorum e Auxesia (Patch 7.51+)\n• Nenhum plugin externo necessário"
         );
 
+        DrawOption(
+            "Cosmic Fishing Helper",
+            "Mostra isca, tug e hookset dos peixes da missão cosmic ativa (FSH).",
+            Config.EnableCosmicFishingHelper,
+            v => Config.EnableCosmicFishingHelper = v,
+            ref isDirty
+        );
+
         DrawSectionTitle("SOLVER CONFIGURATION");
 
         var solverConfig = Config.RecipeNoteSolverConfig;
