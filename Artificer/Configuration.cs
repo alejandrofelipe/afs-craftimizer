@@ -114,6 +114,9 @@ public partial class Configuration
     /// </summary>
     public bool EnableCosmicToolTracking { get; set; } = true;
 
+    /// <summary>Enable the Cosmic Fishing Helper window (required fish for the active mission).</summary>
+    public bool EnableCosmicFishingHelper { get; set; } = true;
+
     /// <summary>User-hidden the CosmicTracker window; it will not reopen automatically.</summary>
     public bool CosmicTrackerHidden { get; set; }
 

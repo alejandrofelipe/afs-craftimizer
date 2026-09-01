@@ -27,6 +27,7 @@ public static class LuminaSheets
     private static readonly System.Lazy<ExcelSheet<BaseParam>> _baseParamSheet = new(() => Module.GetSheet<BaseParam>());
     private static readonly System.Lazy<ExcelSheet<WKSMissionToDoEvalutionRefin>> _wksMissionSheet = new(() => Module.GetSheet<WKSMissionToDoEvalutionRefin>());
     private static readonly System.Lazy<ExcelSheet<WKSCosmoToolClass>> _wksCosmoToolClassSheet = new(() => Module.GetSheet<WKSCosmoToolClass>());
+    private static readonly System.Lazy<ExcelSheet<WKSMissionUnit>> _wksMissionUnitSheet = new(() => Module.GetSheet<WKSMissionUnit>());
     private static readonly System.Lazy<ExcelSheet<GathererCrafterLvAdjustTable>> _gathererCrafterLvAdjustTableSheet = new(() => Module.GetSheet<GathererCrafterLvAdjustTable>());
     private static readonly System.Lazy<ExcelSheet<GatheringItem>> _gatheringItemSheet = new(() => Module.GetSheet<GatheringItem>());
     private static readonly System.Lazy<ExcelSheet<GatheringPointBase>> _gatheringPointBaseSheet = new(() => Module.GetSheet<GatheringPointBase>());
@@ -43,6 +44,7 @@ public static class LuminaSheets
     public static ExcelSheet<BaseParam> BaseParamSheet => _baseParamSheet.Value;
     public static ExcelSheet<WKSMissionToDoEvalutionRefin> WKSMissionToDoEvalutionRefinSheet => _wksMissionSheet.Value;
     public static ExcelSheet<WKSCosmoToolClass> WKSCosmoToolClassSheet => _wksCosmoToolClassSheet.Value;
+    public static ExcelSheet<WKSMissionUnit> WKSMissionUnitSheet => _wksMissionUnitSheet.Value;
     public static ExcelSheet<GathererCrafterLvAdjustTable> GathererCrafterLvAdjustTableSheet => _gathererCrafterLvAdjustTableSheet.Value;
     public static ExcelSheet<GatheringItem> GatheringItemSheet => _gatheringItemSheet.Value;
     public static ExcelSheet<GatheringPointBase> GatheringPointBaseSheet => _gatheringPointBaseSheet.Value;

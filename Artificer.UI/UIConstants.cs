@@ -13,6 +13,7 @@ public static class UIConstants
     public const float SynthHelperWidth   = 494f;
     public const float MacroListMinWidth  = 465f;
     public const float MacroListMinHeight = 520f;
+    public const float FishingHelperWidth = 400f;
 
     // ── Character stat clamping ───────────────────────────────────────────────
     public const int MaxCraftStat = 9000;
