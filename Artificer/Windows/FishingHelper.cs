@@ -176,12 +176,13 @@ public sealed unsafe class FishingHelper : Window, IDisposable
         {
             ImGui.SameLine();
             using (ImRaii.PushColor(ImGuiCol.Text, Colors.TextMuted))
-                ImGui.TextUnformatted(i == 0 ? "→" : "⟳ →");
+                ImGui.TextUnformatted("→");
             ImGui.SameLine();
 
             var moochId = info.MoochChain[i];
             var moochItem = LuminaSheets.ItemSheet.GetRowOrDefault(moochId);
-            DrawItemIcon(moochItem?.Icon ?? 0, iconSize, moochItem?.Name.ExtractText() ?? $"#{moochId}");
+            var moochName = moochItem?.Name.ExtractText() ?? $"#{moochId}";
+            DrawItemIcon(moochItem?.Icon ?? 0, iconSize, $"Mooch: {moochName}");
         }
     }
 
