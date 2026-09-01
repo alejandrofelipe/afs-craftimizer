@@ -3,7 +3,7 @@
 **Fork mantido por:** alejandrofelipe  
 **Autor original:** Asriel (WorkingRobot)  
 **Repositório original:** https://github.com/WorkingRobot/Craftimizer  
-**Versão atual:** 2.30.4.2 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
+**Versão atual:** 2.31.0.0 · FFXIV 7.51+ · Dalamud.NET.Sdk 15.0.0
 
 ---
 
@@ -17,7 +17,7 @@ Artificer.UI/          ← Biblioteca de UI compartilhada (sem Dalamud, ImGui.NE
 Artificer.UIStudio/    ← App desktop standalone para testar UI sem o FFXIV rodando
 Artificer.Simulator/   ← Lógica de simulação de crafting (puro C#, sem dependências externas)
 Artificer.Solver/      ← Algoritmos MCTS, genético e Raphael
-Artificer.Test/        ← 260 testes cobrindo Simulator, Solver e UI
+Artificer.Test/        ← 398 testes cobrindo Simulator, Solver, listas, fishing e UI
 Artificer.Benchmark/   ← Benchmarks de performance do solver
 ```
 
@@ -164,6 +164,7 @@ Parâmetros configuráveis: iterações (até 1.500.000), constante de exploraç
 - 🐛 Fix: o refresh do **detalhe da lista de crafting** não cancelava a carga de preço em andamento no caminho de erro (ao contrário da janela de Rota de Coleta) — agora cancela a geração no `catch`, sem CTS pendurado
 - 🔒 Deps: **`Microsoft.Extensions.Caching.Memory` 9.0.0 → 10.0.11** — alinha com o TFM net10 e com o `Microsoft.Data.Sqlite 10.0.11`
 - ♻️ Refactor: os dois maiores arquivos do projeto foram divididos em **partials por domínio** (seguindo a convenção do `MacroEditor`) — `CraftingHelper.cs` (1690 → 692 linhas: `.BestMacro`/`.Stats`/`.CraftStatus`) e `CraftingListDetailWindow.cs` (1064 → 219: `.DataLoading`/`.Rendering`). **Move puro, sem mudança de comportamento** (verificado por build 0-warnings + 385 testes; cada método movido byte-idêntico)
+- **Fishing Helper para Cosmic Exploration (FSH):** nova janela que abre sozinha quando você está de Fisher com missão cosmic ativa e mostra, por peixe exigido, a **cadeia de isca/mooch** (ícones + tooltips), o **tug** (`!`/`!!`/`!!!`) e o **hookset** requerido, com badges de Multi Hook ×N / Lure / Intuition. Os peixes da missão vêm das sheets do próprio jogo (`WKSMissionUnit → MissionToDo → Item`, com gate pelo job da missão); os dados de captura de **738 peixes** das 3 luas são embarcados (derivados do GatherBuddy, Apache-2.0) — lacunas da própria fonte aparecem honestamente como "isca desconhecida". Fecha ao reportar/abandonar/trocar de job; toggle em Settings → Crafting Log
 
 ---
 
@@ -197,7 +198,7 @@ UI Studio:
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" run --project Artificer.UIStudio
 ```
 
-Testes (260 testes cobrindo Simulator, Solver e UI):
+Testes (398 testes cobrindo Simulator, Solver, listas, fishing e UI):
 ```powershell
 "C:\Users\aleja\scoop\apps\dotnet-sdk\current\dotnet.exe" test
 ```
@@ -213,9 +214,9 @@ Testes (260 testes cobrindo Simulator, Solver e UI):
 | UI (shared lib) | ImGui.NET 1.90.9.1 |
 | UI Studio | Silk.NET 2.22.0 (OpenGL + GLFW) |
 | KDE / violin plots | MathNet.Numerics 5.0.0 |
-| Persistência | Microsoft.Data.Sqlite 9.0.5 |
-| Cache de ícones | Microsoft.Extensions.Caching.Memory 9.0.0 |
-| Solver A* | Raphael.Net 4.1.0 |
+| Persistência | Microsoft.Data.Sqlite 10.0.11 |
+| Cache de ícones | Microsoft.Extensions.Caching.Memory 10.0.11 |
+| Solver A* | Raphael.Net 5.0.0 |
 | Performance | SIMD (Vector256) no MCTS para scoring de nodes |
 
 ---
@@ -223,3 +224,5 @@ Testes (260 testes cobrindo Simulator, Solver e UI):
 ## Créditos
 
 Todo o crédito pelo desenvolvimento original vai para **Asriel (WorkingRobot)**.
+
+Dados de captura de pesca das missões Cosmic derivados do **[GatherBuddy](https://github.com/Ottermandias/GatherBuddy)** (Ottermandias, Apache-2.0).
