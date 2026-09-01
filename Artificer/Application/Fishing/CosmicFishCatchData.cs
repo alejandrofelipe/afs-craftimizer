@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Artificer.Application.Fishing;
 
 public enum FishTug : byte { Weak, Strong, Legendary }
-public enum FishHookset : byte { Regular, Precise, Powerful, Stellar }
+public enum FishHookset : byte { Regular, Precise, Powerful, Stellar, Unknown = 255 }
 public enum FishLure : byte { None, Modest, Ambitious }
 
 public sealed record FishCatchInfo(
@@ -35,6 +35,7 @@ public static class CosmicFishFormat
         FishHookset.Precise => "Precision Hookset",
         FishHookset.Powerful => "Powerful Hookset",
         FishHookset.Stellar => "Stellar Hookset",
+        FishHookset.Unknown => "?",
         _ => "?",
     };
 }

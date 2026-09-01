@@ -18,6 +18,7 @@ public sealed class CosmicFishFormatTests
     [DataRow(FishHookset.Precise, "Precision Hookset")]
     [DataRow(FishHookset.Powerful, "Powerful Hookset")]
     [DataRow(FishHookset.Stellar, "Stellar Hookset")]
+    [DataRow(FishHookset.Unknown, "?")]
     public void HooksetName_MapsAllValues(FishHookset h, string expected)
         => Assert.AreEqual(expected, CosmicFishFormat.HooksetName(h));
 }
